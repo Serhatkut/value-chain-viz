@@ -3,164 +3,458 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DHL eCommerce Value Chain</title>
+  <title>DHL eCommerce | Process Architecture</title>
 
   <style>
-    body { font-family: "Segoe UI", sans-serif; margin:0; background:#f4f4f4; overflow:hidden; }
-    #chart { display:flex; justify-content:center; align-items:center; height:100vh; }
-    .instruction { position:absolute; top:20px; left:20px; font-size:14px; color:#666; }
-    #details {
-      position:absolute; top:20px; right:20px; width:320px;
-      background:#fff; padding:16px; border-radius:10px;
-      box-shadow:0 4px 15px rgba(0,0,0,0.12);
-      display:none; border-left:5px solid #d40511;
+    :root{
+      --dhl-yellow:#FFCC00;
+      --dhl-red:#D40511;
+      --ink:#111;
+      --muted:#6b7280;
+      --bg:#f6f7f9;
+      --card:#ffffff;
+      --border:#e5e7eb;
+      --shadow:0 10px 24px rgba(0,0,0,.08);
+      --radius:14px;
+      --font: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
     }
-    #details h2 { margin:0 0 8px; font-size:16px; color:#d40511; }
-    #details p { margin:0; font-size:13px; line-height:1.4; color:#333; }
-    #error { position:absolute; left:20px; top:50px; color:#b00020; font-size:13px; display:none; max-width:60vw; }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:var(--font);
+      color:var(--ink);
+      background:var(--bg);
+      height:100vh;
+      overflow:hidden;
+    }
+
+    /* Header */
+    .topbar{
+      height:64px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 18px;
+      background:linear-gradient(90deg, var(--dhl-yellow), #ffe07a);
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; min-width: 320px;
+      font-weight:700;
+    }
+    .brand-badge{
+      width:10px; height:28px; border-radius:6px; background:var(--dhl-red);
+      box-shadow: 0 6px 16px rgba(212,5,17,.25);
+    }
+    .brand-title{ line-height:1.1; }
+    .brand-title .sub{ display:block; font-weight:600; font-size:12px; color:rgba(0,0,0,.65); }
+
+    .controls{
+      display:flex; align-items:center; gap:10px; flex:1;
+      justify-content:center;
+    }
+    .control{
+      display:flex; align-items:center; gap:8px;
+      background:rgba(255,255,255,.78);
+      border:1px solid rgba(0,0,0,.08);
+      padding:8px 10px;
+      border-radius: 999px;
+      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    }
+    select, input{
+      font-family:var(--font);
+      border:none;
+      outline:none;
+      background:transparent;
+      font-size:13px;
+      min-width: 280px;
+    }
+    input{ min-width: 260px; }
+
+    .actions{ display:flex; align-items:center; gap:10px; min-width: 260px; justify-content:flex-end; }
+    .btn{
+      background: var(--dhl-red);
+      color:white;
+      border:none;
+      border-radius:999px;
+      padding:9px 12px;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+      box-shadow: 0 10px 18px rgba(212,5,17,.22);
+    }
+    .btn.secondary{
+      background: rgba(255,255,255,.86);
+      color: var(--ink);
+      box-shadow:none;
+      border:1px solid rgba(0,0,0,.10);
+    }
+
+    /* Main */
+    .main{
+      height: calc(100vh - 64px);
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr 1.25fr;
+      gap: 14px;
+      padding: 14px;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      min-width: 0;
+    }
+    .panel-header{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panel-title{
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.2px;
+      display:flex; align-items:center; gap:8px;
+    }
+    .pill{
+      font-size:11px;
+      font-weight:800;
+      padding:3px 8px;
+      border-radius:999px;
+      background: rgba(212,5,17,.10);
+      color: var(--dhl-red);
+      border: 1px solid rgba(212,5,17,.18);
+    }
+    .panel-body{
+      padding: 10px;
+      overflow:auto;
+    }
+
+    /* Lists */
+    .item{
+      border:1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 10px;
+      margin: 8px 0;
+      cursor:pointer;
+      background:#fff;
+      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease;
+    }
+    .item:hover{
+      transform: translateY(-1px);
+      border-color: rgba(212,5,17,.35);
+      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+    }
+    .item.active{
+      border-color: var(--dhl-red);
+      box-shadow: 0 12px 22px rgba(212,5,17,.12);
+    }
+    .item .name{
+      font-weight:800;
+      font-size:13px;
+    }
+    .item .meta{
+      margin-top:4px;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.3;
+    }
+
+    /* Details */
+    .breadcrumbs{
+      font-size:12px;
+      color: rgba(0,0,0,.65);
+      margin-bottom:10px;
+      line-height:1.4;
+    }
+    .detail-title{
+      font-size:16px;
+      font-weight:900;
+      margin:0 0 8px;
+      color: var(--dhl-red);
+    }
+    .detail-desc{
+      font-size:13px;
+      color: var(--ink);
+      line-height:1.55;
+      margin:0 0 14px;
+    }
+    .kv{
+      border-top:1px dashed var(--border);
+      padding-top:10px;
+      font-size:12px;
+      color: rgba(0,0,0,.75);
+    }
+    .kv div{ margin: 6px 0; }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    .empty{
+      padding: 18px 12px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1100px){
+      body{ overflow:auto; }
+      .main{ grid-template-columns: 1fr; height:auto; }
+      select, input{ min-width: 180px; }
+      .brand{ min-width: 0; }
+      .actions{ min-width: 0; }
+    }
   </style>
-
-  <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
-<body>
-  <div class="instruction">Click center to zoom out. Click arcs to zoom in.</div>
-  <div id="error"></div>
 
-  <div id="details">
-    <h2 id="node-name">Process Name</h2>
-    <p id="node-desc">Description goes here...</p>
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-badge"></div>
+      <div class="brand-title">
+        DHL eCommerce
+        <span class="sub">Enterprise Process Architecture Explorer</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="control">
+        <strong style="font-size:12px;color:rgba(0,0,0,.65)">L0</strong>
+        <select id="l0Select"></select>
+      </div>
+
+      <div class="control">
+        <span style="font-size:12px;color:rgba(0,0,0,.65);font-weight:800">Search</span>
+        <input id="searchInput" placeholder="Type to filter within selected L0…" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn secondary" id="resetBtn">Reset</button>
+      <button class="btn" id="expandAllBtn">Expand defaults</button>
+    </div>
   </div>
 
-  <div id="chart"></div>
+  <div class="main">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">L1 <span class="pill" id="l1Count">0</span></div>
+      </div>
+      <div class="panel-body" id="l1List"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">L2 <span class="pill" id="l2Count">0</span></div>
+      </div>
+      <div class="panel-body" id="l2List"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">L3 <span class="pill" id="l3Count">0</span></div>
+      </div>
+      <div class="panel-body" id="l3List"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Details</div>
+      </div>
+      <div class="panel-body" id="details"></div>
+    </div>
+  </div>
 
   <script>
-    (async function init() {
-      try {
-        const res = await fetch('./data.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error(`Failed to load data.json (${res.status} ${res.statusText})`);
-        const data = await res.json();
-        renderChart(data);
-      } catch (e) {
-        console.error(e);
-        const el = document.getElementById('error');
-        el.style.display = 'block';
-        el.textContent = String(e);
+    const state = {
+      data: null,
+      l0: null,
+      l1: null,
+      l2: null,
+      l3: null,
+      search: ""
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function parseName(name) {
+      // Supports: "ITF_01: Something"  => { code:"ITF_01", title:"Something" }
+      if (!name) return { code:"", title:"" };
+      const parts = name.split(":");
+      if (parts.length >= 2) return { code: parts[0].trim(), title: parts.slice(1).join(":").trim() };
+      return { code:"", title:name.trim() };
+    }
+
+    function safeChildren(node) {
+      return Array.isArray(node?.children) ? node.children : [];
+    }
+
+    function render() {
+      const l0Node = state.l0;
+      const l1Nodes = safeChildren(l0Node);
+
+      renderList({
+        container: el("l1List"),
+        nodes: filterNodes(l1Nodes, state.search),
+        active: state.l1,
+        onClick: (n) => { state.l1=n; state.l2=null; state.l3=null; render(); }
+      });
+      el("l1Count").textContent = l1Nodes.length;
+
+      const l2Nodes = safeChildren(state.l1);
+      renderList({
+        container: el("l2List"),
+        nodes: filterNodes(l2Nodes, state.search),
+        active: state.l2,
+        onClick: (n) => { state.l2=n; state.l3=null; render(); }
+      });
+      el("l2Count").textContent = l2Nodes.length;
+
+      const l3Nodes = safeChildren(state.l2);
+      renderList({
+        container: el("l3List"),
+        nodes: filterNodes(l3Nodes, state.search),
+        active: state.l3,
+        onClick: (n) => { state.l3=n; render(); }
+      });
+      el("l3Count").textContent = l3Nodes.length;
+
+      renderDetails();
+    }
+
+    function filterNodes(nodes, q) {
+      const query = (q || "").trim().toLowerCase();
+      if (!query) return nodes;
+      return nodes.filter(n => {
+        const { code, title } = parseName(n.name || "");
+        const hay = `${code} ${title} ${(n.description||"")}`.toLowerCase();
+        return hay.includes(query);
+      });
+    }
+
+    function renderList({ container, nodes, active, onClick }) {
+      container.innerHTML = "";
+      if (!nodes.length) {
+        container.innerHTML = `<div class="empty">No items to show.</div>`;
+        return;
       }
-    })();
+      nodes.forEach(n => {
+        const { code, title } = parseName(n.name);
+        const div = document.createElement("div");
+        div.className = "item" + (active === n ? " active" : "");
+        div.innerHTML = `
+          <div class="name">${code ? `<span class="mono">${code}</span> — ` : ""}${escapeHtml(title)}</div>
+          <div class="meta">${escapeHtml(n.description || "No description provided.")}</div>
+        `;
+        div.addEventListener("click", () => onClick(n));
+        container.appendChild(div);
+      });
+    }
 
-    function renderChart(data) {
-      const width  = window.innerWidth;
-      const height = window.innerHeight;
-      const radius = Math.min(width, height) / 2.5;
-      const color  = d3.scaleOrdinal(d3.schemeTableau10);
+    function renderDetails() {
+      const target = state.l3 || state.l2 || state.l1 || state.l0;
+      const path = [
+        state.l0 ? parseName(state.l0.name).title || state.l0.name : null,
+        state.l1 ? parseName(state.l1.name).title || state.l1.name : null,
+        state.l2 ? parseName(state.l2.name).title || state.l2.name : null,
+        state.l3 ? parseName(state.l3.name).title || state.l3.name : null
+      ].filter(Boolean);
 
-      d3.select("#chart").selectAll("*").remove();
+      if (!target) {
+        el("details").innerHTML = `<div class="empty">Select an L0 to begin.</div>`;
+        return;
+      }
 
-      const svg = d3.select("#chart").append("svg")
-        .attr("viewBox", [-width/2, -height/2, width, height])
-        .style("max-width", "100%")
-        .style("height", "auto");
+      const { code, title } = parseName(target.name || "");
+      el("details").innerHTML = `
+        <div class="breadcrumbs"><strong>Path:</strong> ${escapeHtml(path.join("  ›  "))}</div>
+        <h3 class="detail-title">${code ? `<span class="mono">${code}</span> — ` : ""}${escapeHtml(title || target.name || "")}</h3>
+        <p class="detail-desc">${escapeHtml(target.description || "No description provided.")}</p>
+        <div class="kv">
+          <div><strong>Children:</strong> ${safeChildren(target).length}</div>
+          <div><strong>Node key:</strong> <span class="mono">${escapeHtml(target.name || "")}</span></div>
+        </div>
+      `;
+    }
 
-      const root = d3.hierarchy(data)
-        .sum(d => (d.children && d.children.length) ? 0 : (d.size ?? 1))
-        .sort((a,b) => (b.value ?? 0) - (a.value ?? 0));
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[s]));
+    }
 
-      d3.partition().size([2*Math.PI, root.height + 1])(root);
-      root.each(d => d.current = d);
+    function resetSelection() {
+      const l0Select = el("l0Select");
+      const first = state.data?.children?.[0] || state.data;
+      state.l0 = first;
+      state.l1 = null;
+      state.l2 = null;
+      state.l3 = null;
+      state.search = "";
+      el("searchInput").value = "";
+      l0Select.value = first?.name || "";
+      render();
+    }
 
-      const arc = d3.arc()
-        .startAngle(d => d.x0)
-        .endAngle(d => d.x1)
-        .padAngle(d => Math.min((d.x1 - d.x0)/2, 0.005))
-        .padRadius(radius * 1.5)
-        .innerRadius(d => d.y0 * radius)
-        .outerRadius(d => Math.max(d.y0 * radius, d.y1 * radius - 1));
+    function expandDefaults() {
+      // Convenience: auto-select first L1, first L2, first L3 if available
+      state.l1 = safeChildren(state.l0)[0] || null;
+      state.l2 = safeChildren(state.l1)[0] || null;
+      state.l3 = safeChildren(state.l2)[0] || null;
+      render();
+    }
 
-      const g = svg.append("g");
+    async function init() {
+      const res = await fetch("./data.json", { cache: "no-store" });
+      if (!res.ok) throw new Error(`Failed to load data.json (${res.status} ${res.statusText})`);
+      const data = await res.json();
+      state.data = data;
 
-      const path = g.append("g")
-        .selectAll("path")
-        .data(root.descendants().slice(1))
-        .join("path")
-          .attr("fill", d => { let p=d; while (p.depth>1) p=p.parent; return color(p.data.name); })
-          .attr("fill-opacity", d => arcVisible(d.current) ? (d.children ? 0.85 : 0.65) : 0)
-          .attr("d", d => arc(d.current))
-          .style("cursor","pointer")
-          .on("click", clicked);
+      // L0 = top-level children if present; else the root itself
+      const l0Options = Array.isArray(data.children) && data.children.length ? data.children : [data];
 
-      path.on("mouseover", function(_, d) {
-        document.getElementById("details").style.display = "block";
-        const name = d.data.name || "";
-        const clean = name.includes(":") ? name.split(":").slice(1).join(":").trim() : name;
-        const id = name.includes(":") ? name.split(":")[0].trim() : "";
-        document.getElementById("node-name").textContent = (id ? (id + " ") : "") + clean;
-        document.getElementById("node-desc").textContent = d.data.description || "No description provided.";
-        d3.select(this).attr("fill-opacity", 1);
-      }).on("mouseout", function(_, d) {
-        d3.select(this).attr("fill-opacity", arcVisible(d.current) ? (d.children ? 0.85 : 0.65) : 0);
+      const l0Select = el("l0Select");
+      l0Select.innerHTML = "";
+      l0Options.forEach(n => {
+        const opt = document.createElement("option");
+        const title = parseName(n.name).title || n.name || "Untitled";
+        opt.value = n.name || title;
+        opt.textContent = title;
+        l0Select.appendChild(opt);
       });
 
-      const label = g.append("g")
-        .attr("pointer-events","none")
-        .attr("text-anchor","middle")
-        .style("user-select","none")
-        .selectAll("text")
-        .data(root.descendants().slice(1))
-        .join("text")
-          .attr("dy","0.35em")
-          .attr("fill-opacity", d => +labelVisible(d.current))
-          .attr("transform", d => labelTransform(d.current))
-          .style("font-size","11px")
-          .text(d => {
-            const name = d.data.name || "";
-            return name.includes(":") ? name.split(":").slice(1).join(":").trim() : name;
-          });
+      // Default selection: first L0
+      state.l0 = l0Options[0];
+      l0Select.value = state.l0.name || "";
 
-      const parent = g.append("circle")
-        .datum(root)
-        .attr("r", radius)
-        .attr("fill", "none")
-        .attr("pointer-events", "all")
-        .style("cursor","pointer")
-        .on("click", clicked);
+      l0Select.addEventListener("change", () => {
+        const selected = l0Options.find(x => (x.name || "") === l0Select.value) || l0Options[0];
+        state.l0 = selected;
+        state.l1 = state.l2 = state.l3 = null;
+        render();
+      });
 
-      function clicked(event, p) {
-        parent.datum(p.parent || root);
+      el("searchInput").addEventListener("input", (e) => {
+        state.search = e.target.value || "";
+        render();
+      });
 
-        root.each(d => d.target = {
-          x0: Math.max(0, Math.min(1, (d.x0 - p.x0)/(p.x1 - p.x0))) * 2*Math.PI,
-          x1: Math.max(0, Math.min(1, (d.x1 - p.x0)/(p.x1 - p.x0))) * 2*Math.PI,
-          y0: Math.max(0, d.y0 - p.depth),
-          y1: Math.max(0, d.y1 - p.depth)
-        });
+      el("resetBtn").addEventListener("click", resetSelection);
+      el("expandAllBtn").addEventListener("click", expandDefaults);
 
-        const t = g.transition().duration(750);
-
-        path.transition(t)
-          .tween("data", d => {
-            const i = d3.interpolate(d.current, d.target);
-            return t => (d.current = i(t));
-          })
-          .attr("fill-opacity", d => arcVisible(d.target) ? (d.children ? 0.85 : 0.65) : 0)
-          .attrTween("d", d => () => arc(d.current));
-
-        label.transition(t)
-          .attr("fill-opacity", d => +labelVisible(d.current))
-          .attrTween("transform", d => () => labelTransform(d.current));
-      }
-
-      function arcVisible(d) {
-        return d.y1 <= root.height + 1 && d.y0 >= 1 && d.x1 > d.x0;
-      }
-      function labelVisible(d) {
-        return d.y1 <= root.height + 1 && d.y0 >= 1 && (d.x1 - d.x0) > 0.03;
-      }
-      function labelTransform(d) {
-        const x = ((d.x0 + d.x1) / 2) * 180 / Math.PI;
-        const y = ((d.y0 + d.y1) / 2) * radius;
-        return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
-      }
+      render();
+      expandDefaults();
     }
+
+    init().catch(err => {
+      document.body.innerHTML = `<pre style="padding:18px;color:#b00020;font-family:ui-monospace">${err}</pre>`;
+      console.error(err);
+    });
   </script>
 </body>
 </html>
