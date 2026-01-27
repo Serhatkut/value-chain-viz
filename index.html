@@ -19,14 +19,14 @@
       --radius:14px;
       --font:"Segoe UI", system-ui, -apple-system, Arial, sans-serif;
 
-      /* Requested level colors */
-      --l0:#D40511;    /* red */
-      --l1:#FFCC00;    /* yellow */
-      --l2:#2f343b;    /* dark grey */
-      --l3:#f0f2f4;    /* light grey */
+      /* requested level colors */
+      --l0:#D40511;
+      --l1:#FFCC00;
+      --l2:#2f343b;
+      --l3:#f0f2f4;
 
-      --l2Text:#ffffff;
       --l1Text:#111827;
+      --l2Text:#ffffff;
     }
 
     *{ box-sizing:border-box; }
@@ -39,7 +39,7 @@
       overflow:hidden;
     }
 
-    /* Header */
+    /* ===== Top header ===== */
     .topbar{
       padding: 12px 14px 10px;
       background: linear-gradient(90deg, var(--dhl-yellow), #ffe07a);
@@ -121,7 +121,7 @@
       box-shadow:none;
     }
 
-    /* L0 tabs bar (RED) */
+    /* L0 tabs (red) */
     .l0bar{
       display:flex;
       gap:10px;
@@ -155,16 +155,17 @@
       box-shadow: 0 14px 26px rgba(212,5,17,.18);
     }
 
-    /* Main */
+    /* ===== Main layout ===== */
     .main{
       height: calc(100vh - 108px);
       display:grid;
-      grid-template-columns: 1.35fr 1fr;
+      grid-template-columns: 1fr; /* no big right panel */
       gap: 12px;
       padding: 12px 14px 14px;
       overflow:hidden;
     }
     .stack{
+      height:100%;
       display:grid;
       grid-template-rows: auto auto 1fr;
       gap: 12px;
@@ -209,28 +210,23 @@
       overflow:auto;
     }
 
-    /* === FULL WIDTH + WRAP CHAINS ===
-       Each row fills the width; items wrap as needed.
-    */
-    .chainGrid{
+    /* ===== L1/L2: full-width wrapping grid ===== */
+    .grid{
       display:grid;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 10px;
       align-items: stretch;
     }
 
-    /* Chevron block: contained shape using clip-path (no overflow) */
-    .chev{
+    /* Chevron-card (contained; no overflow width problems) */
+    .chevcard{
       position:relative;
-      height:58px;
-      padding: 10px 14px;
-      display:flex;
-      align-items:center;
+      min-width:0;
       cursor:pointer;
-      border-radius: 12px; /* kept for focus/outline; shape is clipped */
+      padding: 10px 12px;
       border: 1px solid rgba(0,0,0,.12);
+      box-shadow: none;
       transition: transform .08s ease, box-shadow .12s ease, outline-color .12s ease;
-      min-width: 0;
       clip-path: polygon(
         0 0,
         calc(100% - 18px) 0,
@@ -238,44 +234,27 @@
         calc(100% - 18px) 100%,
         0 100%
       );
+      border-radius: 12px; /* kept for outline; clip-path defines final shape */
     }
-    .chev:hover{
+    .chevcard:hover{
       transform: translateY(-1px);
       box-shadow: 0 12px 22px rgba(0,0,0,.10);
     }
-    .chev.active{
+    .chevcard.active{
       outline: 3px solid rgba(212,5,17,.35);
       box-shadow: 0 16px 30px rgba(212,5,17,.10);
     }
 
-    .chevText{ min-width:0; display:flex; flex-direction:column; gap:4px; }
-    .chevTitle{
-      font-size:13px;
-      font-weight:1000;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .chevSub{
-      font-size:12px;
-      opacity:.88;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    /* L1 yellow */
-    .chev.l1{
+    /* Level colors */
+    .chevcard.l1{
       background: var(--l1);
       color: var(--l1Text);
       border-color: rgba(0,0,0,.10);
     }
-    /* L2 dark grey */
-    .chev.l2{
+    .chevcard.l2{
       background: var(--l2);
       color: var(--l2Text);
-      border-color: rgba(255,255,255,.08);
-      height:54px;
+      border-color: rgba(255,255,255,.10);
       clip-path: polygon(
         0 0,
         calc(100% - 16px) 0,
@@ -285,77 +264,221 @@
       );
     }
 
-    /* L3 list (light grey) */
-    .l3wrap{ padding: 2px 4px 10px; }
-    .l3list{ margin:0; padding:0; list-style:none; }
-    .l3item{
-      background: var(--l3);
-      border: 1px solid rgba(0,0,0,.08);
-      border-radius: 12px;
-      padding: 10px 12px 10px 36px;
-      margin: 8px 0;
-      cursor:pointer;
+    /* Card content */
+    .row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      justify-content:space-between;
+      margin-bottom:6px;
+    }
+    .badges{ display:flex; gap:6px; align-items:center; min-width:0; }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 1000;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.35);
+      color: inherit;
+      max-width: 100%;
+    }
+    .badge.code{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .badge.order{
+      background: rgba(255,255,255,.22);
+      border-color: rgba(0,0,0,.10);
+    }
+
+    .title{
+      font-size: 13px;
+      font-weight: 1100;
+      line-height: 1.2;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-bottom:4px;
+    }
+    .desc{
+      font-size: 12px;
+      opacity: .9;
+      line-height: 1.3;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height: 32px;
+    }
+
+    /* ===== L3: vertical waterfall process ===== */
+    .waterfall{
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      padding: 2px 4px 10px;
+    }
+
+    .vchev{
       position:relative;
+      background: var(--l3);
+      border: 1px solid rgba(0,0,0,.10);
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor:pointer;
       transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+      clip-path: polygon(
+        0 0,
+        100% 0,
+        100% calc(100% - 16px),
+        50% 100%,
+        0 calc(100% - 16px)
+      );
     }
-    .l3item::before{
-      content:"•";
-      position:absolute;
-      left: 14px;
-      top: 6px;
-      font-size: 26px;
-      line-height: 1;
-      color: rgba(0,0,0,.45);
-    }
-    .l3item:hover{
+    .vchev:hover{
       transform: translateY(-1px);
       border-color: rgba(212,5,17,.25);
       box-shadow: 0 12px 22px rgba(0,0,0,.08);
     }
-    .l3item.active{
+    .vchev.active{
       border-color: rgba(212,5,17,.55);
+      outline: 3px solid rgba(212,5,17,.22);
       box-shadow: 0 16px 30px rgba(212,5,17,.10);
     }
-    .l3name{ font-weight:1000; font-size:13px; color: var(--ink); }
-    .l3meta{ margin-top:4px; font-size:12px; color: rgba(0,0,0,.62); line-height:1.35; }
 
-    /* Details */
-    .details{ padding:12px; }
-    .breadcrumbs{
-      font-size:12px;
-      color:rgba(0,0,0,.62);
-      margin-bottom:8px;
-      line-height:1.4;
+    /* connector line between waterfall items */
+    .vchev::after{
+      content:"";
+      position:absolute;
+      left:50%;
+      bottom:-14px;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 14px;
+      background: rgba(0,0,0,.18);
+      border-radius: 2px;
     }
-    .details-title{
-      margin:0 0 8px;
+    .vchev.last::after{ display:none; }
+
+    .vtitle{
+      font-weight: 1100;
+      font-size: 13px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      margin-bottom:4px;
+    }
+    .vmeta{
+      font-size: 12px;
+      color: rgba(0,0,0,.65);
+      line-height: 1.35;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    .empty{
+      padding: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ===== Details: small bottom-right inspector ===== */
+    .inspector{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      width: 380px;
+      max-width: calc(100vw - 28px);
+      max-height: 44vh;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      box-shadow: 0 18px 34px rgba(0,0,0,.18);
+      overflow:hidden;
+      display:none; /* shown when something is selected */
+      z-index: 1000;
+    }
+    .inspector.show{ display:block; }
+
+    .inspector-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,0,0,.08);
+      background: linear-gradient(180deg, #fff, #fbfbfc);
+    }
+    .inspector-title{
+      font-weight: 1100;
+      font-size: 13px;
       color: var(--dhl-red);
-      font-size:16px;
-      font-weight:1100;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      min-width:0;
     }
-    .details-desc{
-      margin:0;
-      font-size:13px;
-      line-height:1.55;
+    .inspector-actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex:0 0 auto;
+    }
+    .iconbtn{
+      border:1px solid rgba(0,0,0,.12);
+      background:#fff;
+      border-radius: 10px;
+      padding: 6px 8px;
+      cursor:pointer;
+      font-weight: 1000;
+      font-size: 12px;
+    }
+    .inspector-body{
+      padding: 10px 12px 12px;
+      overflow:auto;
+      max-height: calc(44vh - 44px);
+    }
+    .crumb{
+      font-size: 12px;
+      color: rgba(0,0,0,.62);
+      line-height: 1.35;
+      margin-bottom: 8px;
+    }
+    .h{
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 1200;
       color: var(--ink);
     }
+    .p{
+      margin:0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(0,0,0,.82);
+    }
     .kv{
-      margin-top:12px;
-      border-top:1px dashed var(--border);
+      margin-top:10px;
+      border-top:1px dashed rgba(0,0,0,.14);
       padding-top:10px;
       font-size:12px;
       color: rgba(0,0,0,.75);
     }
     .kv div{ margin:6px 0; }
-
     .mono{
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-weight:1000;
+      font-weight: 1000;
     }
-    .empty{ padding: 10px; color: var(--muted); font-size: 13px; }
 
     #error{
-      position:absolute;
+      position:fixed;
       left:14px; bottom:14px;
       background:#fff;
       border:1px solid rgba(212,5,17,.25);
@@ -366,15 +489,23 @@
       display:none;
       max-width: 75vw;
       font-size:13px;
+      z-index: 2000;
     }
 
     @media (max-width: 1100px){
       body{ overflow:auto; }
-      .main{ height:auto; grid-template-columns: 1fr; }
-      .stack{ grid-template-rows: auto auto auto; }
+      .main{ height:auto; }
       input{ min-width: 160px; max-width: 60vw; }
       .brand{ min-width: 0; }
-      .chev, .chev.l2{ clip-path: none; border-radius: 12px; }
+      /* simplify shapes on small screens */
+      .chevcard, .chevcard.l2, .vchev{ clip-path:none; border-radius: 12px; }
+      .vchev::after{ display:none; }
+      .inspector{
+        left: 14px;
+        right: 14px;
+        width: auto;
+        max-height: 50vh;
+      }
     }
   </style>
 </head>
@@ -386,7 +517,7 @@
         <div class="brand-badge"></div>
         <div>
           DHL eCommerce
-          <small>Enterprise Business Architecture • L0→L1→L2→L3</small>
+          <small>Enterprise Business Architecture • Process Chains</small>
         </div>
       </div>
 
@@ -400,21 +531,19 @@
       </div>
     </div>
 
-    <!-- L0 RED TABS -->
     <div class="l0bar" id="l0Bar"></div>
   </div>
 
   <div class="main">
-    <!-- Left -->
     <div class="stack">
       <!-- L1 -->
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">L1 Chain <span class="pill" id="l1Count">0</span></div>
-          <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900">L1 = Yellow</div>
+          <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900">Yellow = L1 • Wraps to rows</div>
         </div>
         <div class="panel-body">
-          <div class="chainGrid" id="l1Grid"></div>
+          <div class="grid" id="l1Grid"></div>
         </div>
       </div>
 
@@ -425,32 +554,33 @@
           <div id="l2Hint" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900"></div>
         </div>
         <div class="panel-body">
-          <div class="chainGrid" id="l2Grid"></div>
+          <div class="grid" id="l2Grid"></div>
         </div>
       </div>
 
       <!-- L3 -->
       <div class="panel">
         <div class="panel-header">
-          <div class="panel-title">L3 Activities <span class="pill" id="l3Count">0</span></div>
+          <div class="panel-title">L3 Waterfall <span class="pill" id="l3Count">0</span></div>
           <div id="l3Hint" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900"></div>
         </div>
         <div class="panel-body">
-          <div class="l3wrap" id="l3Body"></div>
+          <div id="l3Body"></div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Right -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Details</div>
-        <div id="pathBadge" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900"></div>
-      </div>
-      <div class="panel-body details" id="detailsPanel">
-        <div class="empty">Pick an L0 tab, then click L1 → L2 → L3.</div>
+  <!-- Bottom-right inspector -->
+  <div class="inspector" id="inspector">
+    <div class="inspector-header">
+      <div class="inspector-title" id="insTitle">Details</div>
+      <div class="inspector-actions">
+        <button class="iconbtn" id="insMinBtn">–</button>
+        <button class="iconbtn" id="insCloseBtn">✕</button>
       </div>
     </div>
+    <div class="inspector-body" id="insBody"></div>
   </div>
 
   <div id="error"></div>
@@ -463,7 +593,8 @@
       l1: null,
       l2: null,
       l3: null,
-      search: ""
+      search: "",
+      inspectorMin: false
     };
 
     const $ = (id) => document.getElementById(id);
@@ -480,6 +611,48 @@
       return String(str).replace(/[&<>"']/g, s => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
       }[s]));
+    }
+
+    // Derive an "order" from code if no explicit `order` exists.
+    // Example: S2E_01_03 -> "01.03" (or "01.03.04" depending on digits found)
+    function deriveOrder(node){
+      if (node && (node.order !== undefined && node.order !== null && node.order !== "")) return String(node.order);
+      const { code } = parseName(node?.name || "");
+      if (!code) return "-";
+      const nums = code.match(/\d+/g);
+      if (!nums || !nums.length) return "-";
+      // keep last 2-3 segments depending on availability
+      const tail = nums.slice(-3);
+      return tail.map(n => n.padStart(2,"0")).join(".");
+    }
+
+    // Sort by explicit order if present; else by derived numeric signature from code; else by name.
+    function sortNodes(nodes){
+      const withKey = nodes.map(n => {
+        const explicit = (n.order !== undefined && n.order !== null && n.order !== "") ? n.order : null;
+        const { code, title } = parseName(n.name || "");
+        const nums = code ? (code.match(/\d+/g) || []).map(x => parseInt(x,10)) : [];
+        return { n, explicit, nums, title: title || code || "" };
+      });
+
+      withKey.sort((a,b) => {
+        // explicit numeric order first
+        if (a.explicit !== null && b.explicit !== null) return Number(a.explicit) - Number(b.explicit);
+        if (a.explicit !== null && b.explicit === null) return -1;
+        if (a.explicit === null && b.explicit !== null) return 1;
+
+        // compare numeric arrays
+        const len = Math.max(a.nums.length, b.nums.length);
+        for (let i=0;i<len;i++){
+          const av = a.nums[i] ?? -1;
+          const bv = b.nums[i] ?? -1;
+          if (av !== bv) return av - bv;
+        }
+        // fallback alpha
+        return a.title.localeCompare(b.title);
+      });
+
+      return withKey.map(x => x.n);
     }
 
     function matchesSearch(node, query){
@@ -499,22 +672,34 @@
       return p;
     }
 
-    function setDetails(target){
-      const panel = $("detailsPanel");
-      const path = buildPath();
-      $("pathBadge").textContent = path.length ? path.join("  ›  ") : "";
+    function showInspector(target){
+      const ins = $("inspector");
+      const insTitle = $("insTitle");
+      const insBody = $("insBody");
 
       if (!target){
-        panel.innerHTML = `<div class="empty">Select an L1/L2 chevron or an L3 item.</div>`;
+        ins.classList.remove("show");
         return;
       }
 
+      const path = buildPath();
       const { code, title } = parseName(target.name || "");
-      panel.innerHTML = `
-        <div class="breadcrumbs"><strong>Path:</strong> ${escapeHtml(path.join("  ›  "))}</div>
-        <h3 class="details-title">${code ? `<span class="mono">${escapeHtml(code)}</span> — ` : ""}${escapeHtml(title || target.name || "")}</h3>
-        <p class="details-desc">${escapeHtml(target.description || "No description provided.")}</p>
+      const ord = deriveOrder(target);
+
+      ins.classList.add("show");
+
+      insTitle.textContent = (title || code || "Details");
+      if (state.inspectorMin){
+        insBody.innerHTML = `<div class="crumb">${escapeHtml(path.join("  ›  "))}</div>`;
+        return;
+      }
+
+      insBody.innerHTML = `
+        <div class="crumb"><strong>Path:</strong> ${escapeHtml(path.join("  ›  "))}</div>
+        <div class="h">${escapeHtml(code ? (code + " — " + (title || "")) : (title || target.name || ""))}</div>
+        <p class="p">${escapeHtml(target.description || "No description provided.")}</p>
         <div class="kv">
+          <div><strong>Order:</strong> ${escapeHtml(ord)}</div>
           <div><strong>Children:</strong> ${safeChildren(target).length}</div>
           <div><strong>Raw key:</strong> <span class="mono">${escapeHtml(target.name || "")}</span></div>
         </div>
@@ -533,7 +718,7 @@
           state.l0 = n;
           state.l1 = state.l2 = state.l3 = null;
           renderAll();
-          autoOpen(); // keep this for convenience; remove if you prefer manual drill
+          autoOpen();
         });
         bar.appendChild(tab);
       });
@@ -548,25 +733,35 @@
 
       nodes.forEach((n) => {
         const { code, title } = parseName(n.name);
+        const ord = deriveOrder(n);
+
         const div = document.createElement("div");
-        div.className = `chev ${levelClass}` + (activeNode === n ? " active" : "");
+        div.className = `chevcard ${levelClass}` + (activeNode === n ? " active" : "");
+
         div.innerHTML = `
-          <div class="chevText">
-            <div class="chevTitle">${escapeHtml(code ? (code + " — " + title) : title)}</div>
-            <div class="chevSub">${escapeHtml(n.description || "No description provided.")}</div>
+          <div class="row">
+            <div class="badges">
+              <span class="badge code">${escapeHtml(code || "NO_CODE")}</span>
+              <span class="badge order"># ${escapeHtml(ord)}</span>
+            </div>
           </div>
+          <div class="title">${escapeHtml(title || n.name || "")}</div>
+          <div class="desc">${escapeHtml(n.description || "No description provided.")}</div>
         `;
+
         div.addEventListener("click", () => onClick(n));
         gridEl.appendChild(div);
       });
     }
 
-    function renderL3(){
+    function renderL3Waterfall(){
       const container = $("l3Body");
       container.innerHTML = "";
 
       const l3All = safeChildren(state.l2);
-      const l3 = l3All.filter(n => matchesSearch(n, state.search));
+      const l3Sorted = sortNodes(l3All);
+      const l3 = l3Sorted.filter(n => matchesSearch(n, state.search));
+
       $("l3Count").textContent = l3All.length;
       $("l3Hint").textContent = state.l2 ? `Selected L2: ${parseName(state.l2.name).title}` : "Select an L2 to show L3";
 
@@ -583,33 +778,35 @@
         return;
       }
 
-      const ul = document.createElement("ul");
-      ul.className = "l3list";
+      const wrap = document.createElement("div");
+      wrap.className = "waterfall";
 
-      l3.forEach(n => {
+      l3.forEach((n, idx) => {
         const { code, title } = parseName(n.name);
-        const li = document.createElement("li");
-        li.className = "l3item" + (state.l3 === n ? " active" : "");
-        li.innerHTML = `
-          <div class="l3name">${escapeHtml(code ? (code + " — " + title) : title)}</div>
-          <div class="l3meta">${escapeHtml(n.description || "No description provided.")}</div>
+        const ord = deriveOrder(n);
+
+        const item = document.createElement("div");
+        item.className = "vchev" + (state.l3 === n ? " active" : "") + (idx === l3.length-1 ? " last" : "");
+        item.innerHTML = `
+          <div class="vtitle">${escapeHtml(code ? (code + " — " + (title || "")) : (title || n.name || ""))} <span style="opacity:.6;font-weight:900">(#${escapeHtml(ord)})</span></div>
+          <div class="vmeta">${escapeHtml(n.description || "No description provided.")}</div>
         `;
-        li.addEventListener("click", () => {
+        item.addEventListener("click", () => {
           state.l3 = n;
           renderAll();
-          setDetails(state.l3);
+          showInspector(state.l3);
         });
-        ul.appendChild(li);
+        wrap.appendChild(item);
       });
 
-      container.appendChild(ul);
+      container.appendChild(wrap);
     }
 
     function renderAll(){
       renderL0Bar();
 
       // L1
-      const l1All = safeChildren(state.l0);
+      const l1All = sortNodes(safeChildren(state.l0));
       const l1 = l1All.filter(n => matchesSearch(n, state.search));
       $("l1Count").textContent = l1All.length;
 
@@ -618,11 +815,11 @@
         state.l2 = null;
         state.l3 = null;
         renderAll();
-        setDetails(state.l1);
+        showInspector(state.l1);
       });
 
       // L2
-      const l2All = safeChildren(state.l1);
+      const l2All = sortNodes(safeChildren(state.l1));
       const l2 = l2All.filter(n => matchesSearch(n, state.search));
       $("l2Count").textContent = l2All.length;
       $("l2Hint").textContent = state.l1 ? `Selected L1: ${parseName(state.l1.name).title}` : "Select an L1 to show L2";
@@ -631,15 +828,15 @@
         state.l2 = node;
         state.l3 = null;
         renderAll();
-        setDetails(state.l2);
+        showInspector(state.l2);
       });
 
-      // L3
-      renderL3();
+      // L3 waterfall
+      renderL3Waterfall();
 
-      // Details default
+      // Default inspector target
       const target = state.l3 || state.l2 || state.l1 || null;
-      setDetails(target);
+      showInspector(target);
     }
 
     function resetAll(){
@@ -647,15 +844,15 @@
       state.search = "";
       $("searchInput").value = "";
       renderAll();
-      setDetails(null);
+      showInspector(null);
     }
 
     function autoOpen(){
-      state.l1 = safeChildren(state.l0)[0] || null;
-      state.l2 = safeChildren(state.l1)[0] || null;
+      state.l1 = sortNodes(safeChildren(state.l0))[0] || null;
+      state.l2 = sortNodes(safeChildren(state.l1))[0] || null;
       state.l3 = null;
       renderAll();
-      setDetails(state.l2 || state.l1);
+      showInspector(state.l2 || state.l1);
     }
 
     async function init(){
@@ -674,6 +871,16 @@
 
       $("resetBtn").addEventListener("click", resetAll);
       $("autoBtn").addEventListener("click", autoOpen);
+
+      // Inspector controls
+      $("insCloseBtn").addEventListener("click", () => {
+        $("inspector").classList.remove("show");
+      });
+      $("insMinBtn").addEventListener("click", () => {
+        state.inspectorMin = !state.inspectorMin;
+        $("insMinBtn").textContent = state.inspectorMin ? "+" : "–";
+        showInspector(state.l3 || state.l2 || state.l1 || null);
+      });
 
       renderAll();
       autoOpen();
