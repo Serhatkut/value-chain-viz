@@ -7,9 +7,9 @@
 
   <style>
     :root{
-      /* DHL-ish theme */
       --dhl-red:#D40511;
       --dhl-yellow:#FFCC00;
+
       --ink:#111;
       --muted:#666;
       --bg:#f6f6f7;
@@ -19,38 +19,39 @@
       /* Level colors */
       --l0: var(--dhl-red);
       --l1: var(--dhl-yellow);
-      --l2:#2b2f33;       /* dark grey */
-      --l3:#eeeeef;       /* light grey */
+      --l2:#2b2f33;      /* dark grey */
+      --l3:#eeeeef;      /* light grey */
 
-      /* Layout */
       --radius:14px;
       --shadow: 0 10px 30px rgba(0,0,0,.08);
       --shadow-soft: 0 6px 18px rgba(0,0,0,.06);
 
-      --chev-notch: 22px;
-      --chev-tip: 26px;
+      --chev-notch: 20px;
+      --chev-tip: 28px;
+
+      --maxw: 1480px;
     }
 
     *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--ink);
       background:var(--bg);
     }
 
-    /* Header */
+    /* Top bar */
     .topbar{
       position:sticky;
       top:0;
       z-index:50;
       background: linear-gradient(180deg, rgba(255,204,0,.95), rgba(255,204,0,.92));
-      border-bottom:1px solid rgba(0,0,0,.08);
+      border-bottom:1px solid rgba(0,0,0,.10);
       backdrop-filter: blur(6px);
     }
     .topbar-inner{
-      max-width: 1400px;
-      margin: 0 auto;
+      max-width: var(--maxw);
+      margin:0 auto;
       padding: 14px 18px 10px;
     }
     .brand-row{
@@ -58,6 +59,7 @@
       align-items:flex-start;
       justify-content:space-between;
       gap:14px;
+      flex-wrap:wrap;
     }
     .brand{
       display:flex;
@@ -76,14 +78,14 @@
       font-size: 18px;
       line-height:1.15;
       margin:0;
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: .2px;
     }
     .brand .sub{
       font-size:12px;
       color:#3a2b00;
       opacity:.85;
-      font-weight: 650;
+      font-weight: 750;
       margin-top:2px;
     }
 
@@ -100,506 +102,488 @@
       border-radius:999px;
       padding:8px 10px;
       display:flex;
-      gap:8px;
       align-items:center;
-      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      gap:10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
     }
-    .pill input[type="text"]{
+    .pill input{
       border:none;
       outline:none;
       background:transparent;
-      min-width: 260px;
-      font-size: 13px;
+      font-weight:800;
+      font-size:12px;
+      width: 320px;
+      max-width: 55vw;
     }
+    .toggle{
+      user-select:none;
+      cursor:pointer;
+      font-size:12px;
+      font-weight:900;
+      gap:8px;
+    }
+    .toggle input{ transform: translateY(1px); }
+
     .btn{
       border:none;
       cursor:pointer;
-      font-weight:800;
-      font-size:12px;
-      padding:8px 10px;
       border-radius:999px;
+      padding:9px 12px;
+      font-weight:900;
+      font-size:12px;
       background: rgba(255,255,255,.85);
       border:1px solid rgba(0,0,0,.12);
-      transition: transform .05s ease, background .2s ease;
-      white-space:nowrap;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
     }
-    .btn:hover{ background: rgba(255,255,255,.98); }
-    .btn:active{ transform: translateY(1px); }
+    .btn:hover{ filter: brightness(.98); }
     .btn-primary{
       background: var(--dhl-red);
       color:white;
-      border:1px solid rgba(0,0,0,.12);
+      border-color: rgba(0,0,0,.15);
     }
-    .btn-primary:hover{ background: #b7040e; }
-
-    .toggle{
-      display:flex; align-items:center; gap:8px;
-      font-size:12px; font-weight:800;
-      color:#3a2b00;
-    }
-    .toggle input{ transform: translateY(1px); }
 
     /* L0 Tabs */
     .tabs{
       margin-top:10px;
       display:flex;
+      gap:8px;
+      flex-wrap:wrap;
       align-items:center;
-      gap:10px;
-      overflow-x:auto;
-      padding-bottom:10px;
-      scrollbar-width: thin;
     }
     .tab{
-      flex:0 0 auto;
       border:none;
       cursor:pointer;
-      background: rgba(255,255,255,.65);
+      background: rgba(255,255,255,.75);
       border:1px solid rgba(0,0,0,.12);
-      border-radius: 999px;
-      padding: 9px 12px;
-      font-weight: 900;
-      font-size: 12px;
+      padding:9px 10px;
+      border-radius:999px;
+      font-weight:950;
+      font-size:12px;
       display:flex;
-      gap:10px;
       align-items:center;
-      transition: transform .08s ease, background .2s ease;
-      box-shadow: 0 8px 22px rgba(0,0,0,.06);
-      white-space:nowrap;
+      gap:8px;
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
+      color:#111;
+      max-width: 100%;
     }
     .tab .dot{
-      width:10px; height:10px;
+      width:10px;height:10px;border-radius:50%;
       background: var(--l0);
-      border-radius: 999px;
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.7);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+      flex:0 0 auto;
     }
     .tab .small{
-      font-weight: 900;
-      font-size: 11px;
+      font-size:11px;
       opacity:.75;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+    .tab span:nth-child(2){
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 46vw;
     }
     .tab.active{
-      background: rgba(212,5,17,.95);
-      color:#fff;
-      border-color: rgba(0,0,0,.15);
-      transform: translateY(-1px);
+      background: rgba(212,5,17,.12);
+      border-color: rgba(212,5,17,.35);
     }
-    .tab.active .dot{ background: #fff; box-shadow: inset 0 0 0 2px rgba(0,0,0,.12); }
-    .tab.active .small{ opacity:.9; }
 
-    /* Page layout */
+    /* Main layout */
     .wrap{
-      max-width: 1400px;
+      max-width: var(--maxw);
       margin: 0 auto;
-      padding: 14px 18px 26px;
+      padding: 14px 18px 28px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
     }
 
-    .section{
+    /* Process House accordion */
+    .process-house{
       background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-soft);
-      padding: 14px;
-      margin-top: 12px;
-    }
-
-    .section-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      margin-bottom: 12px;
-      flex-wrap:wrap;
-    }
-    .section-title{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      font-weight: 950;
-      font-size: 13px;
-    }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding: 4px 10px;
-      font-weight: 950;
-      font-size: 11px;
-      border: 1px solid rgba(0,0,0,.10);
-      background: #fafafa;
-      color: #222;
-    }
-    .badge.l1{ background: rgba(255,204,0,.20); }
-    .badge.l2{ background: rgba(43,47,51,.12); }
-    .badge.l3{ background: rgba(238,238,239,.9); }
-
-    .hint{
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    /* Accordion */
-    details.process-house{
-      background: #fff;
-      border: 1px solid var(--line);
+      border:1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow-soft);
       overflow:hidden;
-      margin-top: 12px;
     }
-    details.process-house summary{
-      list-style:none;
+    .process-house summary{
       cursor:pointer;
+      list-style:none;
       padding: 12px 14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:12px;
-      background: linear-gradient(180deg, #fff, #fbfbfc);
-      border-bottom: 1px solid var(--line);
-      font-weight: 950;
-      font-size: 13px;
+      gap:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
     }
-    details.process-house summary::-webkit-details-marker{ display:none; }
+    .process-house summary::-webkit-details-marker{ display:none; }
     .summary-left{
-      display:flex; align-items:center; gap:10px;
-    }
-    .house-pill{
-      border-radius:999px;
-      padding: 5px 10px;
-      background: rgba(212,5,17,.12);
-      border: 1px solid rgba(212,5,17,.18);
-      font-size:11px;
+      display:flex;
+      align-items:center;
+      gap:10px;
       font-weight:950;
     }
+    .house-pill{
+      font-size:12px;
+      font-weight:1000;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(212,5,17,.12);
+      border:1px solid rgba(212,5,17,.25);
+      color: var(--dhl-red);
+    }
+    .hint{
+      font-size:12px;
+      font-weight:850;
+      color: rgba(0,0,0,.55);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 60vw;
+    }
     .house-grid{
-      padding: 14px;
+      padding: 12px 12px 14px;
       display:grid;
       grid-template-columns: repeat(4, minmax(220px, 1fr));
       gap: 12px;
     }
     @media (max-width: 1100px){
-      .house-grid{ grid-template-columns: repeat(2, minmax(220px,1fr)); }
+      .house-grid{ grid-template-columns: repeat(2, minmax(220px, 1fr)); }
     }
     @media (max-width: 640px){
       .house-grid{ grid-template-columns: 1fr; }
     }
     .house-col{
-      background: #fcfcfd;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      padding: 12px;
+      border:1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px;
+      background: rgba(255,255,255,.9);
     }
     .house-col h3{
-      margin: 0 0 10px;
-      font-size: 12px;
-      font-weight: 950;
-      color:#2b2f33;
+      margin:0 0 10px 0;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      font-size: 12px;
+      font-weight: 1000;
+      color: rgba(0,0,0,.75);
     }
     .cat-tag{
-      font-size:10px;
-      font-weight: 950;
-      color:#fff;
-      border-radius:999px;
-      padding: 3px 8px;
-      background: #2b2f33;
+      font-size:11px;
+      font-weight:1000;
+      color: rgba(0,0,0,.65);
+      padding: 5px 8px;
+      border-radius: 999px;
+      border:1px solid rgba(0,0,0,.12);
+      background: rgba(255,204,0,.18);
     }
     .house-card{
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,.10);
+      border:1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      padding: 10px 10px 9px;
       background: #fff;
-      padding: 10px;
-      box-shadow: 0 10px 22px rgba(0,0,0,.04);
+      box-shadow: 0 3px 12px rgba(0,0,0,.06);
       cursor:pointer;
-      transition: transform .08s ease, border-color .2s ease;
+      transition: transform .08s ease, box-shadow .08s ease;
     }
-    .house-card:hover{ transform: translateY(-1px); border-color: rgba(212,5,17,.25); }
-    .house-card:active{ transform: translateY(0px); }
+    .house-card:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,.10);
+    }
     .house-code{
-      font-weight: 950;
-      color: var(--dhl-red);
+      font-weight: 1000;
       font-size: 12px;
-      margin-bottom: 4px;
+      color: var(--dhl-red);
+      letter-spacing:.2px;
     }
     .house-name{
-      font-weight: 950;
-      font-size: 12px;
-      margin-bottom: 6px;
+      margin-top: 2px;
+      font-weight: 1000;
+      font-size: 13px;
     }
     .house-desc{
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 650;
-      line-height: 1.25;
+      margin-top: 5px;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(0,0,0,.60);
+      line-height:1.25;
     }
 
-    /* Chevron chains */
-    .chain{
-      width: 100%;
+    /* Sections */
+    .section{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+    }
+    .section-head{
+      padding: 10px 12px;
       display:flex;
-      flex-wrap: wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
+      border-bottom: 1px solid var(--line);
+      flex-wrap:wrap;
+    }
+    .section-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:1000;
+      font-size:12px;
+    }
+    .badge{
+      font-size:11px;
+      font-weight:1000;
+      padding:5px 8px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.14);
+      background:#fff;
+    }
+    .badge.l1{ background: rgba(255,204,0,.25); border-color: rgba(255,204,0,.45); }
+    .badge.l2{ background: rgba(43,47,51,.10); border-color: rgba(43,47,51,.22); }
+    .badge.l3{ background: rgba(238,238,239,.80); border-color: rgba(0,0,0,.12); }
+
+    /* Chevron chain: full width + wrap rows */
+    .chain{
+      padding: 12px;
+      display:grid;
       gap: 10px;
-      align-items: stretch;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      align-items:stretch;
+    }
+    @media (max-width: 520px){
+      .chain{ grid-template-columns: 1fr; }
     }
 
     .chev{
-      position: relative;
-      flex: 1 1 240px;      /* enables wrap + fill */
-      min-width: 220px;
-      border-radius: 12px;
-      padding: 10px 12px;
-      cursor: pointer;
-      border: 1px solid rgba(0,0,0,.12);
-      box-shadow: 0 10px 22px rgba(0,0,0,.06);
-      transition: transform .08s ease, filter .2s ease;
-      overflow:hidden;
+      position:relative;
+      cursor:pointer;
+      border-radius: 14px;
+      box-shadow: 0 8px 18px rgba(0,0,0,.08);
+      border:1px solid rgba(0,0,0,.14);
+      padding: 12px 14px 12px 14px;
+      min-height: 78px;
       display:flex;
       flex-direction:column;
       justify-content:center;
-      clip-path: polygon(0 0, calc(100% - var(--chev-tip)) 0, 100% 50%, calc(100% - var(--chev-tip)) 100%, var(--chev-notch) 100%, 0 50%, var(--chev-notch) 0);
-    }
-    .chev.first{
-      clip-path: polygon(0 0, calc(100% - var(--chev-tip)) 0, 100% 50%, calc(100% - var(--chev-tip)) 100%, 0 100%, 0 0);
-    }
-    .chev:hover{ transform: translateY(-1px); filter: brightness(1.02); }
-    .chev:active{ transform: translateY(0px); }
 
+      /* Chevron shape via clip-path */
+      clip-path: polygon(
+        0% 0%,
+        calc(100% - var(--chev-tip)) 0%,
+        100% 50%,
+        calc(100% - var(--chev-tip)) 100%,
+        0% 100%,
+        var(--chev-notch) 50%
+      );
+    }
     .chev.l1{ background: var(--l1); }
-    .chev.l2{ background: var(--l2); color: #fff; border-color: rgba(255,255,255,.10); }
-    .chev.l2 .chev-desc{ color: rgba(255,255,255,.78); }
-    .chev.l2 .meta .owner{ background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.14); color:#fff; }
+    .chev.l2{ background: var(--l2); color:#fff; border-color: rgba(0,0,0,.35); }
+    .chev.l1 .meta{ color: rgba(0,0,0,.82); }
+    .chev.l2 .meta{ color: rgba(255,255,255,.82); }
 
-    .chev.selected{
-      outline: 3px solid rgba(212,5,17,.45);
+    .chev.active{
+      outline: 3px solid rgba(212,5,17,.35);
       outline-offset: 2px;
     }
 
-    .chev-top{
+    .chev .topline{
       display:flex;
-      align-items:flex-start;
+      align-items:baseline;
       justify-content:space-between;
       gap:10px;
     }
-    .chev-code{
-      font-weight: 1000;
-      font-size: 12px;
-      letter-spacing: .2px;
+    .chev .code{
+      font-weight:1000;
+      font-size:12px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .chev-title{
-      font-weight: 950;
-      font-size: 12px;
-      line-height: 1.2;
+    .chev .order{
+      font-weight:1000;
+      font-size:11px;
+      opacity:.75;
+      white-space:nowrap;
+    }
+    .chev .name{
       margin-top: 3px;
-    }
-    .chev-desc{
-      font-size: 12px;
-      font-weight: 700;
-      color: rgba(0,0,0,.70);
-      margin-top: 6px;
-      line-height: 1.25;
+      font-weight:1000;
+      font-size: 13px;
+      line-height:1.12;
+      overflow:hidden;
+      text-overflow:ellipsis;
       display:-webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
-      overflow:hidden;
+      min-height: 28px;
     }
-    .meta{
-      margin-top: 8px;
-      display:flex;
-      gap:6px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .owner{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius: 999px;
-      padding: 4px 8px;
+    .chev .meta{
+      margin-top: 6px;
       font-size: 11px;
-      font-weight: 900;
-      background: rgba(255,255,255,.55);
-      border: 1px solid rgba(0,0,0,.10);
-      color:#111;
-      max-width:100%;
-    }
-    .owner span{
+      font-weight: 800;
+      line-height: 1.2;
       overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 240px;
-      display:inline-block;
+      text-overflow:ellipsis;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
     }
 
-    /* L3 + Details (NOT side-of-page, but next to L3 section) */
+    /* L3 + Details (next to each other) */
     .l3-grid{
       display:grid;
-      grid-template-columns: 1.25fr 0.75fr;
+      grid-template-columns: 1.35fr .65fr;
       gap: 12px;
-      width: 100%;
-      align-items:start;
+      padding: 12px;
     }
     @media (max-width: 980px){
       .l3-grid{ grid-template-columns: 1fr; }
     }
 
     .waterfall{
-      padding: 4px 4px 6px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
     }
-    .step{
-      position: relative;
-      background: var(--l3);
-      border: 1px solid rgba(0,0,0,.12);
+    .l3-card{
+      border:1px solid rgba(0,0,0,.12);
       border-radius: 14px;
       padding: 10px 12px;
-      box-shadow: 0 10px 22px rgba(0,0,0,.05);
-      cursor: pointer;
-      transition: transform .08s ease, background .2s ease;
-      margin-bottom: 12px;
+      background: #fff;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      cursor:pointer;
     }
-    .step:hover{ transform: translateY(-1px); background: #f3f3f4; }
-    .step:active{ transform: translateY(0px); }
-
-    .step.selected{
-      outline: 3px solid rgba(212,5,17,.38);
+    .l3-card.active{
+      outline: 3px solid rgba(212,5,17,.22);
       outline-offset: 2px;
     }
-
-    .step::after{
-      /* connector */
-      content:"";
-      position:absolute;
-      left: 24px;
-      bottom: -12px;
-      width: 2px;
-      height: 12px;
-      background: rgba(0,0,0,.25);
-    }
-    .step:last-child::after{ display:none; }
-
-    .step-head{
+    .l3-head{
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
     }
-    .step-left{
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      min-width:0;
-    }
-    .step-num{
-      width: 26px; height: 26px;
-      border-radius: 999px;
-      background: #fff;
-      border: 1px solid rgba(0,0,0,.12);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight: 1000;
-      font-size: 12px;
-      flex:0 0 auto;
-    }
-    .step-title{
-      font-weight: 950;
-      font-size: 12px;
-      line-height: 1.2;
-      margin-top: 2px;
-      min-width:0;
-    }
-    .step-code{
-      font-weight: 1000;
-      font-size: 12px;
+    .l3-code{
+      font-weight:1000;
+      font-size:12px;
       color: var(--dhl-red);
-      margin-bottom: 2px;
-      letter-spacing: .2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 70%;
     }
-    .step-desc{
+    .l3-owner{
+      font-weight:1000;
+      font-size:11px;
+      color: rgba(0,0,0,.62);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 45%;
+      text-align:right;
+    }
+    .l3-name{
+      margin-top: 4px;
+      font-weight:1000;
+      font-size: 13px;
+      line-height:1.15;
+    }
+    .l3-desc{
       margin-top: 6px;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 11px;
+      font-weight: 800;
+      color: rgba(0,0,0,.60);
+      line-height:1.25;
+    }
+    .l4{
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(0,0,0,.15);
       color: rgba(0,0,0,.72);
-      line-height: 1.25;
+      font-size: 11px;
+      font-weight: 850;
     }
-    .bullets{
-      margin: 8px 0 0 0;
-      padding-left: 18px;
-      color: rgba(0,0,0,.72);
-      font-weight: 700;
-      font-size: 12px;
-      line-height: 1.25;
-    }
-
-    /* Details card */
-    .details{
-      position: sticky;
-      top: 92px; /* below sticky header */
-    }
-    @media (max-width: 980px){
-      .details{ position: relative; top: 0; }
+    .l4 ul{
+      margin: 6px 0 0 16px;
+      padding:0;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
     }
 
     .details-card{
-      background: #fff;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-soft);
+      border:1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      background:#fff;
+      box-shadow: 0 6px 18px rgba(0,0,0,.06);
       overflow:hidden;
+      position: sticky;
+      top: 110px; /* below header */
     }
+    @media (max-width: 980px){
+      .details-card{ position:relative; top:auto; }
+    }
+
     .details-head{
-      padding: 12px 12px 10px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(180deg, #fff, #fbfbfc);
+      padding: 10px 12px;
       display:flex;
+      align-items:center;
       justify-content:space-between;
-      align-items:flex-start;
       gap:10px;
+      border-bottom:1px solid rgba(0,0,0,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.75));
     }
     .details-head .title{
-      font-weight: 1000;
-      font-size: 12px;
       margin:0;
+      font-weight:1000;
+      font-size:12px;
     }
     .breadcrumb{
+      margin-top: 3px;
       font-size: 11px;
       font-weight: 850;
-      color: var(--muted);
-      margin-top: 4px;
-      line-height:1.2;
+      color: rgba(0,0,0,.55);
+      max-width: 60ch;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
     }
     .details-body{
-      padding: 12px;
-    }
-    .kv{
-      display:grid;
-      grid-template-columns: 110px 1fr;
-      gap: 8px 10px;
-      font-size: 12px;
-      margin-top: 8px;
-    }
-    .k{
-      color: var(--muted);
-      font-weight: 900;
-    }
-    .v{
-      font-weight: 800;
-      color:#222;
+      padding: 10px 12px 12px;
     }
     .descbox{
-      margin-top: 10px;
-      padding: 10px;
+      margin-top: 8px;
       border-radius: 12px;
-      background: #fafafa;
-      border: 1px solid rgba(0,0,0,.08);
-      font-size: 12px;
-      font-weight: 750;
-      color:#222;
-      line-height: 1.25;
+      padding: 9px 10px;
+      background: rgba(255,204,0,.18);
+      border: 1px solid rgba(255,204,0,.35);
+      font-size: 11px;
+      font-weight: 850;
+      line-height:1.25;
+    }
+    .kv{
+      margin-top: 10px;
+      display:grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px 10px;
+      font-size: 11px;
+      line-height:1.25;
+    }
+    .kv .k{
+      font-weight:1000;
+      color: rgba(0,0,0,.62);
+    }
+    .kv .v{
+      font-weight: 900;
+      color: rgba(0,0,0,.85);
+      word-break: break-word;
     }
 
     .empty{
@@ -607,16 +591,15 @@
       border-radius: 12px;
       border: 1px dashed rgba(0,0,0,.18);
       color: var(--muted);
-      font-weight: 800;
+      font-weight: 900;
       font-size: 12px;
       background: #fff;
     }
-
     .footer-note{
-      margin-top: 14px;
+      margin-top: 12px;
       color: rgba(0,0,0,.55);
       font-size: 11px;
-      font-weight: 750;
+      font-weight: 800;
       line-height:1.3;
     }
     .error{
@@ -625,9 +608,10 @@
       color: #7d0008;
       padding: 10px 12px;
       border-radius: 12px;
-      font-weight: 900;
+      font-weight: 950;
       font-size: 12px;
       margin-top: 12px;
+      white-space: pre-wrap;
     }
   </style>
 </head>
@@ -645,12 +629,12 @@
         </div>
 
         <div class="controls">
-          <div class="pill" title="Search filters current L0/L1/L2/L3 by code, name, description, owner">
+          <div class="pill" title="Search filters current L0/L1/L2/L3 (code, name, description, owner, trigger, outcome, notes)">
             <span style="font-weight:1000;font-size:12px;">Search</span>
-            <input id="search" type="text" placeholder="Filter L1/L2/L3 (code/name/description/owner)"/>
+            <input id="search" type="text" placeholder="Filter (code/name/description/owner/trigger/outcome)"/>
           </div>
 
-          <label class="toggle pill" title="When enabled, auto-select the first available item when changing levels">
+          <label class="toggle pill" title="When enabled, auto-select first available item when changing levels">
             <input id="autoOpen" type="checkbox" checked />
             Auto-open
           </label>
@@ -670,9 +654,9 @@
       <summary>
         <div class="summary-left">
           <span class="house-pill">L0 View</span>
-          <span>Process House (categories from JSON)</span>
+          <span>Process House</span>
         </div>
-        <span class="hint">Click a card to select L0</span>
+        <span class="hint">Click a card to select an L0 (collapsible)</span>
       </summary>
       <div id="houseGrid" class="house-grid"></div>
     </details>
@@ -703,7 +687,7 @@
       <div id="l2Chain" class="chain"></div>
     </section>
 
-    <!-- L3 + Details (next to each other) -->
+    <!-- L3 + Details -->
     <section class="section">
       <div class="section-head">
         <div class="section-title">
@@ -718,16 +702,16 @@
         <div>
           <div id="l3List" class="waterfall"></div>
           <div class="footer-note">
-            Tip: L3 cards list all children of the selected L2. If an L3 has sub-activities (L4),
-            they appear as bullets under the relevant L3 card.
+            L3 shows all children of the selected L2. If an L3 has sub-activities (L4), they appear as bullets.
+            Search includes descendant matches (so you won’t “lose” items because the match is in L4).
           </div>
         </div>
 
-        <div class="details">
+        <div>
           <div class="details-card">
             <div class="details-head">
               <div>
-                <p class="title" style="margin:0;">Details</p>
+                <p class="title">Details</p>
                 <div id="breadcrumb" class="breadcrumb">—</div>
               </div>
               <button id="collapseDetails" class="btn" title="Collapse/expand details">Collapse</button>
@@ -763,10 +747,10 @@
     const tabsEl = $("tabs");
     const houseEl = $("house");
     const houseGridEl = $("houseGrid");
+
     const l1ChainEl = $("l1Chain");
     const l2ChainEl = $("l2Chain");
-    const l3ListEl = $("l3List");
-    const errEl = $("err");
+    const l3ListEl  = $("l3List");
 
     const l1CountEl = $("l1Count");
     const l2CountEl = $("l2Count");
@@ -779,142 +763,133 @@
     const breadcrumbEl = $("breadcrumb");
     const detailsBodyEl = $("detailsBody");
     const collapseDetailsBtn = $("collapseDetails");
+    const errEl = $("err");
 
     // ----------------------------
     // Helpers
     // ----------------------------
-    function safeText(s){
-      return (s ?? "").toString();
-    }
-
-    function splitCodeAndTitle(name){
-      // Example: "S2E_01: Strategy & Ambition Setting"
-      const t = safeText(name);
-      const idx = t.indexOf(":");
-      if(idx > 0){
-        return { code: t.slice(0, idx).trim(), title: t.slice(idx+1).trim() };
-      }
-      // Fallback: treat first token like code if it matches pattern
-      const m = t.match(/^([A-Z0-9_]+)\s+(.*)$/);
-      if(m) return { code: m[1], title: m[2] };
-      return { code: "", title: t };
-    }
-
-    function normalize(s){
-      return safeText(s).toLowerCase();
-    }
-
-    function matchesSearch(node, q){
-      if(!q) return true;
-      const hay = [
-        node.id, node.name, node.description, node.owner, node.trigger, node.outcome, node.notes, node.category
-      ].map(normalize).join(" | ");
-      return hay.includes(q);
-    }
-
-    function findL0ById(id){
-      return state.l0List.find(x => x.id === id) || null;
-    }
-
-    function nodeChildren(node){
-      return Array.isArray(node?.children) ? node.children : [];
-    }
-
-    function clearSelections(fromLevel){
-      // fromLevel: "l0"|"l1"|"l2"|"l3"
-      if(fromLevel === "l0"){
-        state.selected.l1 = null; state.selected.l2 = null; state.selected.l3 = null;
-      } else if(fromLevel === "l1"){
-        state.selected.l2 = null; state.selected.l3 = null;
-      } else if(fromLevel === "l2"){
-        state.selected.l3 = null;
-      }
-    }
-
-    function getBreadcrumb(){
-      const parts = [];
-      if(state.selected.l0) parts.push(state.selected.l0.name);
-      if(state.selected.l1) parts.push(state.selected.l1.name);
-      if(state.selected.l2) parts.push(state.selected.l2.name);
-      if(state.selected.l3) parts.push(state.selected.l3.name);
-      return parts.join("  ›  ") || "—";
-    }
-
-    function renderDetails(node){
-      breadcrumbEl.textContent = getBreadcrumb();
-
-      if(state.detailsCollapsed){
-        detailsBodyEl.innerHTML = `<div class="empty">Details collapsed. Click “Expand” to view.</div>`;
-        return;
-      }
-
-      if(!node){
-        detailsBodyEl.innerHTML = `<div class="empty">Select a process element (L1/L2/L3) to see details.</div>`;
-        return;
-      }
-
-      const { code, title } = splitCodeAndTitle(node.name || "");
-      const desc = safeText(node.description);
-      const owner = safeText(node.owner);
-      const trig = safeText(node.trigger);
-      const outc = safeText(node.outcome);
-      const notes = safeText(node.notes);
-      const cat = safeText(node.category);
-
-      const rows = [
-        ["ID", safeText(node.id)],
-        ["Code", code || "—"],
-        ["Name", title || safeText(node.name)],
-        ["Owner", owner || "—"],
-      ];
-
-      if(cat) rows.push(["Category", cat]);
-      if(trig) rows.push(["Trigger", trig]);
-      if(outc) rows.push(["Outcome", outc]);
-      if(notes) rows.push(["Notes", notes]);
-
-      const kv = rows.map(([k,v]) => `
-        <div class="k">${k}</div>
-        <div class="v">${escapeHtml(v)}</div>
-      `).join("");
-
-      detailsBodyEl.innerHTML = `
-        <div style="font-weight:1000;font-size:12px;color:var(--dhl-red);">${escapeHtml(code || node.id || "")}</div>
-        <div style="font-weight:1000;font-size:13px;margin-top:3px;">${escapeHtml(title || node.name || "")}</div>
-        ${desc ? `<div class="descbox">${escapeHtml(desc)}</div>` : ``}
-        <div class="kv">${kv}</div>
-      `;
-    }
-
+    function safeText(s){ return (s ?? "").toString(); }
     function escapeHtml(s){
       const str = safeText(s);
       return str.replace(/[&<>"']/g, (ch) => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
       }[ch]));
     }
+    function normalize(s){ return safeText(s).trim().toLowerCase(); }
+
+    function splitCodeAndTitle(name){
+      const t = safeText(name);
+      const i = t.indexOf(":");
+      if(i === -1) return { code:"", title:t };
+      return { code: t.slice(0,i).trim(), title: t.slice(i+1).trim() };
+    }
+
+    // More stable ordering than simple string compare:
+    // S2E_02_10 sorts after S2E_02_02
+    function sortById(a,b){
+      const A = safeText(a?.id || a?.name || "");
+      const B = safeText(b?.id || b?.name || "");
+      const pa = A.split("_").map(x => (isFinite(+x) ? +x : x));
+      const pb = B.split("_").map(x => (isFinite(+x) ? +x : x));
+      const n = Math.max(pa.length, pb.length);
+      for(let i=0;i<n;i++){
+        const xa = pa[i], xb = pb[i];
+        if(xa === undefined) return -1;
+        if(xb === undefined) return  1;
+        if(typeof xa === "number" && typeof xb === "number"){
+          if(xa !== xb) return xa - xb;
+        } else {
+          const sa = safeText(xa), sb = safeText(xb);
+          if(sa !== sb) return sa.localeCompare(sb);
+        }
+      }
+      return 0;
+    }
+
+    // Fallback L0 category mapping if JSON doesn't provide "category"
+    function inferL0Category(l0){
+      const id = safeText(l0?.id).toUpperCase();
+      if(l0?.category) return l0.category;
+
+      // Manage the Business
+      if(["S2E","GRC","EA_PM"].includes(id)) return "Manage the Business";
+
+      // Run the Business (core operational chain)
+      if(["L2C","O2D","D2O","P2R"].includes(id)) return "Run the Business";
+
+      // Enabling functions (also part of run, but keep distinct if you want later)
+      if(["S2P","H2R","R2R"].includes(id)) return "Enabling Functions";
+
+      // Change the Business
+      if(["I2P","TRF"].includes(id)) return "Change the Business";
+
+      // Foundation
+      if(["DA","ITF"].includes(id)) return "Foundation";
+
+      return "Other";
+    }
+
+    function deepMatch(node, q){
+      if(!q) return true;
+      if(!node) return false;
+
+      const hay = [
+        node.id, node.name, node.description, node.owner,
+        node.trigger, node.outcome, node.notes, node.category
+      ].map(normalize).join(" | ");
+
+      if(hay.includes(q)) return true;
+
+      // If query matches any descendant, keep parent so the chain doesn't look "incomplete"
+      const kids = Array.isArray(node.children) ? node.children : [];
+      for(const c of kids){
+        if(deepMatch(c, q)) return true;
+      }
+      return false;
+    }
+
+    function filteredChildren(node){
+      const kids = Array.isArray(node?.children) ? node.children : [];
+      const q = normalize(state.search);
+      const out = q ? kids.filter(k => deepMatch(k, q)) : kids.slice();
+      out.sort(sortById);
+      return out;
+    }
+
+    function getBreadcrumb(){
+      const parts = [];
+      if(state.selected.l0) parts.push(splitCodeAndTitle(state.selected.l0.name).title || state.selected.l0.id);
+      if(state.selected.l1) parts.push(splitCodeAndTitle(state.selected.l1.name).title || state.selected.l1.id);
+      if(state.selected.l2) parts.push(splitCodeAndTitle(state.selected.l2.name).title || state.selected.l2.id);
+      if(state.selected.l3) parts.push(splitCodeAndTitle(state.selected.l3.name).title || state.selected.l3.id);
+      return parts.length ? parts.join(" > ") : "—";
+    }
 
     // ----------------------------
     // Render: Process House
     // ----------------------------
     function renderProcessHouse(){
-      // Group L0 by category
       const groups = {};
-      for(const l0 of state.l0List){
+      for(const raw of state.l0List){
+        const l0 = { ...raw, category: inferL0Category(raw) };
         const cat = l0.category || "Other";
         if(!groups[cat]) groups[cat] = [];
         groups[cat].push(l0);
       }
 
-      const orderedCats = ["Manage the Business","Run the Business","Change the Business","Foundation"];
-      const cats = [...orderedCats.filter(c => groups[c]), ...Object.keys(groups).filter(c => !orderedCats.includes(c))];
+      const preferred = ["Manage the Business","Run the Business","Enabling Functions","Change the Business","Foundation","Other"];
+      const cats = [
+        ...preferred.filter(c => groups[c] && groups[c].length),
+        ...Object.keys(groups).filter(c => !preferred.includes(c))
+      ];
 
       houseGridEl.innerHTML = cats.map(cat => {
-        const cards = groups[cat]
-          .sort((a,b)=> (a.id||"").localeCompare(b.id||""))
+        const cards = (groups[cat]||[])
+          .sort(sortById)
           .map(l0 => {
             const { code, title } = splitCodeAndTitle(l0.name);
             return `
-              <div class="house-card" data-l0="${escapeHtml(l0.id)}" role="button" tabindex="0" aria-label="Select ${escapeHtml(l0.name)}">
+              <div class="house-card" data-l0="${escapeHtml(l0.id)}" role="button" tabindex="0">
                 <div class="house-code">${escapeHtml(code || l0.id)}</div>
                 <div class="house-name">${escapeHtml(title || l0.name)}</div>
                 <div class="house-desc">${escapeHtml(l0.description || "")}</div>
@@ -933,11 +908,10 @@
         `;
       }).join("");
 
-      // Click handlers
       houseGridEl.querySelectorAll(".house-card").forEach(card => {
         card.addEventListener("click", () => {
           selectL0(card.getAttribute("data-l0"));
-          houseEl.open = false; // collapse after choosing
+          houseEl.open = false;
         });
         card.addEventListener("keydown", (e) => {
           if(e.key === "Enter" || e.key === " "){
@@ -949,14 +923,14 @@
     }
 
     // ----------------------------
-    // Render: Tabs
+    // Render: Tabs (L0)
     // ----------------------------
     function renderTabs(){
       tabsEl.innerHTML = state.l0List.map(l0 => {
         const active = state.selected.l0?.id === l0.id ? "active" : "";
         const { code, title } = splitCodeAndTitle(l0.name);
         return `
-          <button class="tab ${active}" data-l0="${escapeHtml(l0.id)}">
+          <button class="tab ${active}" data-l0="${escapeHtml(l0.id)}" title="${escapeHtml(l0.name)}">
             <span class="dot" aria-hidden="true"></span>
             <span>${escapeHtml(title || l0.name)}</span>
             <span class="small">${escapeHtml(code || l0.id)}</span>
@@ -976,40 +950,33 @@
       container.innerHTML = "";
       if(!items || items.length === 0) return;
 
-      items.forEach((node, idx) => {
-        const { code, title } = splitCodeAndTitle(node.name);
-        const isFirst = idx === 0 ? "first" : "";
-        const selected =
-          (level === "l1" && state.selected.l1?.id === node.id) ||
-          (level === "l2" && state.selected.l2?.id === node.id)
-          ? "selected" : "";
+      const selectedId = state.selected[level]?.id;
 
-        const owner = safeText(node.owner);
+      for(let i=0;i<items.length;i++){
+        const n = items[i];
+        const active = selectedId === n.id ? "active" : "";
+        const { code, title } = splitCodeAndTitle(n.name || "");
+        const meta = n.description || n.owner || "";
 
         const el = document.createElement("div");
-        el.className = `chev ${isFirst} ${level === "l1" ? "l1" : "l2"} ${selected}`;
+        el.className = `chev ${level} ${active}`;
         el.setAttribute("role","button");
         el.setAttribute("tabindex","0");
-        el.dataset.id = node.id;
+        el.dataset.id = n.id;
+
         el.innerHTML = `
-          <div class="chev-top">
-            <div style="min-width:0;">
-              <div class="chev-code">${escapeHtml(code || node.id || "")}</div>
-              <div class="chev-title">${escapeHtml(title || node.name || "")}</div>
-            </div>
+          <div class="topline">
+            <div class="code">${escapeHtml(code || n.id || "")}</div>
+            <div class="order">#${i+1}</div>
           </div>
-          ${node.description ? `<div class="chev-desc">${escapeHtml(node.description)}</div>` : ``}
-          <div class="meta">
-            ${owner ? `<span class="owner" title="${escapeHtml(owner)}">👤 <span>${escapeHtml(owner)}</span></span>` : ``}
-            ${nodeChildren(node).length ? `<span class="owner" title="Children count">↳ <span>${nodeChildren(node).length} children</span></span>` : ``}
-          </div>
+          <div class="name">${escapeHtml(title || n.name || "")}</div>
+          <div class="meta">${escapeHtml(meta)}</div>
         `;
 
         el.addEventListener("click", () => {
-          if(level === "l1") selectL1(node.id);
-          if(level === "l2") selectL2(node.id);
-          // also show details when clicking any chevron
-          renderDetails(node);
+          if(level === "l1") selectL1(n.id);
+          if(level === "l2") selectL2(n.id);
+          renderDetails(n);
         });
         el.addEventListener("keydown", (e) => {
           if(e.key === "Enter" || e.key === " "){
@@ -1019,182 +986,184 @@
         });
 
         container.appendChild(el);
-      });
+      }
     }
 
     // ----------------------------
-    // Render: L3 waterfall + nested L4 bullets
+    // Render: L3 waterfall
     // ----------------------------
-    function renderL3(list){
+    function renderL3(items){
       l3ListEl.innerHTML = "";
-      if(!list || list.length === 0){
-        l3ListEl.innerHTML = `<div class="empty">No L3 activities found for this L2 (empty children).</div>`;
+      if(!items || items.length === 0){
+        l3ListEl.innerHTML = `<div class="empty">No L3 items to display.</div>`;
         return;
       }
 
-      list.forEach((n, i) => {
-        const { code, title } = splitCodeAndTitle(n.name);
-        const selected = state.selected.l3?.id === n.id ? "selected" : "";
+      const selectedId = state.selected.l3?.id;
 
-        const bullets = nodeChildren(n);
-        const bulletHtml = bullets.length
-          ? `<ul class="bullets">
-              ${bullets.map(b => {
-                const s = splitCodeAndTitle(b.name);
-                return `<li><span style="font-weight:950;color:#111">${escapeHtml(s.code || b.id || "")}</span> — ${escapeHtml(s.title || b.name || "")}</li>`;
+      for(const l3 of items){
+        const { code, title } = splitCodeAndTitle(l3.name || "");
+        const owner = safeText(l3.owner);
+        const desc = safeText(l3.description);
+
+        const card = document.createElement("div");
+        card.className = `l3-card ${selectedId === l3.id ? "active" : ""}`;
+        card.dataset.id = l3.id;
+
+        const l4Kids = Array.isArray(l3.children) ? l3.children : [];
+        const l4Html = l4Kids.length ? `
+          <div class="l4">
+            Sub-activities (${l4Kids.length})
+            <ul>
+              ${l4Kids.sort(sortById).map(x => {
+                const s = splitCodeAndTitle(x.name || "");
+                return `<li><b>${escapeHtml(s.code || x.id || "")}</b> — ${escapeHtml(s.title || x.name || "")}</li>`;
               }).join("")}
-            </ul>`
-          : "";
-
-        const el = document.createElement("div");
-        el.className = `step ${selected}`;
-        el.dataset.id = n.id;
-
-        el.innerHTML = `
-          <div class="step-head">
-            <div class="step-left">
-              <div class="step-num">${i+1}</div>
-              <div style="min-width:0;">
-                <div class="step-code">${escapeHtml(code || n.id || "")}</div>
-                <div class="step-title">${escapeHtml(title || n.name || "")}</div>
-              </div>
-            </div>
+            </ul>
           </div>
-          ${n.description ? `<div class="step-desc">${escapeHtml(n.description)}</div>` : ``}
-          ${bulletHtml}
+        ` : "";
+
+        card.innerHTML = `
+          <div class="l3-head">
+            <div class="l3-code">${escapeHtml(code || l3.id || "")}</div>
+            <div class="l3-owner">${escapeHtml(owner || "")}</div>
+          </div>
+          <div class="l3-name">${escapeHtml(title || l3.name || "")}</div>
+          ${desc ? `<div class="l3-desc">${escapeHtml(desc)}</div>` : ``}
+          ${l4Html}
         `;
 
-        el.addEventListener("click", () => {
-          state.selected.l3 = n;
-          renderL3(nodeChildren(state.selected.l2));
-          renderDetails(n);
+        card.addEventListener("click", () => {
+          state.selected.l3 = l3;
           breadcrumbEl.textContent = getBreadcrumb();
+          renderDetails(l3);
+          // highlight
+          renderL3(items);
         });
 
-        l3ListEl.appendChild(el);
-      });
+        l3ListEl.appendChild(card);
+      }
     }
 
     // ----------------------------
-    // Selection
+    // Details panel (next to L3)
     // ----------------------------
-    function selectL0(id){
-      const l0 = findL0ById(id);
-      if(!l0) return;
+    function renderDetails(node){
+      breadcrumbEl.textContent = getBreadcrumb();
 
-      state.selected.l0 = l0;
-      clearSelections("l0");
+      if(state.detailsCollapsed){
+        detailsBodyEl.innerHTML = `<div class="empty">Details collapsed. Click “Expand” to view.</div>`;
+        return;
+      }
+      if(!node){
+        detailsBodyEl.innerHTML = `<div class="empty">Select a process element (L1/L2/L3) to see details.</div>`;
+        return;
+      }
+
+      const { code, title } = splitCodeAndTitle(node.name || "");
+      const desc = safeText(node.description);
+      const rows = [
+        ["ID", safeText(node.id)],
+        ["Code", code || "—"],
+        ["Name", title || safeText(node.name)],
+        ["Owner", safeText(node.owner) || "—"],
+      ];
+      if(node.category) rows.push(["Category", safeText(node.category)]);
+      if(node.trigger)  rows.push(["Trigger", safeText(node.trigger)]);
+      if(node.outcome)  rows.push(["Outcome", safeText(node.outcome)]);
+      if(node.notes)    rows.push(["Notes", safeText(node.notes)]);
+
+      const kv = rows.map(([k,v]) => `
+        <div class="k">${escapeHtml(k)}</div>
+        <div class="v">${escapeHtml(v)}</div>
+      `).join("");
+
+      detailsBodyEl.innerHTML = `
+        <div style="font-weight:1000;font-size:12px;color:var(--dhl-red);">${escapeHtml(code || node.id || "")}</div>
+        <div style="font-weight:1000;font-size:13px;margin-top:3px;">${escapeHtml(title || node.name || "")}</div>
+        ${desc ? `<div class="descbox">${escapeHtml(desc)}</div>` : ``}
+        <div class="kv">${kv}</div>
+      `;
+    }
+
+    // ----------------------------
+    // Selection handlers
+    // ----------------------------
+    function selectL0(l0Id){
+      const l0 = state.l0List.find(x => x.id === l0Id);
+      state.selected.l0 = l0 || null;
+      state.selected.l1 = null;
+      state.selected.l2 = null;
+      state.selected.l3 = null;
 
       renderTabs();
       renderL1();
+      renderL2();
+      renderL3([]);
+      l3CountEl.textContent = "0";
+      l3HintEl.textContent = "Select an L2 to show L3 waterfall.";
+      renderDetails(l0);
+      breadcrumbEl.textContent = getBreadcrumb();
 
-      // Auto-open first L1 if enabled
-      if(state.autoOpen){
+      if(state.autoOpen && l0){
         const l1s = filteredChildren(l0);
         if(l1s.length) selectL1(l1s[0].id);
-      } else {
-        renderL2();
-        renderL3([]);
       }
-
-      // Update hints
-      l1HintEl.textContent = `Selected L0: ${l0.name}`;
-      renderDetails(l0);
     }
 
-    function selectL1(id){
-      const l1s = filteredChildren(state.selected.l0);
-      const l1 = l1s.find(x => x.id === id) || null;
-      state.selected.l1 = l1;
-      clearSelections("l1");
+    function selectL1(l1Id){
+      const l0 = state.selected.l0;
+      if(!l0) return;
+      const l1 = (l0.children || []).find(x => x.id === l1Id);
+      state.selected.l1 = l1 || null;
+      state.selected.l2 = null;
+      state.selected.l3 = null;
+
       renderL1();
       renderL2();
+      renderL3([]);
+      l3CountEl.textContent = "0";
+      l3HintEl.textContent = "Select an L2 to show L3 waterfall.";
+      renderDetails(l1);
+      breadcrumbEl.textContent = getBreadcrumb();
 
       if(state.autoOpen && l1){
         const l2s = filteredChildren(l1);
         if(l2s.length) selectL2(l2s[0].id);
-        else {
-          renderL3([]);
-          l3CountEl.textContent = "0";
-          l3HintEl.textContent = "No L2 children found for this L1.";
-        }
-      } else {
-        renderL3([]);
-        l3CountEl.textContent = "0";
-        l3HintEl.textContent = "Select an L2 to show L3 waterfall.";
       }
-
-      if(l1) renderDetails(l1);
     }
 
-    function selectL2(id){
-      const l2s = filteredChildren(state.selected.l1);
-      const l2 = l2s.find(x => x.id === id) || null;
-      state.selected.l2 = l2;
-      clearSelections("l2");
+    function selectL2(l2Id){
+      const l1 = state.selected.l1;
+      if(!l1) return;
+      const l2 = (l1.children || []).find(x => x.id === l2Id);
+      state.selected.l2 = l2 || null;
+      state.selected.l3 = null;
+
       renderL2();
 
-      if(l2){
-        const l3s = filteredChildren(l2); // L3 list must be ALL children
-        renderL3(l3s);
-        l3CountEl.textContent = String(l3s.length);
-        l3HintEl.textContent = `Selected L2: ${l2.name}`;
+      const l3s = l2 ? filteredChildren(l2) : [];
+      l3CountEl.textContent = String(l3s.length);
+      renderL3(l3s);
 
-        if(state.autoOpen && l3s.length){
-          state.selected.l3 = l3s[0];
-          renderL3(l3s);
-          renderDetails(l3s[0]);
-        } else {
-          state.selected.l3 = null;
-          renderDetails(l2);
-        }
-      } else {
-        renderL3([]);
-        l3CountEl.textContent = "0";
-      }
-
+      l3HintEl.textContent = l2 ? `Selected L2: ${l2.name}` : "Select an L2 to show L3 waterfall.";
+      renderDetails(l2);
       breadcrumbEl.textContent = getBreadcrumb();
-    }
 
-    // Children filtering using search
-    function filteredChildren(node){
-      const kids = nodeChildren(node);
-      if(!state.search) return kids;
-      return kids considerDeepFilter(kids, state.search);
-    }
-
-    function considerDeepFilter(nodes, q){
-      // include node if it matches OR any descendant matches (so you don't "lose" a chain)
-      const out = [];
-      for(const n of nodes){
-        const selfMatch = matchesSearch(n, q);
-        const descMatch = deepAnyMatch(n, q);
-        if(selfMatch || descMatch) out.push(n);
+      if(state.autoOpen && l3s.length){
+        state.selected.l3 = l3s[0];
+        breadcrumbEl.textContent = getBreadcrumb();
+        renderDetails(l3s[0]);
+        renderL3(l3s);
       }
-      return out;
     }
 
-    function deepAnyMatch(node, q){
-      const kids = nodeChildren(node);
-      for(const k of kids){
-        if(matchesSearch(k, q)) return true;
-        if(deepAnyMatch(k, q)) return true;
-      }
-      return false;
-    }
-
-    // ----------------------------
-    // Render L1/L2
-    // ----------------------------
     function renderL1(){
       const l0 = state.selected.l0;
       const l1s = l0 ? filteredChildren(l0) : [];
       l1CountEl.textContent = String(l1s.length);
       renderChain(l1ChainEl, l1s, "l1");
-
-      if(!l0){
-        l1HintEl.textContent = "Select an L0 tab to show L1.";
-      }
+      l1HintEl.textContent = l0 ? `Selected L0: ${l0.name}` : "Select an L0 tab to show L1.";
     }
 
     function renderL2(){
@@ -1202,33 +1171,26 @@
       const l2s = l1 ? filteredChildren(l1) : [];
       l2CountEl.textContent = String(l2s.length);
       renderChain(l2ChainEl, l2s, "l2");
-
-      if(!l1){
-        l2HintEl.textContent = "Select an L1 to show L2.";
-      } else {
-        l2HintEl.textContent = `Selected L1: ${l1.name}`;
-      }
+      l2HintEl.textContent = l1 ? `Selected L1: ${l1.name}` : "Select an L1 to show L2.";
     }
 
     // ----------------------------
     // Events
     // ----------------------------
     $("search").addEventListener("input", (e) => {
-      state.search = normalize(e.target.value.trim());
-      // Re-render current selections with filtering
-      renderTabs();      // tabs stay same, but keep active state
+      state.search = normalize(e.target.value);
+      renderTabs();
       renderProcessHouse();
       renderL1();
       renderL2();
 
-      // L3 depends on selected L2; keep it but filter list
       if(state.selected.l2){
         const l3s = filteredChildren(state.selected.l2);
-        renderL3(l3s);
         l3CountEl.textContent = String(l3s.length);
+        renderL3(l3s);
       } else {
-        renderL3([]);
         l3CountEl.textContent = "0";
+        renderL3([]);
       }
       breadcrumbEl.textContent = getBreadcrumb();
     });
@@ -1242,8 +1204,6 @@
       state.search = "";
       state.detailsCollapsed = false;
       collapseDetailsBtn.textContent = "Collapse";
-
-      // reset to first L0
       if(state.l0List.length){
         selectL0(state.l0List[0].id);
       }
@@ -1252,45 +1212,85 @@
 
     $("openHouse").addEventListener("click", () => {
       houseEl.open = true;
-      // scroll house into view (under sticky header)
       houseEl.scrollIntoView({ behavior:"smooth", block:"start" });
     });
 
     collapseDetailsBtn.addEventListener("click", () => {
       state.detailsCollapsed = !state.detailsCollapsed;
       collapseDetailsBtn.textContent = state.detailsCollapsed ? "Expand" : "Collapse";
-
       const node = state.selected.l3 || state.selected.l2 || state.selected.l1 || state.selected.l0;
       renderDetails(node);
     });
 
     // ----------------------------
-    // Data load
+    // Data load (defensive)
     // ----------------------------
+    function unwrapL0List(json){
+      // Accept: {children:[...]}, {data:{children:[...]}}, or [...] (array root)
+      if(Array.isArray(json)) return json;
+      if(json && Array.isArray(json.children)) return json.children;
+      if(json && json.data && Array.isArray(json.data.children)) return json.data.children;
+      if(json && json.root && Array.isArray(json.root.children)) return json.root.children;
+      return [];
+    }
+
+    async function fetchFirst(paths){
+      let lastErr = null;
+      for(const p of paths){
+        try{
+          const res = await fetch(`${p}?v=${Date.now()}`, { cache:"no-store" });
+          if(!res.ok) throw new Error(`${p} -> HTTP ${res.status}`);
+          const json = await res.json();
+          return { json, path: p };
+        } catch(e){
+          lastErr = e;
+        }
+      }
+      throw lastErr || new Error("Failed to load JSON");
+    }
+
     async function init(){
       try{
-        // Cache-bust is safe on Pages and avoids stale JSON
-        const res = await fetch(`data.json?v=${Date.now()}`, { cache:"no-store" });
-        if(!res.ok) throw new Error(`Failed to load data.json (${res.status})`);
-        const json = await res.json();
+        const candidates = [
+          "data.json",
+          "./data.json",
+          "./assets/data.json",
+          "./data/data.json"
+        ];
+
+        const { json, path } = await fetchFirst(candidates);
 
         state.data = json;
-        state.l0List = Array.isArray(json.children) ? json.children : [];
+        state.l0List = unwrapL0List(json);
+
+        // normalize categories (fallback inference)
+        state.l0List = state.l0List.map(x => ({ ...x, category: inferL0Category(x) }));
 
         if(!state.l0List.length){
-          throw new Error("JSON loaded, but no root.children found (expected L0 list).");
+          throw new Error(
+            "JSON loaded but no L0 list found. Expected one of: " +
+            "{children:[...]}, {data:{children:[...]}}, {root:{children:[...]}}, or [...] (array root)."
+          );
         }
 
         renderTabs();
         renderProcessHouse();
-
-        // Select first L0 by default
         selectL0(state.l0List[0].id);
 
-        errEl.style.display = "none";
+        errEl.style.display = "block";
+        errEl.textContent =
+          `Loaded: ${path}\n` +
+          `L0 count: ${state.l0List.length}\n` +
+          `Tip: if you still see 0, open DevTools → Console to see fetch errors.`;
       } catch (e){
         errEl.style.display = "block";
-        errEl.textContent = `Error: ${e.message}`;
+        errEl.textContent =
+          `Error loading process data.\n` +
+          `${e?.message || e}\n\n` +
+          `Checks:\n` +
+          `• Ensure data.json is in the repo root (same folder as index.html)\n` +
+          `• Ensure it is valid JSON (no trailing commas)\n` +
+          `• Ensure GitHub Pages is serving the latest commit (cache can lie)\n`;
         console.error(e);
       }
     }
