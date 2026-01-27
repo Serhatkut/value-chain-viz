@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DHL eCommerce | Process Architecture</title>
 
   <style>
     :root{
       --dhl-yellow:#FFCC00;
       --dhl-red:#D40511;
-      --ink:#111;
-      --muted:#6b7280;
       --bg:#f6f7f9;
       --card:#ffffff;
+      --ink:#111827;
+      --muted:#6b7280;
       --border:#e5e7eb;
       --shadow:0 10px 24px rgba(0,0,0,.08);
       --radius:14px;
@@ -20,113 +20,145 @@
     }
 
     *{ box-sizing:border-box; }
+    html, body { height:100%; }
     body{
       margin:0;
       font-family:var(--font);
-      color:var(--ink);
       background:var(--bg);
-      height:100vh;
+      color:var(--ink);
       overflow:hidden;
     }
 
-    /* Header */
+    /* Top bar */
     .topbar{
       height:64px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:0 18px;
+      padding:0 16px;
       background:linear-gradient(90deg, var(--dhl-yellow), #ffe07a);
       border-bottom: 1px solid rgba(0,0,0,.06);
     }
     .brand{
-      display:flex; align-items:center; gap:12px; min-width: 320px;
-      font-weight:700;
+      display:flex; align-items:center; gap:12px;
+      font-weight:900;
+      letter-spacing:.2px;
+      min-width: 320px;
     }
     .brand-badge{
-      width:10px; height:28px; border-radius:6px; background:var(--dhl-red);
-      box-shadow: 0 6px 16px rgba(212,5,17,.25);
+      width:10px; height:28px; border-radius:8px;
+      background:var(--dhl-red);
+      box-shadow:0 10px 18px rgba(212,5,17,.22);
     }
-    .brand-title{ line-height:1.1; }
-    .brand-title .sub{ display:block; font-weight:600; font-size:12px; color:rgba(0,0,0,.65); }
+    .brand small{
+      display:block;
+      font-weight:700;
+      font-size:12px;
+      color:rgba(0,0,0,.62);
+      letter-spacing:0;
+    }
 
     .controls{
-      display:flex; align-items:center; gap:10px; flex:1;
+      display:flex;
+      align-items:center;
+      gap:10px;
       justify-content:center;
+      flex:1;
+      min-width: 0;
     }
     .control{
-      display:flex; align-items:center; gap:8px;
-      background:rgba(255,255,255,.78);
-      border:1px solid rgba(0,0,0,.08);
+      display:flex;
+      align-items:center;
+      gap:8px;
       padding:8px 10px;
-      border-radius: 999px;
-      box-shadow: 0 6px 14px rgba(0,0,0,.06);
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.10);
+      background:rgba(255,255,255,.78);
+      box-shadow:0 6px 14px rgba(0,0,0,.06);
+      min-width: 0;
+    }
+    .control label{
+      font-size:12px;
+      font-weight:900;
+      color:rgba(0,0,0,.62);
+      white-space:nowrap;
     }
     select, input{
-      font-family:var(--font);
       border:none;
       outline:none;
       background:transparent;
+      font-family:var(--font);
       font-size:13px;
-      min-width: 280px;
+      min-width: 220px;
+      max-width: 46vw;
     }
-    input{ min-width: 260px; }
+    input{ min-width: 220px; }
 
-    .actions{ display:flex; align-items:center; gap:10px; min-width: 260px; justify-content:flex-end; }
+    .actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+      min-width: 260px;
+    }
     .btn{
-      background: var(--dhl-red);
-      color:white;
       border:none;
+      cursor:pointer;
       border-radius:999px;
       padding:9px 12px;
-      font-weight:600;
+      font-weight:800;
       font-size:13px;
-      cursor:pointer;
-      box-shadow: 0 10px 18px rgba(212,5,17,.22);
+    }
+    .btn.primary{
+      background:var(--dhl-red);
+      color:#fff;
+      box-shadow:0 10px 18px rgba(212,5,17,.22);
     }
     .btn.secondary{
-      background: rgba(255,255,255,.86);
-      color: var(--ink);
+      background:rgba(255,255,255,.86);
+      color:var(--ink);
+      border:1px solid rgba(0,0,0,.12);
       box-shadow:none;
-      border:1px solid rgba(0,0,0,.10);
     }
 
-    /* Main */
+    /* Main layout */
     .main{
       height: calc(100vh - 64px);
       display:grid;
-      grid-template-columns: 1fr 1fr 1fr 1.25fr;
-      gap: 14px;
-      padding: 14px;
+      grid-template-rows: auto auto auto 1fr;
+      gap:12px;
+      padding:14px;
+      overflow:hidden;
     }
 
     .panel{
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
       overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      min-width: 0;
+      min-height: 0;
     }
     .panel-header{
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
+      background: linear-gradient(180deg, #fff, #fbfbfc);
     }
     .panel-title{
+      display:flex;
+      align-items:center;
+      gap:8px;
       font-size:13px;
-      font-weight:800;
+      font-weight:900;
       letter-spacing:.2px;
-      display:flex; align-items:center; gap:8px;
     }
     .pill{
       font-size:11px;
-      font-weight:800;
+      font-weight:900;
       padding:3px 8px;
       border-radius:999px;
       background: rgba(212,5,17,.10);
@@ -134,80 +166,171 @@
       border: 1px solid rgba(212,5,17,.18);
     }
     .panel-body{
-      padding: 10px;
+      padding:10px;
       overflow:auto;
     }
 
-    /* Lists */
-    .item{
-      border:1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 10px;
-      margin: 8px 0;
-      cursor:pointer;
-      background:#fff;
-      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease;
+    /* Chevron chain */
+    .chevron-strip{
+      display:flex;
+      gap:0;
+      overflow:auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
     }
-    .item:hover{
+
+    .chevron{
+      position:relative;
+      flex: 0 0 auto;
+      height:52px;
+      display:flex;
+      align-items:center;
+      padding: 0 18px 0 14px;
+      margin-right: 18px; /* space for arrow */
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      transition: transform .08s ease, border-color .12s ease, box-shadow .12s ease;
+      border-radius: 12px;
+      min-width: 240px;
+      max-width: 420px;
+    }
+
+    /* Arrow head */
+    .chevron::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      right:-18px;
+      transform: translateY(-50%);
+      width:0; height:0;
+      border-top:26px solid transparent;
+      border-bottom:26px solid transparent;
+      border-left:18px solid #fff;
+      filter: drop-shadow(1px 0 0 var(--border));
+    }
+
+    /* notch on left (except first) */
+    .chevron.notch::before{
+      content:"";
+      position:absolute;
+      top:50%;
+      left:-18px;
+      transform: translateY(-50%);
+      width:0; height:0;
+      border-top:26px solid transparent;
+      border-bottom:26px solid transparent;
+      border-left:18px solid var(--bg);
+    }
+
+    .chevron:hover{
       transform: translateY(-1px);
       border-color: rgba(212,5,17,.35);
-      box-shadow: 0 10px 18px rgba(0,0,0,.06);
+      box-shadow: 0 12px 22px rgba(0,0,0,.08);
     }
-    .item.active{
+
+    .chevron.active{
       border-color: var(--dhl-red);
-      box-shadow: 0 12px 22px rgba(212,5,17,.12);
+      box-shadow: 0 14px 26px rgba(212,5,17,.14);
     }
-    .item .name{
-      font-weight:800;
+    .chevron.active::after{
+      border-left-color: rgba(212,5,17,.08);
+      filter:none;
+    }
+
+    .chev-text{
+      min-width: 0;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .chev-title{
       font-size:13px;
+      font-weight:900;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
-    .item .meta{
-      margin-top:4px;
+    .chev-sub{
       font-size:12px;
       color: var(--muted);
-      line-height:1.3;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 360px;
+    }
+    .mono{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-weight:900;
+      color: var(--dhl-red);
     }
 
     /* Details */
+    .details-grid{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap:12px;
+      padding:12px;
+    }
+    .details-card{
+      border:1px solid var(--border);
+      border-radius: 14px;
+      background:#fff;
+      padding:12px;
+    }
     .breadcrumbs{
       font-size:12px;
-      color: rgba(0,0,0,.65);
-      margin-bottom:10px;
+      color: rgba(0,0,0,.62);
+      margin-bottom:8px;
       line-height:1.4;
     }
-    .detail-title{
-      font-size:16px;
-      font-weight:900;
-      margin:0 0 8px;
+    .details-title{
+      margin:0 0 6px;
       color: var(--dhl-red);
+      font-size:16px;
+      font-weight:1000;
     }
-    .detail-desc{
+    .details-desc{
+      margin:0;
       font-size:13px;
-      color: var(--ink);
       line-height:1.55;
-      margin:0 0 14px;
+      color: var(--ink);
     }
     .kv{
+      margin-top:10px;
       border-top:1px dashed var(--border);
       padding-top:10px;
       font-size:12px;
       color: rgba(0,0,0,.75);
     }
-    .kv div{ margin: 6px 0; }
-    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    .kv div{ margin:6px 0; }
 
     .empty{
-      padding: 18px 12px;
+      padding: 12px;
       color: var(--muted);
       font-size: 13px;
+    }
+    #error{
+      position:absolute;
+      left:14px; bottom:14px;
+      background:#fff;
+      border:1px solid rgba(212,5,17,.25);
+      color:#b00020;
+      padding:10px 12px;
+      border-radius:12px;
+      box-shadow: var(--shadow);
+      display:none;
+      max-width: 70vw;
+      font-size:13px;
     }
 
     @media (max-width: 1100px){
       body{ overflow:auto; }
-      .main{ grid-template-columns: 1fr; height:auto; }
-      select, input{ min-width: 180px; }
-      .brand{ min-width: 0; }
+      .main{ height:auto; overflow:visible; }
+      .details-grid{ grid-template-columns: 1fr; }
+      select, input{ min-width: 150px; max-width: 60vw; }
       .actions{ min-width: 0; }
+      .brand{ min-width: 0; }
     }
   </style>
 </head>
@@ -216,63 +339,82 @@
   <div class="topbar">
     <div class="brand">
       <div class="brand-badge"></div>
-      <div class="brand-title">
+      <div>
         DHL eCommerce
-        <span class="sub">Enterprise Process Architecture Explorer</span>
+        <small>Enterprise Business Architecture • Process Chains</small>
       </div>
     </div>
 
     <div class="controls">
       <div class="control">
-        <strong style="font-size:12px;color:rgba(0,0,0,.65)">L0</strong>
+        <label for="l0Select">L0</label>
         <select id="l0Select"></select>
       </div>
 
       <div class="control">
-        <span style="font-size:12px;color:rgba(0,0,0,.65);font-weight:800">Search</span>
-        <input id="searchInput" placeholder="Type to filter within selected L0…" />
+        <label for="searchInput">Search</label>
+        <input id="searchInput" placeholder="Filter within current level (code/name/description)..." />
       </div>
     </div>
 
     <div class="actions">
       <button class="btn secondary" id="resetBtn">Reset</button>
-      <button class="btn" id="expandAllBtn">Expand defaults</button>
+      <button class="btn primary" id="autoBtn">Auto-open first</button>
     </div>
   </div>
 
   <div class="main">
+    <!-- L1 -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">L1 <span class="pill" id="l1Count">0</span></div>
+        <div class="panel-title">L1 Process Chain <span class="pill" id="l1Count">0</span></div>
+        <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:800">Click a chevron to drill down</div>
       </div>
-      <div class="panel-body" id="l1List"></div>
+      <div class="panel-body">
+        <div class="chevron-strip" id="l1Strip"></div>
+      </div>
     </div>
 
+    <!-- L2 -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">L2 <span class="pill" id="l2Count">0</span></div>
+        <div class="panel-title">L2 Process Chain <span class="pill" id="l2Count">0</span></div>
+        <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:800" id="l2Hint"></div>
       </div>
-      <div class="panel-body" id="l2List"></div>
+      <div class="panel-body">
+        <div class="chevron-strip" id="l2Strip"></div>
+      </div>
     </div>
 
+    <!-- L3 -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">L3 <span class="pill" id="l3Count">0</span></div>
+        <div class="panel-title">L3 Process Chain <span class="pill" id="l3Count">0</span></div>
+        <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:800" id="l3Hint"></div>
       </div>
-      <div class="panel-body" id="l3List"></div>
+      <div class="panel-body">
+        <div class="chevron-strip" id="l3Strip"></div>
+      </div>
     </div>
 
+    <!-- Details -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">Details</div>
+        <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:800" id="pathBadge"></div>
       </div>
-      <div class="panel-body" id="details"></div>
+      <div class="panel-body" id="detailsPanel">
+        <div class="empty">Select an L0 and click a process chevron.</div>
+      </div>
     </div>
   </div>
+
+  <div id="error"></div>
 
   <script>
     const state = {
       data: null,
+      l0Options: [],
       l0: null,
       l1: null,
       l2: null,
@@ -280,147 +422,204 @@
       search: ""
     };
 
-    const el = (id) => document.getElementById(id);
+    const $ = (id) => document.getElementById(id);
 
-    function parseName(name) {
-      // Supports: "ITF_01: Something"  => { code:"ITF_01", title:"Something" }
+    function safeChildren(node){ return Array.isArray(node?.children) ? node.children : []; }
+
+    function parseName(name){
+      // "CODE: Title" => {code, title}; else {code:"", title:name}
       if (!name) return { code:"", title:"" };
-      const parts = name.split(":");
+      const parts = String(name).split(":");
       if (parts.length >= 2) return { code: parts[0].trim(), title: parts.slice(1).join(":").trim() };
-      return { code:"", title:name.trim() };
+      return { code:"", title: String(name).trim() };
     }
 
-    function safeChildren(node) {
-      return Array.isArray(node?.children) ? node.children : [];
-    }
-
-    function render() {
-      const l0Node = state.l0;
-      const l1Nodes = safeChildren(l0Node);
-
-      renderList({
-        container: el("l1List"),
-        nodes: filterNodes(l1Nodes, state.search),
-        active: state.l1,
-        onClick: (n) => { state.l1=n; state.l2=null; state.l3=null; render(); }
-      });
-      el("l1Count").textContent = l1Nodes.length;
-
-      const l2Nodes = safeChildren(state.l1);
-      renderList({
-        container: el("l2List"),
-        nodes: filterNodes(l2Nodes, state.search),
-        active: state.l2,
-        onClick: (n) => { state.l2=n; state.l3=null; render(); }
-      });
-      el("l2Count").textContent = l2Nodes.length;
-
-      const l3Nodes = safeChildren(state.l2);
-      renderList({
-        container: el("l3List"),
-        nodes: filterNodes(l3Nodes, state.search),
-        active: state.l3,
-        onClick: (n) => { state.l3=n; render(); }
-      });
-      el("l3Count").textContent = l3Nodes.length;
-
-      renderDetails();
-    }
-
-    function filterNodes(nodes, q) {
-      const query = (q || "").trim().toLowerCase();
-      if (!query) return nodes;
-      return nodes.filter(n => {
-        const { code, title } = parseName(n.name || "");
-        const hay = `${code} ${title} ${(n.description||"")}`.toLowerCase();
-        return hay.includes(query);
-      });
-    }
-
-    function renderList({ container, nodes, active, onClick }) {
-      container.innerHTML = "";
-      if (!nodes.length) {
-        container.innerHTML = `<div class="empty">No items to show.</div>`;
-        return;
-      }
-      nodes.forEach(n => {
-        const { code, title } = parseName(n.name);
-        const div = document.createElement("div");
-        div.className = "item" + (active === n ? " active" : "");
-        div.innerHTML = `
-          <div class="name">${code ? `<span class="mono">${code}</span> — ` : ""}${escapeHtml(title)}</div>
-          <div class="meta">${escapeHtml(n.description || "No description provided.")}</div>
-        `;
-        div.addEventListener("click", () => onClick(n));
-        container.appendChild(div);
-      });
-    }
-
-    function renderDetails() {
-      const target = state.l3 || state.l2 || state.l1 || state.l0;
-      const path = [
-        state.l0 ? parseName(state.l0.name).title || state.l0.name : null,
-        state.l1 ? parseName(state.l1.name).title || state.l1.name : null,
-        state.l2 ? parseName(state.l2.name).title || state.l2.name : null,
-        state.l3 ? parseName(state.l3.name).title || state.l3.name : null
-      ].filter(Boolean);
-
-      if (!target) {
-        el("details").innerHTML = `<div class="empty">Select an L0 to begin.</div>`;
-        return;
-      }
-
-      const { code, title } = parseName(target.name || "");
-      el("details").innerHTML = `
-        <div class="breadcrumbs"><strong>Path:</strong> ${escapeHtml(path.join("  ›  "))}</div>
-        <h3 class="detail-title">${code ? `<span class="mono">${code}</span> — ` : ""}${escapeHtml(title || target.name || "")}</h3>
-        <p class="detail-desc">${escapeHtml(target.description || "No description provided.")}</p>
-        <div class="kv">
-          <div><strong>Children:</strong> ${safeChildren(target).length}</div>
-          <div><strong>Node key:</strong> <span class="mono">${escapeHtml(target.name || "")}</span></div>
-        </div>
-      `;
-    }
-
-    function escapeHtml(str) {
+    function escapeHtml(str){
       return String(str).replace(/[&<>"']/g, s => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
       }[s]));
     }
 
-    function resetSelection() {
-      const l0Select = el("l0Select");
-      const first = state.data?.children?.[0] || state.data;
-      state.l0 = first;
-      state.l1 = null;
-      state.l2 = null;
-      state.l3 = null;
-      state.search = "";
-      el("searchInput").value = "";
-      l0Select.value = first?.name || "";
-      render();
+    function matchesSearch(node, query){
+      const q = (query || "").trim().toLowerCase();
+      if (!q) return true;
+      const { code, title } = parseName(node?.name || "");
+      const hay = `${code} ${title} ${node?.description || ""}`.toLowerCase();
+      return hay.includes(q);
     }
 
-    function expandDefaults() {
-      // Convenience: auto-select first L1, first L2, first L3 if available
+    function renderChevronStrip({ stripEl, nodes, activeNode, onClick }){
+      stripEl.innerHTML = "";
+
+      if (!nodes.length){
+        stripEl.innerHTML = `<div class="empty">No items.</div>`;
+        return;
+      }
+
+      nodes.forEach((n, idx) => {
+        const { code, title } = parseName(n.name);
+        const div = document.createElement("div");
+        div.className = "chevron" + (idx > 0 ? " notch" : "") + (activeNode === n ? " active" : "");
+        div.innerHTML = `
+          <div class="chev-text">
+            <div class="chev-title">
+              ${code ? `<span class="mono">${escapeHtml(code)}</span> — ` : ""}${escapeHtml(title)}
+            </div>
+            <div class="chev-sub">${escapeHtml(n.description || "No description provided.")}</div>
+          </div>
+        `;
+        div.addEventListener("click", () => onClick(n, div));
+        stripEl.appendChild(div);
+      });
+    }
+
+    function setDetails(target){
+      const details = $("detailsPanel");
+      const path = buildPath();
+      $("pathBadge").textContent = path.length ? path.join("  ›  ") : "";
+
+      if (!target){
+        details.innerHTML = `<div class="empty">Select a process chevron to see details.</div>`;
+        return;
+      }
+
+      const { code, title } = parseName(target.name || "");
+      details.innerHTML = `
+        <div class="details-grid">
+          <div class="details-card">
+            <div class="breadcrumbs"><strong>Path:</strong> ${escapeHtml(path.join("  ›  "))}</div>
+            <h3 class="details-title">
+              ${code ? `<span class="mono">${escapeHtml(code)}</span> — ` : ""}${escapeHtml(title || target.name || "")}
+            </h3>
+            <p class="details-desc">${escapeHtml(target.description || "No description provided.")}</p>
+            <div class="kv">
+              <div><strong>Children:</strong> ${safeChildren(target).length}</div>
+              <div><strong>Raw key:</strong> <span class="mono">${escapeHtml(target.name || "")}</span></div>
+            </div>
+          </div>
+
+          <div class="details-card">
+            <div style="font-weight:1000; font-size:13px; margin-bottom:8px;">Actions (optional)</div>
+            <div style="font-size:13px; color:var(--muted); line-height:1.5">
+              • Use Search to filter chevrons within the current chain.<br/>
+              • Auto-open selects first L1→L2→L3 under the chosen L0.<br/>
+              • If you want strict “process flow ordering”, we can add an explicit <span class="mono">order</span> attribute in JSON.
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function buildPath(){
+      const p = [];
+      if (state.l0) p.push(parseName(state.l0.name).title || state.l0.name);
+      if (state.l1) p.push(parseName(state.l1.name).title || state.l1.name);
+      if (state.l2) p.push(parseName(state.l2.name).title || state.l2.name);
+      if (state.l3) p.push(parseName(state.l3.name).title || state.l3.name);
+      return p;
+    }
+
+    function scrollIntoViewIfNeeded(container, element){
+      // Smoothly bring active chevron into view
+      try {
+        const cRect = container.getBoundingClientRect();
+        const eRect = element.getBoundingClientRect();
+        if (eRect.left < cRect.left || eRect.right > cRect.right){
+          element.scrollIntoView({ behavior:"smooth", block:"nearest", inline:"center" });
+        }
+      } catch(_) {}
+    }
+
+    function render(){
+      const l1All = safeChildren(state.l0);
+      const l1 = l1All.filter(n => matchesSearch(n, state.search));
+      $("l1Count").textContent = l1All.length;
+
+      renderChevronStrip({
+        stripEl: $("l1Strip"),
+        nodes: l1,
+        activeNode: state.l1,
+        onClick: (node, elNode) => {
+          state.l1 = node;
+          state.l2 = null;
+          state.l3 = null;
+          state.search = $("searchInput").value || "";
+          render();
+          setDetails(state.l1);
+          scrollIntoViewIfNeeded($("l1Strip"), elNode);
+        }
+      });
+
+      const l2All = safeChildren(state.l1);
+      const l2 = l2All.filter(n => matchesSearch(n, state.search));
+      $("l2Count").textContent = l2All.length;
+      $("l2Hint").textContent = state.l1 ? `Selected L1: ${parseName(state.l1.name).title}` : "Select an L1 to show L2";
+
+      renderChevronStrip({
+        stripEl: $("l2Strip"),
+        nodes: l2,
+        activeNode: state.l2,
+        onClick: (node, elNode) => {
+          state.l2 = node;
+          state.l3 = null;
+          state.search = $("searchInput").value || "";
+          render();
+          setDetails(state.l2);
+          scrollIntoViewIfNeeded($("l2Strip"), elNode);
+        }
+      });
+
+      const l3All = safeChildren(state.l2);
+      const l3 = l3All.filter(n => matchesSearch(n, state.search));
+      $("l3Count").textContent = l3All.length;
+      $("l3Hint").textContent = state.l2 ? `Selected L2: ${parseName(state.l2.name).title}` : "Select an L2 to show L3";
+
+      renderChevronStrip({
+        stripEl: $("l3Strip"),
+        nodes: l3,
+        activeNode: state.l3,
+        onClick: (node, elNode) => {
+          state.l3 = node;
+          state.search = $("searchInput").value || "";
+          render();
+          setDetails(state.l3);
+          scrollIntoViewIfNeeded($("l3Strip"), elNode);
+        }
+      });
+
+      // If nothing selected yet, show something sensible
+      const target = state.l3 || state.l2 || state.l1 || null;
+      setDetails(target);
+    }
+
+    function resetAll(){
+      state.l1 = state.l2 = state.l3 = null;
+      state.search = "";
+      $("searchInput").value = "";
+      render();
+      setDetails(null);
+    }
+
+    function autoOpen(){
       state.l1 = safeChildren(state.l0)[0] || null;
       state.l2 = safeChildren(state.l1)[0] || null;
       state.l3 = safeChildren(state.l2)[0] || null;
       render();
+      setDetails(state.l3 || state.l2 || state.l1);
     }
 
-    async function init() {
-      const res = await fetch("./data.json", { cache: "no-store" });
+    async function init(){
+      const res = await fetch("./data.json", { cache:"no-store" });
       if (!res.ok) throw new Error(`Failed to load data.json (${res.status} ${res.statusText})`);
       const data = await res.json();
       state.data = data;
 
-      // L0 = top-level children if present; else the root itself
-      const l0Options = Array.isArray(data.children) && data.children.length ? data.children : [data];
+      // L0 options: use root children if present, else root as single L0
+      state.l0Options = (Array.isArray(data.children) && data.children.length) ? data.children : [data];
 
-      const l0Select = el("l0Select");
+      const l0Select = $("l0Select");
       l0Select.innerHTML = "";
-      l0Options.forEach(n => {
+      state.l0Options.forEach((n) => {
         const opt = document.createElement("option");
         const title = parseName(n.name).title || n.name || "Untitled";
         opt.value = n.name || title;
@@ -428,32 +627,34 @@
         l0Select.appendChild(opt);
       });
 
-      // Default selection: first L0
-      state.l0 = l0Options[0];
-      l0Select.value = state.l0.name || "";
+      // default L0 = first
+      state.l0 = state.l0Options[0];
+      l0Select.value = state.l0.name || l0Select.options[0]?.value || "";
 
       l0Select.addEventListener("change", () => {
-        const selected = l0Options.find(x => (x.name || "") === l0Select.value) || l0Options[0];
+        const selected = state.l0Options.find(x => (x.name || "") === l0Select.value) || state.l0Options[0];
         state.l0 = selected;
-        state.l1 = state.l2 = state.l3 = null;
-        render();
+        resetAll();
+        autoOpen(); // optional: comment this line if you want no auto-open when L0 changes
       });
 
-      el("searchInput").addEventListener("input", (e) => {
+      $("searchInput").addEventListener("input", (e) => {
         state.search = e.target.value || "";
         render();
       });
 
-      el("resetBtn").addEventListener("click", resetSelection);
-      el("expandAllBtn").addEventListener("click", expandDefaults);
+      $("resetBtn").addEventListener("click", () => resetAll());
+      $("autoBtn").addEventListener("click", () => autoOpen());
 
       render();
-      expandDefaults();
+      autoOpen();
     }
 
     init().catch(err => {
-      document.body.innerHTML = `<pre style="padding:18px;color:#b00020;font-family:ui-monospace">${err}</pre>`;
       console.error(err);
+      const box = $("error");
+      box.style.display = "block";
+      box.textContent = String(err);
     });
   </script>
 </body>
