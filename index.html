@@ -19,15 +19,16 @@
       --radius:14px;
       --font:"Segoe UI", system-ui, -apple-system, Arial, sans-serif;
 
-      /* Requested palette */
-      --l0:#D40511;        /* red */
-      --l1:#FFCC00;        /* yellow */
-      --l2:#2f343b;        /* dark grey */
-      --l3:#f0f2f4;        /* light grey */
+      /* Requested level colors */
+      --l0:#D40511;    /* red */
+      --l1:#FFCC00;    /* yellow */
+      --l2:#2f343b;    /* dark grey */
+      --l3:#f0f2f4;    /* light grey */
 
       --l2Text:#ffffff;
       --l1Text:#111827;
     }
+
     *{ box-sizing:border-box; }
     html, body{ height:100%; }
     body{
@@ -208,69 +209,46 @@
       overflow:auto;
     }
 
-    /* ===== FULL-WIDTH CHEVRON CHAINS =====
-       We render as a grid so chevrons stretch equally to fill the row.
-       Works best when there are not too many items; if many, they wrap.
+    /* === FULL WIDTH + WRAP CHAINS ===
+       Each row fills the width; items wrap as needed.
     */
-    .chain{
+    .chainGrid{
       display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
       gap: 10px;
-      align-items:stretch;
+      align-items: stretch;
     }
-    .chain.l1{ grid-auto-flow: column; grid-auto-columns: 1fr; }
-    .chain.l2{ grid-auto-flow: column; grid-auto-columns: 1fr; }
 
-    /* Chevron tile */
+    /* Chevron block: contained shape using clip-path (no overflow) */
     .chev{
       position:relative;
-      height:56px;
+      height:58px;
+      padding: 10px 14px;
       display:flex;
       align-items:center;
-      padding: 10px 18px 10px 14px;
-      border-radius: 12px;
       cursor:pointer;
-      border: 1px solid rgba(0,0,0,.10);
+      border-radius: 12px; /* kept for focus/outline; shape is clipped */
+      border: 1px solid rgba(0,0,0,.12);
       transition: transform .08s ease, box-shadow .12s ease, outline-color .12s ease;
-      min-width: 0; /* allow ellipsis */
+      min-width: 0;
+      clip-path: polygon(
+        0 0,
+        calc(100% - 18px) 0,
+        100% 50%,
+        calc(100% - 18px) 100%,
+        0 100%
+      );
     }
-
-    /* Arrow head */
-    .chev::after{
-      content:"";
-      position:absolute;
-      top:50%;
-      right:-18px;
-      transform: translateY(-50%);
-      width:0;height:0;
-      border-top:28px solid transparent;
-      border-bottom:28px solid transparent;
-      border-left:18px solid currentColor; /* overridden per level with --arrow */
-    }
-
-    /* Notch for all but first */
-    .chev.notch::before{
-      content:"";
-      position:absolute;
-      top:50%;
-      left:-18px;
-      transform: translateY(-50%);
-      width:0;height:0;
-      border-top:28px solid transparent;
-      border-bottom:28px solid transparent;
-      border-left:18px solid var(--bg);
-    }
-
     .chev:hover{
       transform: translateY(-1px);
       box-shadow: 0 12px 22px rgba(0,0,0,.10);
     }
-
     .chev.active{
-      outline: 3px solid rgba(212,5,17,.25);
+      outline: 3px solid rgba(212,5,17,.35);
       box-shadow: 0 16px 30px rgba(212,5,17,.10);
     }
 
-    .chevText{ min-width:0; display:flex; flex-direction:column; gap:3px; }
+    .chevText{ min-width:0; display:flex; flex-direction:column; gap:4px; }
     .chevTitle{
       font-size:13px;
       font-weight:1000;
@@ -280,7 +258,7 @@
     }
     .chevSub{
       font-size:12px;
-      opacity:.85;
+      opacity:.88;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -290,36 +268,21 @@
     .chev.l1{
       background: var(--l1);
       color: var(--l1Text);
+      border-color: rgba(0,0,0,.10);
     }
-    .chev.l1::after{
-      border-left-color: var(--l1);
-      filter: drop-shadow(1px 0 0 rgba(0,0,0,.10));
-    }
-
     /* L2 dark grey */
     .chev.l2{
       background: var(--l2);
       color: var(--l2Text);
       border-color: rgba(255,255,255,.08);
-    }
-    .chev.l2::after{
-      border-left-color: var(--l2);
-      filter: drop-shadow(1px 0 0 rgba(0,0,0,.22));
-    }
-
-    /* Make L2 slightly shorter */
-    .chev.l2{ height:52px; }
-    .chev.l2::after{
-      border-top:26px solid transparent;
-      border-bottom:26px solid transparent;
-      right:-16px;
-      border-left-width:16px;
-    }
-    .chev.l2.notch::before{
-      border-top:26px solid transparent;
-      border-bottom:26px solid transparent;
-      left:-16px;
-      border-left-width:16px;
+      height:54px;
+      clip-path: polygon(
+        0 0,
+        calc(100% - 16px) 0,
+        100% 50%,
+        calc(100% - 16px) 100%,
+        0 100%
+      );
     }
 
     /* L3 list (light grey) */
@@ -391,28 +354,6 @@
     }
     .empty{ padding: 10px; color: var(--muted); font-size: 13px; }
 
-    /* Wrapping behavior: fit-to-width + wrap if too many chevrons */
-    .chain.l1, .chain.l2{
-      overflow: visible;           /* no scroll */
-      grid-auto-flow: column;
-      grid-auto-columns: 1fr;      /* equal widths */
-      align-items: stretch;
-    }
-    /* If viewport is narrow, allow wrapping by switching to row flow */
-    @media (max-width: 1100px){
-      body{ overflow:auto; }
-      .main{ height:auto; grid-template-columns: 1fr; }
-      .stack{ grid-template-rows: auto auto auto; }
-      input{ min-width: 160px; max-width: 60vw; }
-      .brand{ min-width: 0; }
-
-      .chain.l1, .chain.l2{
-        grid-auto-flow: row;
-        grid-template-columns: 1fr;
-      }
-      .chev::after, .chev.notch::before{ display:none; } /* simplify on small screens */
-    }
-
     #error{
       position:absolute;
       left:14px; bottom:14px;
@@ -426,6 +367,15 @@
       max-width: 75vw;
       font-size:13px;
     }
+
+    @media (max-width: 1100px){
+      body{ overflow:auto; }
+      .main{ height:auto; grid-template-columns: 1fr; }
+      .stack{ grid-template-rows: auto auto auto; }
+      input{ min-width: 160px; max-width: 60vw; }
+      .brand{ min-width: 0; }
+      .chev, .chev.l2{ clip-path: none; border-radius: 12px; }
+    }
   </style>
 </head>
 
@@ -436,7 +386,7 @@
         <div class="brand-badge"></div>
         <div>
           DHL eCommerce
-          <small>Enterprise Business Architecture • Process Chains</small>
+          <small>Enterprise Business Architecture • L0→L1→L2→L3</small>
         </div>
       </div>
 
@@ -461,10 +411,10 @@
       <div class="panel">
         <div class="panel-header">
           <div class="panel-title">L1 Chain <span class="pill" id="l1Count">0</span></div>
-          <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900">Yellow = L1</div>
+          <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900">L1 = Yellow</div>
         </div>
         <div class="panel-body">
-          <div class="chain l1" id="l1Chain"></div>
+          <div class="chainGrid" id="l1Grid"></div>
         </div>
       </div>
 
@@ -475,7 +425,7 @@
           <div id="l2Hint" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900"></div>
         </div>
         <div class="panel-body">
-          <div class="chain l2" id="l2Chain"></div>
+          <div class="chainGrid" id="l2Grid"></div>
         </div>
       </div>
 
@@ -498,7 +448,7 @@
         <div id="pathBadge" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:900"></div>
       </div>
       <div class="panel-body details" id="detailsPanel">
-        <div class="empty">Pick an L0 tab, then click an L1 chevron → L2 → L3.</div>
+        <div class="empty">Pick an L0 tab, then click L1 → L2 → L3.</div>
       </div>
     </div>
   </div>
@@ -571,7 +521,6 @@
       `;
     }
 
-    /* L0 tabs */
     function renderL0Bar(){
       const bar = $("l0Bar");
       bar.innerHTML = "";
@@ -584,38 +533,34 @@
           state.l0 = n;
           state.l1 = state.l2 = state.l3 = null;
           renderAll();
-          autoOpen(); // comment out if you want manual selection after L0 change
+          autoOpen(); // keep this for convenience; remove if you prefer manual drill
         });
         bar.appendChild(tab);
       });
     }
 
-    /* L1/L2 chains: equal-width chevrons across full width */
-    function renderChain(chainEl, nodes, activeNode, level, onClick){
-      chainEl.innerHTML = "";
+    function renderChevronGrid(gridEl, nodes, activeNode, levelClass, onClick){
+      gridEl.innerHTML = "";
       if (!nodes.length){
-        chainEl.innerHTML = `<div class="empty">No items.</div>`;
+        gridEl.innerHTML = `<div class="empty">No items.</div>`;
         return;
       }
 
-      nodes.forEach((n, idx) => {
+      nodes.forEach((n) => {
         const { code, title } = parseName(n.name);
         const div = document.createElement("div");
-        div.className = `chev ${level} ` + (idx > 0 ? "notch " : "") + (activeNode === n ? "active" : "");
-
+        div.className = `chev ${levelClass}` + (activeNode === n ? " active" : "");
         div.innerHTML = `
           <div class="chevText">
             <div class="chevTitle">${escapeHtml(code ? (code + " — " + title) : title)}</div>
             <div class="chevSub">${escapeHtml(n.description || "No description provided.")}</div>
           </div>
         `;
-
         div.addEventListener("click", () => onClick(n));
-        chainEl.appendChild(div);
+        gridEl.appendChild(div);
       });
     }
 
-    /* L3 list */
     function renderL3(){
       const container = $("l3Body");
       container.innerHTML = "";
@@ -626,7 +571,7 @@
       $("l3Hint").textContent = state.l2 ? `Selected L2: ${parseName(state.l2.name).title}` : "Select an L2 to show L3";
 
       if (!state.l2){
-        container.innerHTML = `<div class="empty">Select an L2 sub-chevron to show L3 activities.</div>`;
+        container.innerHTML = `<div class="empty">Select an L2 to show L3 activities.</div>`;
         return;
       }
       if (!l3All.length){
@@ -668,7 +613,7 @@
       const l1 = l1All.filter(n => matchesSearch(n, state.search));
       $("l1Count").textContent = l1All.length;
 
-      renderChain($("l1Chain"), l1, state.l1, "l1", (node) => {
+      renderChevronGrid($("l1Grid"), l1, state.l1, "l1", (node) => {
         state.l1 = node;
         state.l2 = null;
         state.l3 = null;
@@ -682,7 +627,7 @@
       $("l2Count").textContent = l2All.length;
       $("l2Hint").textContent = state.l1 ? `Selected L1: ${parseName(state.l1.name).title}` : "Select an L1 to show L2";
 
-      renderChain($("l2Chain"), l2, state.l2, "l2", (node) => {
+      renderChevronGrid($("l2Grid"), l2, state.l2, "l2", (node) => {
         state.l2 = node;
         state.l3 = null;
         renderAll();
