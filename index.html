@@ -16,36 +16,28 @@
       --muted:#667085;
       --line:#e6e8ee;
 
-      --l0: var(--dhl-red);
-      --l1: var(--dhl-yellow);
-      --l2: #2b2f33;
-      --l3: #f0f1f3;
-
       --radius:14px;
-
-      /* Material-ish elevation */
       --e1: 0 2px 10px rgba(0,0,0,.06);
       --e2: 0 10px 26px rgba(0,0,0,.08);
       --e3: 0 16px 40px rgba(0,0,0,.10);
 
       /* Chevron geometry */
-      --chev-h: 98px;         /* consistent for L1/L2 */
-      --chev-tip: 26px;
+      --chev-h: 112px;       /* readability */
+      --chev-tip: 34px;      /* arrow tip */
       --chev-notch: 18px;
 
-      /* Connected chain spacing */
-      --chev-overlap: 14px;
-
+      /* Layout */
       --maxw: 1560px;
 
-      /* Readability */
-      --fs-code: 13px;
-      --fs-title: 15px;
-      --fs-desc: 12px;
-      --fs-owner: 11px;
+      /* Typography */
+      --fs-code: 14px;
+      --fs-title: 17px;
+      --fs-desc: 13px;
+      --fs-owner: 12px;
     }
 
     *{ box-sizing:border-box; }
+    html, body{ height:100%; }
     body{
       margin:0;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -75,6 +67,7 @@
       display:flex;
       gap:12px;
       align-items:flex-start;
+      min-width: 280px;
     }
     .mark{
       width:10px;height:34px;
@@ -134,8 +127,8 @@
       cursor:pointer;
       max-width: 280px;
     }
-    .select option{ font-weight: 900; }
 
+    /* Breadcrumb */
     .crumbbar{
       max-width: var(--maxw);
       margin: 0 auto;
@@ -146,44 +139,52 @@
       gap:10px;
       flex-wrap:wrap;
     }
-    .crumb{
+    .crumbRow{
       display:flex;
-      align-items:center;
       gap:8px;
+      align-items:center;
       flex-wrap:wrap;
-      font-size:12px;
-      font-weight: 950;
-      color: rgba(0,0,0,.70);
+      max-width: 100%;
     }
-    .chip{
+    .crumbChip{
       display:inline-flex;
       align-items:center;
       gap:8px;
       padding: 7px 10px;
       border-radius: 999px;
-      background: rgba(255,255,255,.88);
       border: 1px solid rgba(0,0,0,.12);
       box-shadow: var(--e1);
-      max-width: 78vw;
+      font-size:12px;
+      font-weight: 950;
+      max-width: 88vw;
+      user-select:none;
     }
-    .chip .dot{
+    .crumbChip .dot{
       width:10px;height:10px;border-radius:50%;
-      background: var(--dhl-red);
       box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
       flex: 0 0 auto;
     }
-    .chip span{
+    .crumbChip span.allowEllip{
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
       max-width: 72vw;
     }
-    .ownerchip{
-      background: rgba(212,5,17,.10);
+    .crumbL0{ background: rgba(212,5,17,.92); color:#fff; border-color: rgba(0,0,0,.16); }
+    .crumbL0 .dot{ background:#fff; }
+    .crumbL1{ background: rgba(255,204,0,.95); color:#111; border-color: rgba(0,0,0,.16); }
+    .crumbL1 .dot{ background: var(--dhl-red); }
+    .crumbL2{ background: rgba(43,47,51,.92); color:#fff; border-color: rgba(0,0,0,.22); }
+    .crumbL2 .dot{ background: var(--dhl-yellow); }
+    .crumbL3{ background: rgba(240,241,243,.95); color:#111; border-color: rgba(0,0,0,.12); }
+    .crumbL3 .dot{ background: var(--dhl-red); }
+
+    .ownerChip{
+      background: rgba(212,5,17,.12);
       border-color: rgba(212,5,17,.22);
       color: rgba(0,0,0,.78);
     }
-    .ownerchip .dot{ background: var(--dhl-red); }
+    .ownerChip .dot{ background: var(--dhl-red); }
 
     main{
       max-width: var(--maxw);
@@ -288,7 +289,7 @@
       background:#fff;
       box-shadow: var(--e2);
       padding: 10px 10px 9px;
-      transition: transform .08s ease, box-shadow .08s ease, border-color .2s ease;
+      transition: transform .08s ease, box-shadow .08s ease, border-color .2s ease, outline-color .2s ease;
       display:flex;
       gap:10px;
       align-items:flex-start;
@@ -361,6 +362,7 @@
       font-weight: 1000;
       border: 1px solid rgba(0,0,0,.12);
       background: #fff;
+      user-select:none;
     }
     .badge.l1{ background: rgba(255,204,0,.22); border-color: rgba(255,204,0,.45); }
     .badge.l2{ background: rgba(43,47,51,.10); border-color: rgba(43,47,51,.22); }
@@ -375,7 +377,7 @@
       max-width: 74vw;
     }
 
-    /* --- Connected chevron chain (flex wrap + overlap) --- */
+    /* Chain wrapper */
     .chainwrap{
       position: relative;
       padding: 12px;
@@ -397,27 +399,38 @@
       z-index: 1;
     }
 
-    /* Make chevrons “same size feel” */
+    /* Chevron */
     .chev{
       position: relative;
       height: var(--chev-h);
-      min-width: 320px;
-      flex: 1 1 360px;
-      max-width: 560px;
+      min-width: 360px;
+      flex: 1 1 420px;
+      max-width: 680px;
 
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,.14);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,.18);
       box-shadow: var(--e2);
       cursor:pointer;
 
-      padding: 12px 16px 12px calc(16px + var(--chev-notch));
+      padding: 12px 18px 12px calc(18px + var(--chev-notch));
       display:flex;
       flex-direction:column;
       justify-content:center;
       overflow:hidden;
 
-      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+      background: var(--chev-bg, #fff);
+      color: var(--chev-fg, #111);
+
+      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
     }
+    @media (max-width: 860px){
+      .chev{ min-width: 280px; flex-basis: 320px; height: 116px; }
+      :root{ --fs-title: 16px; --fs-desc: 12px; }
+    }
+    @media (max-width: 520px){
+      .chev{ min-width: 220px; flex-basis: 260px; height: 120px; }
+    }
+
     .chev:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
 
     /* tip */
@@ -429,7 +442,7 @@
       width: 0; height: 0;
       border-top: calc(var(--chev-h) / 2) solid transparent;
       border-bottom: calc(var(--chev-h) / 2) solid transparent;
-      border-left: var(--chev-tip) solid transparent;
+      border-left: var(--chev-tip) solid var(--chev-tip-bg, var(--chev-bg, #fff));
     }
     /* notch */
     .chev::before{
@@ -442,18 +455,23 @@
       border-bottom: calc(var(--chev-h) / 2) solid transparent;
       border-left: var(--chev-notch) solid var(--bg);
     }
-
-    .chev.rowfirst{ padding-left: 16px; }
+    .chev.rowfirst{ padding-left: 18px; }
     .chev.rowfirst::before{ display:none; }
-    .chev.overlap{ margin-left: calc(var(--chev-overlap) * -1); }
 
-    .chev.l1{ background: var(--l1); color: #111; }
-    .chev.l1::after{ border-left-color: var(--l1); }
+    /* flow arrow inside tip */
+    .flowArrow{
+      position:absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-weight: 1100;
+      font-size: 18px;
+      opacity: .95;
+      pointer-events:none;
+      text-shadow: 0 1px 0 rgba(0,0,0,.15);
+    }
 
-    .chev.l2{ background: var(--l2); color:#fff; border-color: rgba(0,0,0,.30); }
-    .chev.l2::after{ border-left-color: var(--l2); }
-
-    /* Strong selection (visibility) */
+    /* selection */
     .chev.active{
       background: var(--dhl-red) !important;
       color: #fff !important;
@@ -461,8 +479,12 @@
       outline: 4px solid rgba(212,5,17,.26);
       outline-offset: 2px;
       filter: saturate(1.05);
+      opacity: 1 !important;
     }
     .chev.active::after{ border-left-color: var(--dhl-red) !important; }
+
+    /* filtered dim */
+    .chev.dim{ opacity: .35; }
 
     .rowtop{
       display:flex;
@@ -481,11 +503,11 @@
     .ord{
       font-weight: 1000;
       font-size: 12px;
-      opacity:.85;
+      opacity:.90;
       white-space:nowrap;
     }
     .name{
-      margin-top: 5px;
+      margin-top: 6px;
       font-weight: 1000;
       font-size: var(--fs-title);
       line-height:1.15;
@@ -493,44 +515,71 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow:hidden;
-      min-height: 34px;
+      min-height: 40px;
     }
     .meta{
       margin-top: 6px;
       font-size: var(--fs-desc);
       font-weight: 850;
-      line-height:1.25;
-      opacity:.92;
+      line-height:1.28;
+      opacity:.95;
       display:-webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow:hidden;
     }
+
     .ownerTag{
       position:absolute;
-      right: 10px;
+      right: 46px;
       bottom: 10px;
       display:inline-flex;
       align-items:center;
       gap:6px;
-      padding: 6px 10px;
+      padding: 7px 10px;
       border-radius: 999px;
       font-size: var(--fs-owner);
       font-weight: 1000;
-      background: rgba(255,255,255,.80);
-      border: 1px solid rgba(0,0,0,.12);
-      color: rgba(0,0,0,.78);
-      max-width: 60%;
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(0,0,0,.14);
+      color: rgba(0,0,0,.80);
+      max-width: 64%;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
+      user-select:none;
     }
-    .chev.l2 .ownerTag{
+    .chev.darkPill .ownerTag{
       background: rgba(255,255,255,.14);
       border-color: rgba(255,255,255,.22);
       color: rgba(255,255,255,.92);
     }
     .chev.active .ownerTag{
+      background: rgba(255,255,255,.16);
+      border-color: rgba(255,255,255,.28);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* Start/End icons */
+    .edgeIcon{
+      position:absolute;
+      top: 10px;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: var(--e1);
+      border: 1px solid rgba(0,0,0,.14);
+      background: rgba(255,255,255,.88);
+      color: rgba(0,0,0,.75);
+      pointer-events:none;
+    }
+    .edgeIcon svg{ width: 18px; height: 18px; fill: currentColor; }
+    .edgeIcon.start{ left: 10px; }
+    .edgeIcon.end{ right: 58px; }
+    .chev.active .edgeIcon{
       background: rgba(255,255,255,.16);
       border-color: rgba(255,255,255,.28);
       color: rgba(255,255,255,.92);
@@ -547,14 +596,17 @@
       box-shadow: var(--e2);
       cursor:pointer;
       position:relative;
-      transition: transform .08s ease, box-shadow .08s ease;
+      transition: transform .08s ease, box-shadow .08s ease, opacity .15s ease;
     }
     .l3card:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
     .l3card.active{
       outline: 4px solid rgba(212,5,17,.18);
       outline-offset: 2px;
       border-color: rgba(212,5,17,.20);
+      opacity: 1 !important;
     }
+    .l3card.dim{ opacity: .35; }
+
     .l3top{
       display:flex;
       justify-content:space-between;
@@ -593,18 +645,19 @@
       background: #fff;
     }
 
-    /* Click details popover (replaces pin) */
+    /* Popover (follows mouse) */
     .popover{
       position: fixed;
       z-index: 9999;
-      min-width: 300px;
-      max-width: 460px;
+      min-width: 320px;
+      max-width: 520px;
       background:#fff;
       border: 1px solid rgba(0,0,0,.12);
       border-radius: 14px;
       box-shadow: var(--e3);
       padding: 12px 12px 10px;
       display:none;
+      pointer-events:auto;
     }
     .pop-top{
       display:flex;
@@ -692,12 +745,10 @@
     </div>
 
     <div class="actions">
-      <!-- Create (category) filter -->
       <select id="createFilter" class="select" title="Create (L0 category)">
         <option value="">Create: All</option>
       </select>
 
-      <!-- Ownership filter -->
       <select id="ownerFilter" class="select" title="Ownership">
         <option value="">Ownership: All</option>
       </select>
@@ -708,14 +759,11 @@
   </div>
 
   <div class="crumbbar">
-    <div class="crumb">
-      <div class="chip" title="Current location (titles)">
+    <div class="crumbRow" id="crumbRow"></div>
+    <div class="crumbRow">
+      <div class="crumbChip ownerChip" title="Owner of current selection">
         <span class="dot"></span>
-        <span id="crumbText">—</span>
-      </div>
-      <div class="chip ownerchip" title="Current selected owner">
-        <span class="dot"></span>
-        <span id="crumbOwner">Owner: —</span>
+        <span class="allowEllip" id="crumbOwner">Owner: —</span>
       </div>
     </div>
   </div>
@@ -742,7 +790,7 @@
       </div>
       <div id="l1Hint" class="subhint">Select an L0 box in the process house.</div>
     </div>
-    <div class="chainwrap">
+    <div class="chainwrap" id="l1Wrap">
       <svg id="l1Flow" class="flowSvg"></svg>
       <div id="l1" class="chain"></div>
     </div>
@@ -757,7 +805,7 @@
       </div>
       <div id="l2Hint" class="subhint">Select an L1 chevron.</div>
     </div>
-    <div class="chainwrap">
+    <div class="chainwrap" id="l2Wrap">
       <svg id="l2Flow" class="flowSvg"></svg>
       <div id="l2" class="chain"></div>
     </div>
@@ -780,22 +828,46 @@
   <div id="err" style="display:none;" class="error"></div>
 </main>
 
-<!-- Click popover -->
 <div id="pop" class="popover" role="dialog" aria-live="polite"></div>
 
 <script>
   const $ = (id) => document.getElementById(id);
 
   const state = {
-    json: null,
+    root: null,
     l0All: [],
+    allNodes: [],
     selected: { l0:null, l1:null, l2:null, l3:null },
     filters: { create:"", owner:"" },
-    popOpen: false,
-    lastClickedEl: null
+    pop: { open:false, follow:true, node:null, path:"" },
+    mouse: { x: 0, y: 0 }
   };
 
-  // --- small inline icons (placeholders; replace later with DHL icon set if you want) ---
+  // -------- Icons (inline SVG, repo-safe) --------
+  function svgPlay(){ return `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`; }
+  function svgFlag(){ return `<svg viewBox="0 0 24 24"><path d="M6 2h2v2h10l-2 4 2 4H8v10H6V2z"/></svg>`; }
+
+  function icon(kind){
+    const paths = {
+      compass:`<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.7 6.3-2.2 6.1-6.2 2.2 2.2-6.1 6.2-2.2Zm-6 7.4 2.9-1.1 1.1-2.9-2.9 1.1-1.1 2.9Z"/>`,
+      shield:`<path d="M12 2 20 6v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4Zm0 4.2L6 8.7V12c0 3.5 2.2 6.8 6 7.7 3.8-.9 6-4.2 6-7.7V8.7l-6-2.5Z"/>`,
+      cog:`<path d="M19.4 13a7.8 7.8 0 0 0 .1-2l2-1.6-2-3.5-2.4 1c-.5-.4-1.1-.8-1.7-1l-.4-2.6H9l-.4 2.6c-.6.2-1.2.6-1.7 1l-2.4-1-2 3.5L4.6 11a7.8 7.8 0 0 0 0 2L2.6 14.6l2 3.5 2.4-1c.5.4 1.1.8 1.7 1l.4 2.6h4.2l.4-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.5-2-1.6ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/>`,
+      truck:`<path d="M3 4h11v8h2.5l2.5 3v3h-2a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3V4Zm13 9V6h3l2 3v4h-1a2 2 0 0 0-4 0h0Zm-9 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>`,
+      handshake:`<path d="M5 8 2 11l4 4 3-3 3 3 4-4-3-3-2 2-1-1 2-2c1.2-1.2 3.1-1.2 4.2 0l.8.8 1.4-1.4-1.5-1.5c-2-2-5.1-2-7.1 0L9.9 7.1 8.5 5.7 5 9.2V8Z"/>`,
+      wrench:`<path d="M22 19.6 14.7 12.3a6 6 0 0 1-7.7-7.7l3 3 2-2-3-3a6 6 0 0 1 7.7 7.7L24 17.6 22 19.6Zm-10.6-6.6 5.8 5.8 1.4-1.4-5.8-5.8-1.4 1.4Z"/>`,
+      bulb:`<path d="M9 21h6v-1H9v1Zm3-20a7 7 0 0 0-4 12.8V17h8v-3.2A7 7 0 0 0 12 1Zm3 11.7-.9.6V15h-4v-1.7l-.9-.6A5 5 0 1 1 15 12.7Z"/>`,
+      lock:`<path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5Zm3 8H9V6a3 3 0 0 1 6 0v3Z"/>`,
+      data:`<path d="M12 2c-4.4 0-8 1.3-8 3v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5c0-1.7-3.6-3-8-3Zm0 2c3.7 0 6 .9 6 1s-2.3 1-6 1-6-.9-6-1 2.3-1 6-1Zm0 16c-3.7 0-6-.9-6-1v-2.1c1.5.9 4.2 1.4 6 1.4s4.5-.5 6-1.4V19c0 .1-2.3 1-6 1Zm0-6c-3.7 0-6-.9-6-1V11c1.5.9 4.2 1.4 6 1.4s4.5-.5 6-1.4v2c0 .1-2.3 1-6 1Z"/>`,
+      layers:`<path d="M12 2 1 7l11 5 9-4.1V17h2V7L12 2Zm0 12L3 10v2l9 4 9-4v-2l-9 4Zm0 6L3 16v2l9 4 9-4v-2l-9 4Z"/>`,
+      cart:`<path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6.2 6l.6 3h10.4l-1.2 6H8L6.1 4H2V2h5l.4 2h14.2l-2 10H7.4l-.2-1H18v-2H7.2l-.6-3H6.2Z"/>`,
+      people:`<path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Zm-12 9c0-3.3 3.6-6 8-6s8 2.7 8 6v2H4v-2Z"/>`,
+      ledger:`<path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 4v2h8V6H8Zm0 4v2h8v-2H8Zm0 4v2h6v-2H8Z"/>`,
+      rocket:`<path d="M14 2c3 1 6 4 7 7-2 1-4 2-6 4l-4 4c-2 2-3 4-4 6-3-1-6-4-7-7 2-1 4-2 6-4l4-4c2-2 3-4 4-6Zm-8 9 3 3-1.5 1.5-3-3L6 11Zm10-6 3 3-2 2-3-3 2-2Z"/>`
+    };
+    const p = paths[kind] || paths.layers;
+    return `<svg viewBox="0 0 24 24">${p}</svg>`;
+  }
+
   const ICONS = {
     S2E: icon("compass"),
     GRC: icon("shield"),
@@ -813,658 +885,728 @@
     ITF: icon("lock")
   };
 
-  function icon(kind){
-    const paths = {
-      compass:`<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.7 6.3-2.2 6.1-6.2 2.2 2.2-6.1 6.2-2.2Zm-6 7.4 2.9-1.1 1.1-2.9-2.9 1.1-1.1 2.9Z"/>`,
-      shield:`<path d="M12 2 20 6v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4Zm0 4.2L6 8.7V12c0 3.5 2.2 6.8 6 7.7 3.8-.9 6-4.2 6-7.7V8.7l-6-2.5Z"/>`,
-      cog:`<path d="M19.4 13a7.8 7.8 0 0 0 .1-2l2-1.6-2-3.5-2.4 1a7.7 7.7 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6c-.6.2-1.2.6-1.7 1l-2.4-1-2 3.5L4.6 11a7.8 7.8 0 0 0 0 2L2.6 14.6l2 3.5 2.4-1c.5.4 1.1.8 1.7 1l.4 2.6h4.2l.4-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.5-2-1.6ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/>`,
-      truck:`<path d="M3 7h11v8H3V7Zm12 2h3l3 3v3h-6V9Zm-9 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>`,
-      handshake:`<path d="M7 7h3l2 2 2-2h3l2 2-4 4c-1 1-2 1-3 0l-2-2-2 2c-1 1-2 1-3 0L3 9l4-2Z"/>`,
-      layers:`<path d="M12 3 2 8l10 5 10-5-10-5Zm0 12L2 10v3l10 5 10-5v-3l-10 5Zm0 6L2 16v3l10 5 10-5v-3l-10 5Z"/>`,
-      wrench:`<path d="M22 6.5a6 6 0 0 1-7.4 7.4l-7 7L4 19.3l7-7A6 6 0 0 1 18.5 4l-2.3 2.3 1.2 1.2L19.7 5 22 6.5Z"/>`,
-      cart:`<path d="M7 6h14l-2 8H9L7 6Zm-2 0H2V4h4l1 2Zm4 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>`,
-      people:`<path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 0a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM2 22c0-4 3-7 6-7s6 3 6 7H2Zm12 0c.2-2.6 1.7-4.8 4-6 2.5 1.1 4 3.4 4 6h-8Z"/>`,
-      ledger:`<path d="M6 2h10a2 2 0 0 1 2 2v18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h8v2H8V7Zm0 4h8v2H8v-2Zm0 4h6v2H8v-2Z"/>`,
-      bulb:`<path d="M12 2a7 7 0 0 1 4 12c-1 1-1.5 2-1.5 3H9.5c0-1-.5-2-1.5-3A7 7 0 0 1 12 2Zm-2 18h4v2h-4v-2Z"/>`,
-      rocket:`<path d="M14 2c4 2 6 6 6 10l-4 4-4-4 2-10ZM6 12l4 4-4 4c-2-2-2-6 0-8Zm6 6 2 2-2 2-2-2 2-2Z"/>`,
-      data:`<path d="M12 2c5 0 9 1.6 9 3.5S17 9 12 9 3 7.4 3 5.5 7 2 12 2Zm9 6.5V12c0 2-4 3.5-9 3.5S3 14 3 12V8.5C4.7 10 8.3 11 12 11s7.3-1 9-2.5Zm0 7V19c0 2-4 3.5-9 3.5S3 21 3 19v-3.5C4.7 17 8.3 18 12 18s7.3-1 9-2.5Z"/>`,
-      lock:`<path d="M7 10V8a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1Zm2 0h6V8a3 3 0 0 0-6 0v2Z"/>`
-    };
-    return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind] || `<circle cx="12" cy="12" r="8"/>`}</svg>`;
+  // -------- Helpers --------
+  function safeStr(x){ return (x === null || x === undefined) ? "" : String(x); }
+
+  function titleFromName(name){
+    const s = safeStr(name).trim();
+    const idx = s.indexOf(":");
+    if(idx >= 0 && idx < s.length-1) return s.slice(idx+1).trim();
+    return s;
   }
 
-  function esc(s){
-    return (s ?? "").toString().replace(/[&<>"']/g, ch => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-    }[ch]));
+  function orderFromId(id){
+    const m = safeStr(id).match(/(\d+)(?!.*\d)/); // last numeric group
+    return m ? parseInt(m[1], 10) : 9999;
   }
 
-  function splitCodeTitle(name){
-    const t = (name ?? "").toString();
-    const i = t.indexOf(":");
-    if(i > 0) return { code: t.slice(0,i).trim(), title: t.slice(i+1).trim() };
-    return { code:"", title:t };
+  function traverse(node, pathArr = []){
+    if(!node || typeof node !== "object") return;
+    const nextPath = [...pathArr, node];
+    state.allNodes.push({ node, path: nextPath });
+    const kids = Array.isArray(node.children) ? node.children : [];
+    for(const c of kids) traverse(c, nextPath);
   }
 
-  function titleOnly(node){
-    if(!node) return "";
-    const { title } = splitCodeTitle(node.name || "");
-    return (title || node.name || node.id || "").toString().trim();
+  function ownerMatches(node){
+    const f = state.filters.owner;
+    if(!f) return true;
+    const o = safeStr(node.owner).toLowerCase();
+    return o.includes(f.toLowerCase());
   }
 
-  function kids(n){ return Array.isArray(n?.children) ? n.children : []; }
+  function anyDescendantOwnerMatch(node){
+    const f = state.filters.owner;
+    if(!f) return true;
+    const needle = f.toLowerCase();
+    let ok = false;
+    (function rec(n){
+      if(ok) return;
+      if(!n) return;
+      if(safeStr(n.owner).toLowerCase().includes(needle)) { ok = true; return; }
+      const kids = Array.isArray(n.children) ? n.children : [];
+      for(const c of kids) rec(c);
+    })(node);
+    return ok;
+  }
 
-  function sortById(a,b){
-    const A = (a?.id || a?.name || "").toString();
-    const B = (b?.id || b?.name || "").toString();
-    const pa = A.split("_").map(x => isFinite(+x) ? +x : x);
-    const pb = B.split("_").map(x => isFinite(+x) ? +x : x);
-    const n = Math.max(pa.length, pb.length);
-    for(let i=0;i<n;i++){
-      const xa = pa[i], xb = pb[i];
-      if(xa === undefined) return -1;
-      if(xb === undefined) return 1;
-      if(typeof xa === "number" && typeof xb === "number"){
-        if(xa !== xb) return xa - xb;
-      } else {
-        const sa = (xa ?? "").toString(), sb = (xb ?? "").toString();
-        if(sa !== sb) return sa.localeCompare(sb);
-      }
+  function setError(msg){
+    const el = $("err");
+    if(!msg){
+      el.style.display = "none";
+      el.textContent = "";
+      return;
     }
-    return 0;
+    el.style.display = "block";
+    el.textContent = msg;
   }
 
-  // ---- Filters ----
-  function nodeMatchesOwner(node, owner){
-    if(!owner) return true;
-    const o = (node?.owner || "").toString().trim();
-    return o === owner;
-  }
-  function subtreeHasOwner(node, owner){
-    if(!owner) return true;
-    if(nodeMatchesOwner(node, owner)) return true;
-    for(const c of kids(node)){
-      if(subtreeHasOwner(c, owner)) return true;
-    }
-    return false;
-  }
-  function nodeMatchesCreate(node, create){
-    if(!create) return true;
-    const c = (node?.category || "").toString().trim();
-    return c === create;
+  function cssClamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+
+  // -------- Popover (follows mouse) --------
+  function closePop(){
+    state.pop.open = false;
+    state.pop.node = null;
+    $("pop").style.display = "none";
   }
 
-  function applyFiltersToL0(l0){
-    const { create, owner } = state.filters;
-    if(!nodeMatchesCreate(l0, create)) return false;
-    if(!subtreeHasOwner(l0, owner)) return false;
-    return true;
+  function openPop(node, path){
+    state.pop.open = true;
+    state.pop.node = node;
+    state.pop.path = path || "";
+    renderPop();
+    $("pop").style.display = "block";
+    positionPop(state.mouse.x, state.mouse.y);
   }
 
-  function filterChildrenByOwner(list){
-    const owner = state.filters.owner;
-    if(!owner) return list;
-    return list.filter(n => subtreeHasOwner(n, owner));
-  }
-
-  // ---------------- Breadcrumb (titles not IDs) ----------------
-  function setBreadcrumb(){
-    const parts = [];
-    const l0 = state.selected.l0, l1 = state.selected.l1, l2 = state.selected.l2, l3 = state.selected.l3;
-
-    if(l0) parts.push(titleOnly(l0));
-    if(l1) parts.push(titleOnly(l1));
-    if(l2) parts.push(titleOnly(l2));
-    if(l3) parts.push(titleOnly(l3));
-
-    $("crumbText").textContent = parts.length ? parts.join(" > ") : "—";
-
-    const owner = (l3?.owner || l2?.owner || l1?.owner || l0?.owner || "—").toString().trim() || "—";
-    $("crumbOwner").textContent = `Owner: ${owner}`;
-  }
-
-  // -------------- Row continuity connectors (SVG) --------------
-  function drawRowConnectors(chainEl, svgEl){
-    while(svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
-    const items = Array.from(chainEl.querySelectorAll(".chev"));
-    if(items.length < 2) return;
-
-    const tol = 8;
-    const rows = [];
-    for(const el of items){
-      const r = el.getBoundingClientRect();
-      const top = r.top;
-      let row = rows.find(x => Math.abs(x.top - top) <= tol);
-      if(!row){
-        row = { top, els: [] };
-        rows.push(row);
-      }
-      row.els.push({ el, rect: r });
-    }
-    rows.sort((a,b) => a.top - b.top);
-
-    items.forEach(el => el.classList.remove("rowfirst","overlap"));
-    for(const row of rows){
-      row.els.sort((a,b) => a.rect.left - b.rect.left);
-      row.els.forEach((x, idx) => {
-        x.el.classList.toggle("rowfirst", idx === 0);
-        x.el.classList.toggle("overlap", idx !== 0);
-      });
-    }
-
-    const ns = "http://www.w3.org/2000/svg";
-    const defs = document.createElementNS(ns, "defs");
-    const marker = document.createElementNS(ns, "marker");
-    marker.setAttribute("id","arrow");
-    marker.setAttribute("viewBox","0 0 10 10");
-    marker.setAttribute("refX","9");
-    marker.setAttribute("refY","5");
-    marker.setAttribute("markerWidth","6");
-    marker.setAttribute("markerHeight","6");
-    marker.setAttribute("orient","auto-start-reverse");
-    const tip = document.createElementNS(ns,"path");
-    tip.setAttribute("d","M 0 0 L 10 5 L 0 10 z");
-    tip.setAttribute("fill","rgba(0,0,0,.26)");
-    marker.appendChild(tip);
-    defs.appendChild(marker);
-    svgEl.appendChild(defs);
-
-    const svgRect = svgEl.getBoundingClientRect();
-    svgEl.setAttribute("viewBox", `0 0 ${svgRect.width} ${svgRect.height}`);
-
-    for(let i=0;i<rows.length-1;i++){
-      const a = rows[i].els[rows[i].els.length-1].rect;
-      const b = rows[i+1].els[0].rect;
-
-      const ax = (a.right - svgRect.left) - 6;
-      const ay = (a.top - svgRect.top) + a.height/2;
-
-      const bx = (b.left - svgRect.left) + 6;
-      const by = (b.top - svgRect.top) + b.height/2;
-
-      const midY = ay + Math.max(22, (by - ay)/2);
-
-      const d = [
-        `M ${ax} ${ay}`,
-        `C ${ax+22} ${ay}, ${ax+22} ${midY}, ${ax} ${midY}`,
-        `L ${bx} ${midY}`,
-        `C ${bx-22} ${midY}, ${bx-22} ${by}, ${bx} ${by}`
-      ].join(" ");
-
-      const path = document.createElementNS(ns,"path");
-      path.setAttribute("d", d);
-      path.setAttribute("fill","none");
-      path.setAttribute("stroke","rgba(0,0,0,.26)");
-      path.setAttribute("stroke-width","2");
-      path.setAttribute("marker-end","url(#arrow)");
-      svgEl.appendChild(path);
-    }
-  }
-
-  const ro = new ResizeObserver(() => {
-    requestAnimationFrame(() => {
-      drawRowConnectors($("l1"), $("l1Flow"));
-      drawRowConnectors($("l2"), $("l2Flow"));
-    });
-  });
-
-  // ---------------- Click Popover ----------------
-  function popHTML(node){
-    if(!node) return "";
-    const { code, title } = splitCodeTitle(node.name || "");
-    const owner = (node.owner || "").toString().trim();
-    const desc = (node.description || "").toString().trim();
-    return `
+  function renderPop(){
+    const node = state.pop.node;
+    if(!node) return;
+    const el = $("pop");
+    const code = safeStr(node.id);
+    const ttl = titleFromName(node.name || code);
+    const desc = safeStr(node.description);
+    const owner = safeStr(node.owner);
+    const cat = safeStr(node.category);
+    el.innerHTML = `
       <div class="pop-top">
-        <div class="pop-code">${esc(code || node.id || "")}</div>
-        <div class="pop-owner">${esc(owner || "")}</div>
+        <div class="pop-code">${escapeHtml(code)}</div>
+        <div class="pop-owner">${escapeHtml(owner || "—")}</div>
       </div>
-      <div class="pop-title">${esc(title || node.name || "")}</div>
-      ${desc ? `<div class="pop-desc">${esc(desc)}</div>` : ``}
+      <div class="pop-title">${escapeHtml(ttl)}</div>
+      ${desc ? `<div class="pop-desc">${escapeHtml(desc)}</div>` : ""}
       <div class="pop-foot">
-        <div>${esc(node.id || "")}</div>
-        <button id="popClose">Close</button>
+        <div title="Breadcrumb path">${escapeHtml(state.pop.path || "")}</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          ${cat ? `<span style="font-weight:1000;color:rgba(0,0,0,.55)">${escapeHtml(cat)}</span>` : ""}
+          <button id="popClose">Close</button>
+        </div>
       </div>
     `;
+    const btn = $("popClose");
+    if(btn) btn.onclick = closePop;
   }
 
-  function openPop(node, anchorRect){
+  function positionPop(x, y){
+    const el = $("pop");
+    const pad = 14;
+    const w = el.offsetWidth || 360;
+    const h = el.offsetHeight || 220;
+    const vx = window.innerWidth;
+    const vy = window.innerHeight;
+
+    let left = x + 16;
+    let top = y + 16;
+
+    if(left + w + pad > vx) left = x - w - 16;
+    if(top + h + pad > vy) top = y - h - 16;
+
+    left = cssClamp(left, pad, vx - w - pad);
+    top  = cssClamp(top, pad, vy - h - pad);
+
+    el.style.left = left + "px";
+    el.style.top  = top  + "px";
+  }
+
+  window.addEventListener("mousemove", (e) => {
+    state.mouse.x = e.clientX;
+    state.mouse.y = e.clientY;
+    if(state.pop.open){
+      positionPop(e.clientX, e.clientY);
+    }
+  });
+
+  window.addEventListener("scroll", () => {
+    if(state.pop.open) positionPop(state.mouse.x, state.mouse.y);
+  }, { passive:true });
+
+  window.addEventListener("keydown", (e) => {
+    if(e.key === "Escape") closePop();
+  });
+
+  document.addEventListener("click", (e) => {
     const pop = $("pop");
-    pop.innerHTML = popHTML(node);
-    pop.style.display = "block";
-    state.popOpen = true;
+    if(state.pop.open && pop && !pop.contains(e.target)){
+      // clicking outside closes
+      closePop();
+    }
+  });
 
-    requestAnimationFrame(() => {
-      const box = pop.getBoundingClientRect();
-      const margin = 10;
-      const vw = window.innerWidth, vh = window.innerHeight;
+  function escapeHtml(str){
+    return safeStr(str)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
 
-      let x = anchorRect.right + margin;
-      let y = anchorRect.top + Math.min(20, Math.max(0, (anchorRect.height - box.height)/2));
+  // -------- Data load / normalize --------
+  async function load(){
+    try{
+      setError("");
+      const res = await fetch("./data.json", { cache: "no-store" });
+      if(!res.ok) throw new Error(`Failed to fetch data.json (${res.status})`);
+      const json = await res.json();
 
-      if(x + box.width > vw - 8) x = anchorRect.left - margin - box.width;
-      if(x < 8) x = 8;
+      // normalize: accept {children:[...]} or [...]
+      let root = null;
+      if(Array.isArray(json)){
+        root = { id:"ROOT", name:"Root", children: json };
+      } else if(json && typeof json === "object"){
+        root = json;
+        if(!Array.isArray(root.children)){
+          // attempt common alternative
+          if(Array.isArray(root.data)) root.children = root.data;
+          else root.children = [];
+        }
+      } else {
+        throw new Error("Unexpected JSON format. Expect {children:[...]}");
+      }
 
-      if(y + box.height > vh - 8) y = vh - 8 - box.height;
-      if(y < 8) y = 8;
+      state.root = root;
+      state.l0All = (Array.isArray(root.children) ? root.children : []);
+      state.allNodes = [];
+      for(const l0 of state.l0All) traverse(l0, []);
 
-      pop.style.left = `${x}px`;
-      pop.style.top  = `${y}px`;
+      buildFilters();
+      ensureInitialSelection();
+      renderAll();
+    } catch(err){
+      setError(String(err?.message || err));
+      console.error(err);
+    }
+  }
 
-      const closeBtn = $("popClose");
-      if(closeBtn) closeBtn.onclick = (e) => { e.stopPropagation(); closePop(); };
+  function buildFilters(){
+    // Create filter from L0 categories
+    const cats = new Set();
+    for(const l0 of state.l0All){
+      const c = safeStr(l0.category).trim();
+      if(c) cats.add(c);
+    }
+    const createSel = $("createFilter");
+    // reset keeping first option
+    while(createSel.options.length > 1) createSel.remove(1);
+    [...cats].sort().forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = `Create: ${c}`;
+      createSel.appendChild(opt);
     });
-  }
 
-  function closePop(){
-    state.popOpen = false;
-    $("pop").style.display = "none";
-    $("pop").innerHTML = "";
-  }
+    // Ownership filter from all nodes owners
+    const owners = new Set();
+    for(const rec of state.allNodes){
+      const o = safeStr(rec.node.owner).trim();
+      if(o) owners.add(o);
+    }
+    const ownerSel = $("ownerFilter");
+    while(ownerSel.options.length > 1) ownerSel.remove(1);
+    [...owners].sort().forEach(o => {
+      const opt = document.createElement("option");
+      opt.value = o;
+      opt.textContent = `Ownership: ${o}`;
+      ownerSel.appendChild(opt);
+    });
 
-  // ---------------- Process house rendering ----------------
-  function bandKey(title){
-    const t = (title || "").toLowerCase();
-    if(t.includes("manage")) return "manage";
-    if(t.includes("change")) return "change";
-    if(t.includes("foundation")) return "foundation";
-    return "run";
-  }
-
-  function renderHouse(){
-    const body = $("houseBody");
-    const groups = {
-      "Manage the Business": [],
-      "Run the Business": [],
-      "Change the Business": [],
-      "Foundation": []
+    createSel.onchange = () => {
+      state.filters.create = createSel.value || "";
+      // if current L0 doesn't match, pick first matching
+      ensureInitialSelection();
+      renderAll();
     };
 
-    const visibleL0 = state.l0All.filter(applyFiltersToL0);
-
-    for(const l0 of visibleL0){
-      const cat = (l0.category || "Run the Business").toLowerCase();
-      if(cat.includes("manage")) groups["Manage the Business"].push(l0);
-      else if(cat.includes("change")) groups["Change the Business"].push(l0);
-      else if(cat.includes("foundation")) groups["Foundation"].push(l0);
-      else groups["Run the Business"].push(l0);
-    }
-
-    const order = ["Manage the Business","Run the Business","Change the Business","Foundation"];
-    body.innerHTML = order.map(title => {
-      const items = (groups[title] || []).slice().sort(sortById);
-      const key = bandKey(title);
-
-      const cards = items.map(l0 => {
-        const active = state.selected.l0?.id === l0.id ? "active" : "";
-        const { code, title: nm } = splitCodeTitle(l0.name || "");
-        const icon = ICONS[l0.id] || `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>`;
-        return `
-          <div class="l0card ${active}" data-l0="${esc(l0.id)}" role="button" tabindex="0">
-            <div class="icon" aria-hidden="true">${icon}</div>
-            <div class="l0meta">
-              <div class="l0code">${esc(code || l0.id)}</div>
-              <div class="l0name">${esc(nm || l0.name || "")}</div>
-              <div class="l0desc">${esc(l0.description || "")}</div>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      return `
-        <div class="band ${key}">
-          <div class="band-head">
-            <div>${esc(title)}</div>
-            <div class="count">${items.length} L0</div>
-          </div>
-          <div class="band-grid">${cards || `<div class="empty" style="grid-column:1/-1;">No L0 processes in this band (filters may be excluding them).</div>`}</div>
-        </div>
-      `;
-    }).join("");
-
-    body.querySelectorAll(".l0card").forEach(el => {
-      el.addEventListener("click", () => selectL0(el.getAttribute("data-l0")));
-      el.addEventListener("keydown", (e) => {
-        if(e.key === "Enter" || e.key === " "){ e.preventDefault(); el.click(); }
-      });
-    });
-
-    // Ensure selected L0 is still visible under filters
-    if(state.selected.l0 && !applyFiltersToL0(state.selected.l0)){
-      const first = visibleL0[0] || null;
-      state.selected = { l0:first, l1:null, l2:null, l3:null };
-      if(first) {
-        renderHouse();
-        selectL0(first.id);
-      } else {
-        // nothing visible at all
-        clearChains();
-      }
-    }
+    ownerSel.onchange = () => {
+      state.filters.owner = ownerSel.value || "";
+      renderAll();
+    };
   }
 
-  function clearChains(){
-    $("l1").innerHTML = "";
-    $("l2").innerHTML = "";
-    $("l3").innerHTML = `<div class="empty">No processes match the current filters.</div>`;
-    $("l1Count").textContent = "0";
-    $("l2Count").textContent = "0";
-    $("l3Count").textContent = "0";
-    $("l1Hint").textContent = "No L0 processes match the current filters.";
-    $("l2Hint").textContent = "—";
-    $("l3Hint").textContent = "—";
-    setBreadcrumb();
+  function l0MatchesCreate(l0){
+    const f = state.filters.create;
+    if(!f) return true;
+    return safeStr(l0.category) === f;
   }
 
-  // ---------------- Chains rendering ----------------
-  function renderChain(containerId, items, level){
-    const container = $(containerId);
-    container.innerHTML = "";
-
-    items.forEach((n, idx) => {
-      const active = state.selected[level]?.id === n.id ? "active" : "";
-      const { code, title } = splitCodeTitle(n.name || "");
-      const meta = (n.description || "").toString();
-      const owner = (n.owner || "").toString().trim();
-
-      const div = document.createElement("div");
-      div.className = `chev ${level} ${active}`;
-      div.setAttribute("role","button");
-      div.setAttribute("tabindex","0");
-      div.dataset.id = n.id;
-
-      div.innerHTML = `
-        <div class="rowtop">
-          <div class="code">${esc(code || n.id || "")}</div>
-          <div class="ord">#${idx+1}</div>
-        </div>
-        <div class="name">${esc(title || n.name || "")}</div>
-        <div class="meta">${esc(meta)}</div>
-        ${owner ? `<div class="ownerTag" title="Owner">${esc(owner)}</div>` : ``}
-      `;
-
-      div.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if(level === "l1") selectL1(n.id);
-        if(level === "l2") selectL2(n.id);
-        setBreadcrumb();
-        openPop(n, div.getBoundingClientRect());
-      });
-
-      div.addEventListener("keydown", (e) => {
-        if(e.key === "Enter" || e.key === " "){
-          e.preventDefault();
-          div.click();
-        }
-      });
-
-      container.appendChild(div);
-    });
-
-    requestAnimationFrame(() => {
-      const svg = (containerId === "l1") ? $("l1Flow") : $("l2Flow");
-      drawRowConnectors(container, svg);
-    });
-  }
-
-  function renderL3(items){
-    const container = $("l3");
-    container.innerHTML = "";
-
-    if(!items.length){
-      container.innerHTML = `<div class="empty">No L3 activities to display (filters may be excluding them).</div>`;
+  function ensureInitialSelection(){
+    // choose an L0 that matches current create filter
+    const candidates = state.l0All.filter(l0 => l0MatchesCreate(l0));
+    if(candidates.length === 0){
+      state.selected.l0 = null;
+      state.selected.l1 = null;
+      state.selected.l2 = null;
+      state.selected.l3 = null;
       return;
     }
 
-    items.forEach((n) => {
-      const active = state.selected.l3?.id === n.id ? "active" : "";
-      const { code, title } = splitCodeTitle(n.name || "");
-      const owner = (n.owner || "").toString().trim();
-      const desc  = (n.description || "").toString().trim();
+    // if selected l0 invalid, auto select first
+    if(!state.selected.l0 || !l0MatchesCreate(state.selected.l0)){
+      state.selected.l0 = candidates[0];
+      state.selected.l1 = null;
+      state.selected.l2 = null;
+      state.selected.l3 = null;
+    }
+  }
 
-      const div = document.createElement("div");
-      div.className = `l3card ${active}`;
+  // -------- Rendering --------
+  function renderAll(){
+    renderBreadcrumb();
+    renderHouse();
+    renderL1();
+    renderL2();
+    renderL3();
 
-      div.innerHTML = `
-        <div class="l3top">
-          <div class="l3code">${esc(code || n.id || "")}</div>
-          <div class="l3owner">${esc(owner)}</div>
-        </div>
-        <div class="l3name">${esc(title || n.name || "")}</div>
-        ${desc ? `<div class="l3desc">${esc(desc)}</div>` : ``}
-      `;
-
-      div.addEventListener("click", (e) => {
-        e.stopPropagation();
-        state.selected.l3 = n;
-        setBreadcrumb();
-        renderL3(items);
-        openPop(n, div.getBoundingClientRect());
-      });
-
-      container.appendChild(div);
+    // draw connectors after layout
+    requestAnimationFrame(() => {
+      drawFlow("l1", "l1Flow");
+      drawFlow("l2", "l2Flow");
     });
   }
 
-  // ---------------- Selection logic (with owner filtering) ----------------
-  function selectL0(id){
-    closePop();
-    const l0 = state.l0All.find(x => x.id === id);
-    state.selected.l0 = l0 || null;
+  function renderBreadcrumb(){
+    const row = $("crumbRow");
+    row.innerHTML = "";
+
+    const l0 = state.selected.l0;
+    const l1 = state.selected.l1;
+    const l2 = state.selected.l2;
+    const l3 = state.selected.l3;
+
+    if(l0){
+      row.appendChild(makeCrumb("L0", titleFromName(l0.name || l0.id), "crumbL0"));
+    }
+    if(l1){
+      row.appendChild(makeCrumb("L1", titleFromName(l1.name || l1.id), "crumbL1"));
+    }
+    if(l2){
+      row.appendChild(makeCrumb("L2", titleFromName(l2.name || l2.id), "crumbL2"));
+    }
+    if(l3){
+      row.appendChild(makeCrumb("L3", titleFromName(l3.name || l3.id), "crumbL3"));
+    }
+
+    const current = l3 || l2 || l1 || l0;
+    $("crumbOwner").textContent = "Owner: " + (safeStr(current?.owner).trim() || "—");
+  }
+
+  function makeCrumb(level, text, cls){
+    const chip = document.createElement("div");
+    chip.className = `crumbChip ${cls}`;
+    chip.title = level;
+    chip.innerHTML = `<span class="dot"></span><span class="allowEllip">${escapeHtml(text)}</span>`;
+    return chip;
+  }
+
+  function renderHouse(){
+    const host = $("houseBody");
+    host.innerHTML = "";
+
+    // group L0 by category bands
+    const bands = [
+      { key:"Manage the Business", css:"manage", label:"MANAGE THE BUSINESS (Strategic Steering)" },
+      { key:"Run the Business", css:"run", label:"RUN THE BUSINESS (Core Operational Chain)" },
+      { key:"Change the Business", css:"change", label:"CHANGE THE BUSINESS (Evolution & Innovation)" },
+      { key:"Foundation", css:"foundation", label:"FOUNDATION (Digital & Data Backbone)" },
+    ];
+
+    // Some datasets may use slightly different category strings. We'll map by contains.
+    function bandOf(cat){
+      const c = safeStr(cat).toLowerCase();
+      if(c.includes("manage")) return "Manage the Business";
+      if(c.includes("run")) return "Run the Business";
+      if(c.includes("change")) return "Change the Business";
+      if(c.includes("foundation")) return "Foundation";
+      return cat || "Other";
+    }
+
+    // filter by create/category
+    const visibleL0 = state.l0All.filter(l0 => l0MatchesCreate(l0));
+
+    // build a dict band -> items
+    const grouped = new Map();
+    for(const l0 of visibleL0){
+      const b = bandOf(l0.category);
+      if(!grouped.has(b)) grouped.set(b, []);
+      grouped.get(b).push(l0);
+    }
+
+    // render known bands first
+    const renderedKeys = new Set();
+    for(const b of bands){
+      const items = grouped.get(b.key) || [];
+      renderedKeys.add(b.key);
+      if(items.length === 0) continue;
+      host.appendChild(renderBand(b.label, b.css, items));
+    }
+
+    // render other categories if exist
+    for(const [k, items] of grouped.entries()){
+      if(renderedKeys.has(k)) continue;
+      host.appendChild(renderBand(k, "run", items));
+    }
+  }
+
+  function renderBand(label, css, items){
+    const wrap = document.createElement("div");
+    wrap.className = `band ${css}`;
+
+    const head = document.createElement("div");
+    head.className = "band-head";
+    head.innerHTML = `<div>${escapeHtml(label)}</div><div class="count">${items.length}</div>`;
+    wrap.appendChild(head);
+
+    const grid = document.createElement("div");
+    grid.className = "band-grid";
+
+    // sort by id/name
+    items.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
+
+    for(const l0 of items){
+      // apply owner filter: show if any descendant matches (so house remains useful)
+      if(state.filters.owner && !anyDescendantOwnerMatch(l0)) continue;
+
+      const card = document.createElement("div");
+      card.className = "l0card" + (state.selected.l0 === l0 ? " active" : "");
+      const iconKey = safeStr(l0.id).split("_")[0] || safeStr(l0.id);
+      const svg = ICONS[iconKey] || icon("layers");
+      card.innerHTML = `
+        <div class="icon">${svg}</div>
+        <div class="l0meta">
+          <div class="l0code">${escapeHtml(l0.id || "")}</div>
+          <div class="l0name">${escapeHtml(titleFromName(l0.name || l0.id))}</div>
+          <div class="l0desc">${escapeHtml(safeStr(l0.description))}</div>
+        </div>
+      `;
+      card.onclick = (e) => {
+        e.stopPropagation();
+        state.selected.l0 = l0;
+        state.selected.l1 = null;
+        state.selected.l2 = null;
+        state.selected.l3 = null;
+        renderAll();
+        // open pop for l0
+        openPop(l0, (titleFromName(l0.name || l0.id)));
+      };
+      grid.appendChild(card);
+    }
+
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  function renderL1(){
+    const host = $("l1");
+    host.innerHTML = "";
+
+    const l0 = state.selected.l0;
+    const hint = $("l1Hint");
+    if(!l0){
+      hint.textContent = "Select an L0 box in the process house.";
+      $("l1Count").textContent = "0";
+      return;
+    }
+
+    hint.textContent = `Selected L0: ${titleFromName(l0.name || l0.id)}`;
+
+    let kids = Array.isArray(l0.children) ? [...l0.children] : [];
+    kids.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
+
+    $("l1Count").textContent = String(kids.length);
+
+    kids.forEach((n, i) => {
+      const chev = makeChevron(n, i, kids.length, "L1");
+      if(state.selected.l1 === n) chev.classList.add("active");
+      if(state.filters.owner && !ownerMatches(n)) chev.classList.add("dim");
+      chev.onclick = (e) => {
+        e.stopPropagation();
+        state.selected.l1 = n;
+        state.selected.l2 = null;
+        state.selected.l3 = null;
+        renderAll();
+        openPop(n, buildPathString());
+      };
+      host.appendChild(chev);
+    });
+
+    // ensure a valid selection if previous selected isn't in list
+    if(state.selected.l1 && !kids.includes(state.selected.l1)){
+      state.selected.l1 = null;
+      state.selected.l2 = null;
+      state.selected.l3 = null;
+    }
+  }
+
+  function renderL2(){
+    const host = $("l2");
+    host.innerHTML = "";
+
+    const l1 = state.selected.l1;
+    const hint = $("l2Hint");
+    if(!l1){
+      hint.textContent = "Select an L1 chevron.";
+      $("l2Count").textContent = "0";
+      return;
+    }
+
+    hint.textContent = `Selected L1: ${titleFromName(l1.name || l1.id)}`;
+
+    let kids = Array.isArray(l1.children) ? [...l1.children] : [];
+    kids.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
+
+    $("l2Count").textContent = String(kids.length);
+
+    kids.forEach((n, i) => {
+      const chev = makeChevron(n, i, kids.length, "L2");
+      chev.classList.add("darkPill"); // makes owner pill readable
+      if(state.selected.l2 === n) chev.classList.add("active");
+      if(state.filters.owner && !ownerMatches(n)) chev.classList.add("dim");
+      chev.onclick = (e) => {
+        e.stopPropagation();
+        state.selected.l2 = n;
+        state.selected.l3 = null;
+        renderAll();
+        openPop(n, buildPathString());
+      };
+      host.appendChild(chev);
+    });
+
+    if(state.selected.l2 && !kids.includes(state.selected.l2)){
+      state.selected.l2 = null;
+      state.selected.l3 = null;
+    }
+  }
+
+  function collectLeafActivities(node){
+    // We treat "activities" as the children of selected L2.
+    // If there are deeper levels, flatten them into a list.
+    const out = [];
+    (function rec(n){
+      if(!n) return;
+      const kids = Array.isArray(n.children) ? n.children : [];
+      if(kids.length === 0){
+        out.push(n);
+        return;
+      }
+      for(const c of kids) rec(c);
+    })(node);
+    return out;
+  }
+
+  function renderL3(){
+    const host = $("l3");
+    host.innerHTML = "";
+
+    const l2 = state.selected.l2;
+    const hint = $("l3Hint");
+    if(!l2){
+      hint.textContent = "Select an L2 chevron.";
+      $("l3Count").textContent = "0";
+      host.innerHTML = `<div class="empty">Select an L2 sub-chain to show L3 activities.</div>`;
+      return;
+    }
+
+    hint.textContent = `Selected L2: ${titleFromName(l2.name || l2.id)}`;
+
+    // IMPORTANT: show ALL activities. If L3 are leaf nodes, flatten.
+    let acts = Array.isArray(l2.children) ? [...l2.children] : [];
+    if(acts.length === 0){
+      // fallback: maybe L2 itself is leaf in some branches
+      acts = [];
+    }
+
+    // If L2 has deeper nesting, flatten leaf nodes
+    let list = acts.length ? acts : [];
+    // If children exist but are not leaf, optionally flatten
+    if(acts.some(a => Array.isArray(a.children) && a.children.length > 0)){
+      list = collectLeafActivities(l2).filter(x => x !== l2);
+    }
+
+    list.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
+
+    $("l3Count").textContent = String(list.length);
+
+    if(list.length === 0){
+      host.innerHTML = `<div class="empty">No L3 activities found under this L2 (check JSON children).</div>`;
+      return;
+    }
+
+    for(const n of list){
+      const card = document.createElement("div");
+      card.className = "l3card" + (state.selected.l3 === n ? " active" : "");
+      if(state.filters.owner && !ownerMatches(n)) card.classList.add("dim");
+
+      card.innerHTML = `
+        <div class="l3top">
+          <div class="l3code">${escapeHtml(n.id || "")}</div>
+          <div class="l3owner">${escapeHtml(safeStr(n.owner) || "")}</div>
+        </div>
+        <div class="l3name">${escapeHtml(titleFromName(n.name || n.id))}</div>
+        ${safeStr(n.description) ? `<div class="l3desc">${escapeHtml(safeStr(n.description))}</div>` : ""}
+      `;
+      card.onclick = (e) => {
+        e.stopPropagation();
+        state.selected.l3 = n;
+        renderAll();
+        openPop(n, buildPathString(true));
+      };
+      host.appendChild(card);
+    }
+  }
+
+  function makeChevron(node, idx, total, level){
+    const el = document.createElement("div");
+    el.className = "chev";
+
+    // first item in a row doesn't need notch removed: we don't know rows at render time.
+    // We'll keep notch always; visual is fine even on new rows.
+
+    // Per-level color logic:
+    // - L1: yellow ramp (start lighter → end deeper)
+    // - L2: dark grey ramp (start dark → end slightly lighter)
+    const t = total <= 1 ? 0 : (idx / (total - 1));
+    let bg = "#ffffff";
+    let fg = "#111";
+    let tip = bg;
+
+    if(level === "L1"){
+      // yellow ramp
+      const a = 0.85 + 0.10 * (1 - t);
+      // we keep it in yellow family but add subtle warmness
+      bg = `rgba(255,204,0,${a.toFixed(3)})`;
+      fg = "#111";
+      tip = bg;
+    } else if(level === "L2"){
+      // dark ramp (dark grey)
+      const base = 0.92 - 0.18 * t; // background opacity for dark layer
+      bg = `rgba(43,47,51,${base.toFixed(3)})`;
+      fg = "rgba(255,255,255,.94)";
+      tip = bg;
+      el.classList.add("darkPill");
+    }
+
+    el.style.setProperty("--chev-bg", bg);
+    el.style.setProperty("--chev-fg", fg);
+    el.style.setProperty("--chev-tip-bg", tip);
+
+    const code = safeStr(node.id);
+    const ttl = titleFromName(node.name || code);
+    const desc = safeStr(node.description);
+    const owner = safeStr(node.owner);
+
+    const ord = idx + 1;
+
+    const isStart = idx === 0;
+    const isEnd = idx === total - 1;
+
+    el.innerHTML = `
+      ${isStart ? `<div class="edgeIcon start" title="Start">${svgPlay()}</div>` : ""}
+      ${isEnd ? `<div class="edgeIcon end" title="End">${svgFlag()}</div>` : ""}
+      <div class="rowtop">
+        <div class="code">${escapeHtml(code)}</div>
+        <div class="ord">#${ord}</div>
+      </div>
+      <div class="name">${escapeHtml(ttl)}</div>
+      ${desc ? `<div class="meta">${escapeHtml(desc)}</div>` : ""}
+      ${owner ? `<div class="ownerTag" title="Owner">${escapeHtml(owner)}</div>` : ""}
+      <div class="flowArrow" aria-hidden="true">➜</div>
+    `;
+    return el;
+  }
+
+  function buildPathString(includeL3=false){
+    const parts = [];
+    if(state.selected.l0) parts.push(titleFromName(state.selected.l0.name || state.selected.l0.id));
+    if(state.selected.l1) parts.push(titleFromName(state.selected.l1.name || state.selected.l1.id));
+    if(state.selected.l2) parts.push(titleFromName(state.selected.l2.name || state.selected.l2.id));
+    if(includeL3 && state.selected.l3) parts.push(titleFromName(state.selected.l3.name || state.selected.l3.id));
+    return parts.join(" > ");
+  }
+
+  // -------- Flow connectors (SVG arrows between chevrons, across rows) --------
+  function drawFlow(chainId, svgId){
+    const chain = $(chainId);
+    const svg = $(svgId);
+    if(!chain || !svg) return;
+
+    const items = [...chain.querySelectorAll(".chev")];
+    svg.innerHTML = "";
+    if(items.length < 2) return;
+
+    const wrap = chain.parentElement; // chainwrap
+    const wr = wrap.getBoundingClientRect();
+
+    svg.setAttribute("viewBox", `0 0 ${wr.width} ${wr.height}`);
+    svg.setAttribute("preserveAspectRatio", "none");
+
+    // define arrow marker (more visible)
+    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+    defs.innerHTML = `
+      <marker id="${svgId}-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+        <path d="M0,0 L12,6 L0,12 Z" fill="rgba(0,0,0,.40)"></path>
+      </marker>
+    `;
+    svg.appendChild(defs);
+
+    for(let i=0; i<items.length-1; i++){
+      const a = items[i].getBoundingClientRect();
+      const b = items[i+1].getBoundingClientRect();
+
+      // From right-mid of A (near tip), to left-mid of B (near notch)
+      const x1 = (a.right - wr.left) + 6;
+      const y1 = (a.top + a.height/2 - wr.top);
+      const x2 = (b.left - wr.left) - 6;
+      const y2 = (b.top + b.height/2 - wr.top);
+
+      // control points for curvature (handles row wrap nicely)
+      const dx = Math.max(40, Math.abs(x2-x1) * 0.35);
+      const c1x = x1 + dx;
+      const c1y = y1;
+      const c2x = x2 - dx;
+      const c2y = y2;
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", `M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}`);
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", "rgba(0,0,0,.32)");
+      path.setAttribute("stroke-width", "3");
+      path.setAttribute("marker-end", `url(#${svgId}-arrow)`);
+      path.setAttribute("stroke-linecap", "round");
+      svg.appendChild(path);
+    }
+  }
+
+  window.addEventListener("resize", () => {
+    requestAnimationFrame(() => {
+      drawFlow("l1", "l1Flow");
+      drawFlow("l2", "l2Flow");
+    });
+  });
+
+  // -------- Buttons --------
+  $("reset").onclick = () => {
+    state.filters.create = "";
+    state.filters.owner = "";
+    $("createFilter").value = "";
+    $("ownerFilter").value = "";
+
+    state.selected.l0 = null;
     state.selected.l1 = null;
     state.selected.l2 = null;
     state.selected.l3 = null;
 
-    renderHouse();
-
-    $("l1Hint").textContent = l0 ? `Selected L0: ${titleOnly(l0)}` : "Select an L0.";
-    setBreadcrumb();
-
-    let l1 = kids(l0).slice().sort(sortById);
-    l1 = filterChildrenByOwner(l1);
-
-    $("l1Count").textContent = String(l1.length);
-    renderChain("l1", l1, "l1");
-
-    $("l2").innerHTML = "";
-    $("l2Count").textContent = "0";
-    $("l2Hint").textContent = "Select an L1 chevron.";
-
-    $("l3").innerHTML = `<div class="empty">Select an L2 chevron.</div>`;
-    $("l3Count").textContent = "0";
-    $("l3Hint").textContent = "Select an L2 chevron.";
-
-    // auto select first available L1 if any
-    if(l1.length){
-      selectL1(l1[0].id);
-    }
-  }
-
-  function selectL1(id){
+    ensureInitialSelection();
     closePop();
-    const l0 = state.selected.l0;
-    if(!l0) return;
+    renderAll();
+  };
 
-    const l1All = filterChildrenByOwner(kids(l0).slice().sort(sortById));
-    const l1 = l1All.find(x => x.id === id) || null;
+  $("toggleHouse").onclick = () => {
+    const d = $("house");
+    d.open = !d.open;
+  };
 
-    state.selected.l1 = l1;
-    state.selected.l2 = null;
-    state.selected.l3 = null;
-
-    renderChain("l1", l1All, "l1");
-    $("l2Hint").textContent = l1 ? `Selected L1: ${titleOnly(l1)}` : "Select an L1 chevron.";
-    setBreadcrumb();
-
-    let l2 = filterChildrenByOwner(kids(l1).slice().sort(sortById));
-    $("l2Count").textContent = String(l2.length);
-    renderChain("l2", l2, "l2");
-
-    $("l3").innerHTML = `<div class="empty">Select an L2 chevron.</div>`;
-    $("l3Count").textContent = "0";
-    $("l3Hint").textContent = "Select an L2 chevron.";
-
-    if(l2.length){
-      selectL2(l2[0].id);
-    }
-  }
-
-  function selectL2(id){
-    closePop();
-    const l1 = state.selected.l1;
-    if(!l1) return;
-
-    const l2All = filterChildrenByOwner(kids(l1).slice().sort(sortById));
-    const l2 = l2All.find(x => x.id === id) || null;
-
-    state.selected.l2 = l2;
-    state.selected.l3 = null;
-
-    renderChain("l2", l2All, "l2");
-    $("l3Hint").textContent = l2 ? `Selected L2: ${titleOnly(l2)}` : "Select an L2 chevron.";
-    setBreadcrumb();
-
-    let l3 = filterChildrenByOwner(kids(l2).slice().sort(sortById));
-    $("l3Count").textContent = String(l3.length);
-    renderL3(l3);
-
-    if(l3.length){
-      state.selected.l3 = l3[0];
-      renderL3(l3);
-      setBreadcrumb();
-    }
-  }
-
-  // ---------------- Filter dropdown population ----------------
-  function walk(node, fn){
-    fn(node);
-    for(const c of kids(node)) walk(c, fn);
-  }
-
-  function uniqSorted(arr){
-    return Array.from(new Set(arr.filter(x => x && x.toString().trim()))).sort((a,b) => a.localeCompare(b));
-  }
-
-  function populateFilters(){
-    const createSet = new Set();
-    const ownerSet = new Set();
-
-    for(const l0 of state.l0All){
-      createSet.add((l0.category || "").toString().trim());
-      walk(l0, (n) => {
-        const o = (n.owner || "").toString().trim();
-        if(o) ownerSet.add(o);
-      });
-    }
-
-    const create = uniqSorted(Array.from(createSet));
-    const owners = uniqSorted(Array.from(ownerSet));
-
-    const createSel = $("createFilter");
-    const ownerSel  = $("ownerFilter");
-
-    // reset options (keep first "All")
-    createSel.innerHTML = `<option value="">Create: All</option>` + create
-      .filter(x => x)
-      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join("");
-
-    ownerSel.innerHTML = `<option value="">Ownership: All</option>` + owners
-      .map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join("");
-
-    // restore selection if any
-    createSel.value = state.filters.create;
-    ownerSel.value  = state.filters.owner;
-  }
-
-  // ---------------- Init ----------------
-  async function init(){
-    try{
-      const res = await fetch(`data.json?v=${Date.now()}`, { cache: "no-store" });
-      if(!res.ok) throw new Error(`Failed to load data.json (HTTP ${res.status}).`);
-      const json = await res.json();
-
-      if(!json || !Array.isArray(json.children)){
-        throw new Error(`JSON shape mismatch. Expected root {children:[...]}.`);
-      }
-
-      state.json = json;
-      state.l0All = json.children.slice();
-
-      populateFilters();
-      renderHouse();
-
-      $("err").style.display = "none";
-
-      ro.observe($("l1"));
-      ro.observe($("l2"));
-
-      // default pick first visible L0
-      const firstVisible = state.l0All.filter(applyFiltersToL0)[0] || null;
-      if(firstVisible) selectL0(firstVisible.id);
-      else clearChains();
-
-    } catch(e){
-      $("err").style.display = "block";
-      $("err").textContent =
-        `Error: ${e.message}\n\n` +
-        `Common fixes:\n` +
-        `• Ensure data.json is in the SAME folder as index.html\n` +
-        `• Ensure filename is exactly "data.json" (case-sensitive)\n` +
-        `• Ensure GitHub Pages is publishing the branch/folder you committed\n`;
-      console.error(e);
-    }
-  }
-
-  // ---- Global click closes popover (unless click inside popover) ----
-  document.addEventListener("click", (e) => {
-    const pop = $("pop");
-    if(pop.style.display === "block" && !pop.contains(e.target)){
-      closePop();
-    }
-  });
-  document.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") closePop();
-  });
-
-  $("createFilter").addEventListener("change", (e) => {
-    state.filters.create = e.target.value || "";
-    closePop();
-    renderHouse();
-
-    const firstVisible = state.l0All.filter(applyFiltersToL0)[0] || null;
-    if(firstVisible) selectL0(firstVisible.id);
-    else clearChains();
-  });
-
-  $("ownerFilter").addEventListener("change", (e) => {
-    state.filters.owner = e.target.value || "";
-    closePop();
-    renderHouse();
-
-    const firstVisible = state.l0All.filter(applyFiltersToL0)[0] || null;
-    if(firstVisible) selectL0(firstVisible.id);
-    else clearChains();
-  });
-
-  $("reset").addEventListener("click", () => {
-    closePop();
-    state.filters.create = "";
-    state.filters.owner  = "";
-    $("createFilter").value = "";
-    $("ownerFilter").value  = "";
-    renderHouse();
-
-    const firstVisible = state.l0All.filter(applyFiltersToL0)[0] || null;
-    if(firstVisible) selectL0(firstVisible.id);
-    else clearChains();
-  });
-
-  $("toggleHouse").addEventListener("click", () => {
-    $("house").open = !$("house").open;
-    $("house").scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-
-  init();
+  // -------- Start --------
+  load();
 </script>
 </body>
 </html>
