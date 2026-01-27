@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>DHL eCommerce · Enterprise Process Architecture · Value Chain</title>
 
   <style>
@@ -13,25 +13,30 @@
       --bg:#f6f6f7;
       --card:#ffffff;
       --ink:#111;
-      --muted:#666;
-      --line:#e5e5ea;
+      --muted:#667085;
+      --line:#e6e8ee;
 
-      /* Levels */
       --l0: var(--dhl-red);
       --l1: var(--dhl-yellow);
       --l2: #2b2f33;
-      --l3: #eeeeef;
+      --l3: #f0f1f3;
 
       --radius:14px;
-      --shadow: 0 10px 26px rgba(0,0,0,.08);
-      --shadow2: 0 6px 16px rgba(0,0,0,.06);
+
+      /* Material-ish elevation */
+      --e1: 0 2px 10px rgba(0,0,0,.06);
+      --e2: 0 10px 26px rgba(0,0,0,.08);
+      --e3: 0 16px 40px rgba(0,0,0,.10);
 
       /* Chevron geometry */
-      --chev-h: 84px;
-      --chev-tip: 28px;
+      --chev-h: 86px;
+      --chev-tip: 26px;
       --chev-notch: 18px;
 
-      --maxw: 1520px;
+      /* Connected chain spacing */
+      --chev-overlap: 14px;
+
+      --maxw: 1540px;
     }
 
     *{ box-sizing:border-box; }
@@ -42,11 +47,11 @@
       color: var(--ink);
     }
 
-    /* Title bar only */
+    /* TOP: title + breadcrumb only */
     header{
       position: sticky;
-      top:0;
-      z-index: 40;
+      top: 0;
+      z-index: 50;
       background: linear-gradient(180deg, rgba(255,204,0,.95), rgba(255,204,0,.92));
       border-bottom: 1px solid rgba(0,0,0,.10);
       backdrop-filter: blur(6px);
@@ -54,7 +59,7 @@
     .hdr{
       max-width: var(--maxw);
       margin:0 auto;
-      padding: 14px 18px 12px;
+      padding: 14px 18px 10px;
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
@@ -87,7 +92,8 @@
       color:#3a2b00;
       opacity:.85;
     }
-    .hdr-actions{
+
+    .actions{
       display:flex;
       gap:10px;
       align-items:center;
@@ -101,14 +107,14 @@
       padding:9px 12px;
       font-size:12px;
       font-weight: 950;
-      background: rgba(255,255,255,.82);
+      background: rgba(255,255,255,.85);
       border:1px solid rgba(0,0,0,.12);
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      box-shadow: var(--e1);
     }
     .btn-primary{
       background: var(--dhl-red);
       color:#fff;
-      border-color: rgba(0,0,0,.15);
+      border-color: rgba(0,0,0,.14);
     }
     .toggle{
       display:flex;
@@ -116,14 +122,64 @@
       gap:8px;
       font-size:12px;
       font-weight: 950;
-      background: rgba(255,255,255,.82);
+      background: rgba(255,255,255,.85);
       border:1px solid rgba(0,0,0,.12);
       border-radius:999px;
       padding:8px 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      box-shadow: var(--e1);
       user-select:none;
     }
     .toggle input{ transform: translateY(1px); }
+
+    /* Breadcrumb bar (simplified) */
+    .crumbbar{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 18px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .crumb{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      font-size:12px;
+      font-weight: 950;
+      color: rgba(0,0,0,.70);
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(0,0,0,.12);
+      box-shadow: var(--e1);
+      max-width: 70vw;
+    }
+    .chip .dot{
+      width:10px;height:10px;border-radius:50%;
+      background: var(--dhl-red);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+      flex: 0 0 auto;
+    }
+    .chip span{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 56vw;
+    }
+    .ownerchip{
+      background: rgba(212,5,17,.10);
+      border-color: rgba(212,5,17,.22);
+      color: rgba(0,0,0,.75);
+    }
+    .ownerchip .dot{ background: var(--dhl-red); }
 
     main{
       max-width: var(--maxw);
@@ -134,12 +190,12 @@
       gap:14px;
     }
 
-    /* Process house accordion (DHL-like bands) */
+    /* Process house accordion */
     details.house{
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      box-shadow: var(--shadow2);
+      box-shadow: var(--e1);
       overflow:hidden;
     }
     details.house summary{
@@ -179,26 +235,20 @@
       text-overflow:ellipsis;
       max-width: 70vw;
     }
-
-    .house-body{
-      padding: 14px;
-      background: #fff;
-    }
+    .house-body{ padding: 14px; background:#fff; }
 
     .band{
       border-radius: 16px;
       overflow:hidden;
       border: 1px solid rgba(0,0,0,.10);
-      box-shadow: 0 8px 20px rgba(0,0,0,.05);
+      box-shadow: var(--e1);
       margin-bottom: 12px;
     }
     .band:last-child{ margin-bottom:0; }
-
     .band-head{
       padding: 10px 12px;
       font-weight: 1000;
       font-size: 12px;
-      letter-spacing:.2px;
       display:flex;
       justify-content:space-between;
       align-items:center;
@@ -222,7 +272,7 @@
       display:grid;
       grid-template-columns: repeat(4, minmax(240px, 1fr));
       gap: 12px;
-      background: #fff;
+      background:#fff;
     }
     @media (max-width: 1100px){
       .band-grid{ grid-template-columns: repeat(2, minmax(240px, 1fr)); }
@@ -235,8 +285,8 @@
       cursor:pointer;
       border-radius: 14px;
       border: 1px solid rgba(0,0,0,.12);
-      background: #fff;
-      box-shadow: 0 8px 18px rgba(0,0,0,.06);
+      background:#fff;
+      box-shadow: var(--e2);
       padding: 10px 10px 9px;
       transition: transform .08s ease, box-shadow .08s ease, border-color .2s ease;
       display:flex;
@@ -244,12 +294,15 @@
       align-items:flex-start;
       min-height: 96px;
     }
-    .l0card:hover{ transform: translateY(-1px); box-shadow: 0 14px 26px rgba(0,0,0,.10); }
-    .l0card.active{ border-color: rgba(212,5,17,.35); outline: 3px solid rgba(212,5,17,.18); outline-offset: 2px; }
+    .l0card:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
+    .l0card.active{
+      border-color: rgba(212,5,17,.35);
+      outline: 3px solid rgba(212,5,17,.18);
+      outline-offset: 2px;
+    }
 
     .icon{
-      width: 34px;
-      height: 34px;
+      width: 36px; height: 36px;
       border-radius: 12px;
       display:flex;
       align-items:center;
@@ -258,20 +311,11 @@
       border: 1px solid rgba(0,0,0,.10);
       flex:0 0 auto;
     }
-    .icon svg{ width: 20px; height: 20px; }
+    .icon svg{ width: 20px; height: 20px; fill: currentColor; }
+
     .l0meta{ min-width:0; }
-    .l0code{
-      font-weight: 1000;
-      font-size: 12px;
-      color: var(--dhl-red);
-      letter-spacing:.2px;
-    }
-    .l0name{
-      margin-top:2px;
-      font-weight: 1000;
-      font-size: 13px;
-      line-height: 1.15;
-    }
+    .l0code{ font-weight: 1000; font-size: 12px; color: var(--dhl-red); letter-spacing:.2px; }
+    .l0name{ margin-top:2px; font-weight: 1000; font-size: 13px; line-height: 1.15; }
     .l0desc{
       margin-top: 5px;
       font-size: 11px;
@@ -284,12 +328,12 @@
       overflow:hidden;
     }
 
-    /* Sections for L1/L2/L3 */
+    /* Panels */
     section.panel{
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: var(--radius);
-      box-shadow: var(--shadow2);
+      box-shadow: var(--e1);
       overflow:hidden;
     }
     .panel-head{
@@ -330,64 +374,94 @@
       max-width: 70vw;
     }
 
-    /* Professional chevrons (CSS triangles) */
-    .chain{
+    /* --- Connected chevron chain (flex wrap + overlap) --- */
+    .chainwrap{
+      position: relative;
       padding: 12px;
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 12px;
     }
-    @media (max-width: 520px){
-      .chain{ grid-template-columns: 1fr; }
+    .chain{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:stretch;
+      gap: 12px;
+      position: relative;
+      z-index: 2; /* above connectors */
+    }
+    .flowSvg{
+      position:absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events:none;
+      z-index: 1;
     }
 
     .chev{
       position: relative;
       height: var(--chev-h);
+      min-width: 260px;
+      flex: 1 1 260px;
+      max-width: 520px;
+
       border-radius: 14px;
       border: 1px solid rgba(0,0,0,.14);
-      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+      box-shadow: var(--e2);
       cursor:pointer;
-      padding: 12px 16px 12px 16px;
+
+      padding: 12px 16px 12px calc(16px + var(--chev-notch));
       display:flex;
       flex-direction:column;
       justify-content:center;
       overflow:hidden;
-      background: #fff;
+      background:#fff;
+      transition: transform .08s ease, box-shadow .08s ease;
     }
-    /* Arrow tip */
+    .chev:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
+
+    /* tip */
     .chev::after{
       content:"";
       position:absolute;
       top:0;
       right: calc(var(--chev-tip) * -1);
-      width: 0;
-      height: 0;
+      width: 0; height: 0;
       border-top: calc(var(--chev-h) / 2) solid transparent;
       border-bottom: calc(var(--chev-h) / 2) solid transparent;
       border-left: var(--chev-tip) solid #fff;
-      filter: drop-shadow(0 0 0 rgba(0,0,0,0));
     }
-    /* Notch (only for non-first visually, but we keep it subtle) */
+    /* notch */
     .chev::before{
       content:"";
       position:absolute;
       top:0;
       left:0;
-      width:0;
-      height:0;
+      width:0; height:0;
       border-top: calc(var(--chev-h) / 2) solid transparent;
       border-bottom: calc(var(--chev-h) / 2) solid transparent;
       border-left: var(--chev-notch) solid var(--bg);
     }
-    .chev.first::before{ display:none; }
+    /* first chevron in a row: no notch and no overlap */
+    .chev.rowfirst{
+      padding-left: 16px;
+    }
+    .chev.rowfirst::before{ display:none; }
+
+    /* Overlap within same row to look connected */
+    .chev.overlap{
+      margin-left: calc(var(--chev-overlap) * -1);
+    }
 
     .chev.l1{ background: var(--l1); }
     .chev.l1::after{ border-left-color: var(--l1); }
     .chev.l2{ background: var(--l2); color:#fff; border-color: rgba(0,0,0,.30); }
     .chev.l2::after{ border-left-color: var(--l2); }
 
-    .chev.active{ outline: 3px solid rgba(212,5,17,.25); outline-offset: 2px; }
+    /* Strong selection state: “current location” */
+    .chev.active{
+      outline: 4px solid rgba(212,5,17,.26);
+      outline-offset: 2px;
+    }
+    .chev.active::marker{ display:none; }
 
     .rowtop{
       display:flex;
@@ -431,43 +505,55 @@
       -webkit-box-orient: vertical;
       overflow:hidden;
     }
+    .ownerTag{
+      position:absolute;
+      right: 10px;
+      bottom: 10px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 1000;
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(0,0,0,.12);
+      color: rgba(0,0,0,.75);
+      max-width: 58%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .chev.l2 .ownerTag{
+      background: rgba(255,255,255,.12);
+      border-color: rgba(255,255,255,.20);
+      color: rgba(255,255,255,.90);
+    }
 
-    /* L3 + details next to it */
-    .l3grid{
-      padding: 12px;
-      display:grid;
-      grid-template-columns: 1.35fr .65fr;
-      gap: 12px;
-      align-items:start;
-    }
-    @media (max-width: 980px){
-      .l3grid{ grid-template-columns: 1fr; }
-    }
+    /* L3 + hover details only */
+    .l3wrap{ padding: 12px; }
+
     .waterfall{
       display:flex;
       flex-direction:column;
       gap:10px;
+      position: relative;
     }
     .l3card{
       border:1px solid rgba(0,0,0,.12);
       border-radius: 14px;
       padding: 10px 12px;
       background: #fff;
-      box-shadow: 0 6px 16px rgba(0,0,0,.06);
+      box-shadow: var(--e2);
       cursor:pointer;
       position:relative;
+      transition: transform .08s ease, box-shadow .08s ease;
     }
-    .l3card::after{
-      content:"";
-      position:absolute;
-      left: 18px;
-      bottom: -10px;
-      width: 2px;
-      height: 10px;
-      background: rgba(0,0,0,.20);
+    .l3card:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
+    .l3card.active{
+      outline: 4px solid rgba(212,5,17,.18);
+      outline-offset: 2px;
     }
-    .l3card:last-child::after{ display:none; }
-    .l3card.active{ outline: 3px solid rgba(212,5,17,.20); outline-offset:2px; }
 
     .l3top{
       display:flex;
@@ -494,61 +580,9 @@
       max-width: 50%;
       text-align:right;
     }
-    .l3name{
-      margin-top: 4px;
-      font-weight: 1000;
-      font-size: 13px;
-      line-height:1.15;
-    }
-    .l3desc{
-      margin-top: 6px;
-      font-size: 11px;
-      font-weight: 850;
-      color: rgba(0,0,0,.62);
-      line-height:1.25;
-    }
+    .l3name{ margin-top: 4px; font-weight: 1000; font-size: 13px; line-height:1.15; }
+    .l3desc{ margin-top: 6px; font-size: 11px; font-weight: 850; color: rgba(0,0,0,.62); line-height:1.25; }
 
-    .details{
-      position: sticky;
-      top: 92px;
-    }
-    @media (max-width: 980px){
-      .details{ position: relative; top:auto; }
-    }
-    .dcard{
-      border:1px solid rgba(0,0,0,.12);
-      border-radius: 14px;
-      background:#fff;
-      box-shadow: 0 6px 18px rgba(0,0,0,.06);
-      overflow:hidden;
-    }
-    .dhead{
-      padding: 10px 12px;
-      border-bottom:1px solid rgba(0,0,0,.10);
-      background: linear-gradient(180deg, #fff, #fbfbfd);
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:10px;
-    }
-    .dtitle{
-      margin:0;
-      font-weight: 1000;
-      font-size: 12px;
-    }
-    .crumb{
-      margin-top:3px;
-      font-size:11px;
-      font-weight: 850;
-      color: rgba(0,0,0,.55);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 62ch;
-    }
-    .dbody{
-      padding: 10px 12px 12px;
-    }
     .empty{
       padding: 10px;
       border-radius: 12px;
@@ -558,27 +592,82 @@
       font-size: 12px;
       background: #fff;
     }
-    .descbox{
-      margin-top: 8px;
-      padding: 9px 10px;
-      border-radius: 12px;
-      background: rgba(255,204,0,.18);
-      border: 1px solid rgba(255,204,0,.35);
+
+    /* Hover details tooltip (Material-like) */
+    .tooltip{
+      position: fixed;
+      z-index: 9999;
+      min-width: 280px;
+      max-width: 420px;
+      background:#fff;
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      box-shadow: var(--e3);
+      padding: 10px 12px;
+      display:none;
+    }
+    .tt-top{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .tt-code{
+      font-weight:1000;
+      font-size:12px;
+      color: var(--dhl-red);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 68%;
+    }
+    .tt-owner{
+      font-weight:1000;
+      font-size:11px;
+      color: rgba(0,0,0,.60);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 48%;
+      text-align:right;
+    }
+    .tt-name{
+      margin-top: 4px;
+      font-weight:1000;
+      font-size:13px;
+      line-height:1.15;
+    }
+    .tt-desc{
+      margin-top: 6px;
       font-size: 11px;
       font-weight: 850;
-      line-height: 1.25;
+      color: rgba(0,0,0,.65);
+      line-height:1.25;
     }
-    .kv{
+    .tt-actions{
       margin-top: 10px;
-      display:grid;
-      grid-template-columns: 120px 1fr;
-      gap: 8px 10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      border-top: 1px solid rgba(0,0,0,.08);
+      padding-top: 8px;
       font-size: 11px;
-      line-height: 1.25;
+      font-weight: 950;
+      color: rgba(0,0,0,.60);
     }
-    .k{ font-weight: 1000; color: rgba(0,0,0,.62); }
-    .v{ font-weight: 900; color: rgba(0,0,0,.85); word-break: break-word; }
+    .tt-actions button{
+      cursor:pointer;
+      border:none;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 1000;
+      background: rgba(212,5,17,.10);
+      border: 1px solid rgba(212,5,17,.20);
+    }
 
+    /* Error block */
     .error{
       white-space: pre-wrap;
       background: rgba(212,5,17,.10);
@@ -603,13 +692,26 @@
       </div>
     </div>
 
-    <div class="hdr-actions">
-      <label class="toggle" title="Auto-select first item when you drill down">
+    <div class="actions">
+      <label class="toggle">
         <input id="autoOpen" type="checkbox" checked />
         Auto-open
       </label>
       <button id="reset" class="btn">Reset</button>
       <button id="toggleHouse" class="btn btn-primary">Process House</button>
+    </div>
+  </div>
+
+  <div class="crumbbar">
+    <div class="crumb">
+      <div class="chip" title="Current location breadcrumb">
+        <span class="dot"></span>
+        <span id="crumbText">—</span>
+      </div>
+      <div class="chip ownerchip" title="Current selected owner">
+        <span class="dot"></span>
+        <span id="crumbOwner">Owner: —</span>
+      </div>
     </div>
   </div>
 </header>
@@ -621,7 +723,7 @@
         <span class="pill">L0</span>
         <span>Process House</span>
       </div>
-      <span class="hint">Click a box to select (house acts as the filter)</span>
+      <span class="hint">Click a box to select (process house acts as filter)</span>
     </summary>
     <div class="house-body" id="houseBody"></div>
   </details>
@@ -635,7 +737,10 @@
       </div>
       <div id="l1Hint" class="subhint">Select an L0 box in the process house.</div>
     </div>
-    <div id="l1" class="chain"></div>
+    <div class="chainwrap">
+      <svg id="l1Flow" class="flowSvg"></svg>
+      <div id="l1" class="chain"></div>
+    </div>
   </section>
 
   <section class="panel">
@@ -647,7 +752,10 @@
       </div>
       <div id="l2Hint" class="subhint">Select an L1 chevron.</div>
     </div>
-    <div id="l2" class="chain"></div>
+    <div class="chainwrap">
+      <svg id="l2Flow" class="flowSvg"></svg>
+      <div id="l2" class="chain"></div>
+    </div>
   </section>
 
   <section class="panel">
@@ -659,29 +767,16 @@
       </div>
       <div id="l3Hint" class="subhint">Select an L2 chevron.</div>
     </div>
-
-    <div class="l3grid">
+    <div class="l3wrap">
       <div class="waterfall" id="l3"></div>
-
-      <div class="details">
-        <div class="dcard">
-          <div class="dhead">
-            <div>
-              <p class="dtitle">Details</p>
-              <div class="crumb" id="crumb">—</div>
-            </div>
-            <button id="collapseDetails" class="btn">Collapse</button>
-          </div>
-          <div class="dbody" id="detailsBody">
-            <div class="empty">Select an element (L0/L1/L2/L3) to see details.</div>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
   <div id="err" style="display:none;" class="error"></div>
 </main>
+
+<!-- Hover/pin tooltip -->
+<div id="tt" class="tooltip" role="dialog" aria-live="polite"></div>
 
 <script>
   const $ = (id) => document.getElementById(id);
@@ -691,52 +786,52 @@
     l0: [],
     selected: { l0:null, l1:null, l2:null, l3:null },
     autoOpen: true,
-    detailsCollapsed: false,
+    tooltipPinned: false,
+    pinnedNode: null,
   };
 
-  // Simple, consistent inline SVG icons (replace later with your DHL icons if you want)
+  // --- Inline SVG icons (placeholders; you can swap with DHL official set later) ---
   const ICONS = {
-    S2E: iconCompass(),
-    GRC: iconShield(),
-    EA_PM: iconCog(),
-    L2C: iconHandshake(),
-    O2D: iconTruck(),
-    D2O: iconDesign(),
-    P2R: iconWrench(),
-    S2P: iconCart(),
-    H2R: iconPeople(),
-    R2R: iconLedger(),
-    I2P: iconBulb(),
-    TRF: iconRocket(),
-    DA: iconData(),
-    ITF: iconLock()
+    S2E: icon("compass"),
+    GRC: icon("shield"),
+    EA_PM: icon("cog"),
+    L2C: icon("handshake"),
+    O2D: icon("truck"),
+    D2O: icon("layers"),
+    P2R: icon("wrench"),
+    S2P: icon("cart"),
+    H2R: icon("people"),
+    R2R: icon("ledger"),
+    I2P: icon("bulb"),
+    TRF: icon("rocket"),
+    DA: icon("data"),
+    ITF: icon("lock")
   };
 
-  function iconWrap(svg){
-    return `<div class="icon" aria-hidden="true">${svg}</div>`;
-  }
-
-  function iconCompass(){ return svg(`<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.7 6.3-2.2 6.1-6.2 2.2 2.2-6.1 6.2-2.2Zm-6 7.4 2.9-1.1 1.1-2.9-2.9 1.1-1.1 2.9Z"/>`); }
-  function iconShield(){ return svg(`<path d="M12 2 20 6v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4Zm0 4.2L6 8.7V12c0 3.5 2.2 6.8 6 7.7 3.8-.9 6-4.2 6-7.7V8.7l-6-2.5Z"/>`); }
-  function iconCog(){ return svg(`<path d="M19.4 13a7.8 7.8 0 0 0 .1-2l2-1.6-2-3.5-2.4 1a7.7 7.7 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6c-.6.2-1.2.6-1.7 1l-2.4-1-2 3.5L4.6 11a7.8 7.8 0 0 0 0 2L2.6 14.6l2 3.5 2.4-1c.5.4 1.1.8 1.7 1l.4 2.6h4.2l.4-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.5-2-1.6ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/>`); }
-  function iconTruck(){ return svg(`<path d="M3 7h11v8H3V7Zm12 2h3l3 3v3h-6V9Zm-9 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>`); }
-  function iconHandshake(){ return svg(`<path d="M7 7h3l2 2 2-2h3l2 2-4 4c-1 1-2 1-3 0l-2-2-2 2c-1 1-2 1-3 0L3 9l4-2Z"/>`); }
-  function iconWrench(){ return svg(`<path d="M22 6.5a6 6 0 0 1-7.4 7.4l-7 7L4 19.3l7-7A6 6 0 0 1 18.5 4l-2.3 2.3 1.2 1.2L19.7 5 22 6.5Z"/>`); }
-  function iconDesign(){ return svg(`<path d="M4 5h10v2H4V5Zm0 4h16v2H4V9Zm0 4h12v2H4v-2Zm0 4h8v2H4v-2Z"/>`); }
-  function iconCart(){ return svg(`<path d="M7 6h14l-2 8H9L7 6Zm-2 0H2V4h4l1 2Zm4 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>`); }
-  function iconPeople(){ return svg(`<path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 0a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM2 22c0-4 3-7 6-7s6 3 6 7H2Zm12 0c.2-2.6 1.7-4.8 4-6 2.5 1.1 4 3.4 4 6h-8Z"/>`); }
-  function iconLedger(){ return svg(`<path d="M6 2h10a2 2 0 0 1 2 2v18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h8v2H8V7Zm0 4h8v2H8v-2Zm0 4h6v2H8v-2Z"/>`); }
-  function iconBulb(){ return svg(`<path d="M12 2a7 7 0 0 1 4 12c-1 1-1.5 2-1.5 3H9.5c0-1-.5-2-1.5-3A7 7 0 0 1 12 2Zm-2 18h4v2h-4v-2Z"/>`); }
-  function iconRocket(){ return svg(`<path d="M14 2c4 2 6 6 6 10l-4 4-4-4 2-10ZM6 12l4 4-4 4c-2-2-2-6 0-8Zm6 6 2 2-2 2-2-2 2-2Z"/>`); }
-  function iconData(){ return svg(`<path d="M12 2c5 0 9 1.6 9 3.5S17 9 12 9 3 7.4 3 5.5 7 2 12 2Zm9 6.5V12c0 2-4 3.5-9 3.5S3 14 3 12V8.5C4.7 10 8.3 11 12 11s7.3-1 9-2.5Zm0 7V19c0 2-4 3.5-9 3.5S3 21 3 19v-3.5C4.7 17 8.3 18 12 18s7.3-1 9-2.5Z"/>`); }
-  function iconLock(){ return svg(`<path d="M7 10V8a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1Zm2 0h6V8a3 3 0 0 0-6 0v2Z"/>`); }
-
-  function svg(inner){
-    return `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">${inner}</svg>`;
+  function icon(kind){
+    const paths = {
+      compass:`<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.7 6.3-2.2 6.1-6.2 2.2 2.2-6.1 6.2-2.2Zm-6 7.4 2.9-1.1 1.1-2.9-2.9 1.1-1.1 2.9Z"/>`,
+      shield:`<path d="M12 2 20 6v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4Zm0 4.2L6 8.7V12c0 3.5 2.2 6.8 6 7.7 3.8-.9 6-4.2 6-7.7V8.7l-6-2.5Z"/>`,
+      cog:`<path d="M19.4 13a7.8 7.8 0 0 0 .1-2l2-1.6-2-3.5-2.4 1a7.7 7.7 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6c-.6.2-1.2.6-1.7 1l-2.4-1-2 3.5L4.6 11a7.8 7.8 0 0 0 0 2L2.6 14.6l2 3.5 2.4-1c.5.4 1.1.8 1.7 1l.4 2.6h4.2l.4-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.5-2-1.6ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/>`,
+      truck:`<path d="M3 7h11v8H3V7Zm12 2h3l3 3v3h-6V9Zm-9 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>`,
+      handshake:`<path d="M7 7h3l2 2 2-2h3l2 2-4 4c-1 1-2 1-3 0l-2-2-2 2c-1 1-2 1-3 0L3 9l4-2Z"/>`,
+      layers:`<path d="M12 3 2 8l10 5 10-5-10-5Zm0 12L2 10v3l10 5 10-5v-3l-10 5Zm0 6L2 16v3l10 5 10-5v-3l-10 5Z"/>`,
+      wrench:`<path d="M22 6.5a6 6 0 0 1-7.4 7.4l-7 7L4 19.3l7-7A6 6 0 0 1 18.5 4l-2.3 2.3 1.2 1.2L19.7 5 22 6.5Z"/>`,
+      cart:`<path d="M7 6h14l-2 8H9L7 6Zm-2 0H2V4h4l1 2Zm4 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>`,
+      people:`<path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 0a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM2 22c0-4 3-7 6-7s6 3 6 7H2Zm12 0c.2-2.6 1.7-4.8 4-6 2.5 1.1 4 3.4 4 6h-8Z"/>`,
+      ledger:`<path d="M6 2h10a2 2 0 0 1 2 2v18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 5h8v2H8V7Zm0 4h8v2H8v-2Zm0 4h6v2H8v-2Z"/>`,
+      bulb:`<path d="M12 2a7 7 0 0 1 4 12c-1 1-1.5 2-1.5 3H9.5c0-1-.5-2-1.5-3A7 7 0 0 1 12 2Zm-2 18h4v2h-4v-2Z"/>`,
+      rocket:`<path d="M14 2c4 2 6 6 6 10l-4 4-4-4 2-10ZM6 12l4 4-4 4c-2-2-2-6 0-8Zm6 6 2 2-2 2-2-2 2-2Z"/>`,
+      data:`<path d="M12 2c5 0 9 1.6 9 3.5S17 9 12 9 3 7.4 3 5.5 7 2 12 2Zm9 6.5V12c0 2-4 3.5-9 3.5S3 14 3 12V8.5C4.7 10 8.3 11 12 11s7.3-1 9-2.5Zm0 7V19c0 2-4 3.5-9 3.5S3 21 3 19v-3.5C4.7 17 8.3 18 12 18s7.3-1 9-2.5Z"/>`,
+      lock:`<path d="M7 10V8a5 5 0 0 1 10 0v2h1a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h1Zm2 0h6V8a3 3 0 0 0-6 0v2Z"/>`
+    };
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${paths[kind] || `<circle cx="12" cy="12" r="8"/>`}</svg>`;
   }
 
   function esc(s){
-    return (s ?? "").toString().replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    return (s ?? "").toString().replace(/[&<>"']/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[ch]));
   }
 
   function splitCodeTitle(name){
@@ -768,53 +863,186 @@
     return 0;
   }
 
-  function breadcrumb(){
+  function setBreadcrumb(){
     const parts = [];
-    if(state.selected.l0) parts.push(state.selected.l0.id);
-    if(state.selected.l1) parts.push(state.selected.l1.id);
-    if(state.selected.l2) parts.push(state.selected.l2.id);
-    if(state.selected.l3) parts.push(state.selected.l3.id);
-    return parts.length ? parts.join(" > ") : "—";
+    const l0 = state.selected.l0, l1 = state.selected.l1, l2 = state.selected.l2, l3 = state.selected.l3;
+
+    if(l0){ parts.push(l0.id); }
+    if(l1){ parts.push(l1.id); }
+    if(l2){ parts.push(l2.id); }
+    if(l3){ parts.push(l3.id); }
+
+    $("crumbText").textContent = parts.length ? parts.join(" > ") : "—";
+
+    const owner = (l3?.owner || l2?.owner || l1?.owner || l0?.owner || "—").toString();
+    $("crumbOwner").textContent = `Owner: ${owner}`;
   }
 
-  function renderDetails(node){
-    $("crumb").textContent = breadcrumb();
-
-    if(state.detailsCollapsed){
-      $("detailsBody").innerHTML = `<div class="empty">Details collapsed. Click “Expand”.</div>`;
-      return;
-    }
-    if(!node){
-      $("detailsBody").innerHTML = `<div class="empty">Select an element (L0/L1/L2/L3) to see details.</div>`;
-      return;
-    }
-
+  // ---------------- Tooltip (hover + pin) ----------------
+  function nodeTooltipHTML(node){
+    if(!node) return "";
     const { code, title } = splitCodeTitle(node.name || "");
-    const desc = (node.description || "").toString().trim();
-
-    const rows = [
-      ["ID", node.id || ""],
-      ["Code", code || "—"],
-      ["Name", title || node.name || ""],
-      ["Owner", node.owner || "—"],
-    ];
-    if(node.category) rows.push(["Category", node.category]);
-    if(node.notes) rows.push(["Notes", node.notes]);
-
-    const kv = rows.map(([k,v]) => `<div class="k">${esc(k)}</div><div class="v">${esc(v)}</div>`).join("");
-
-    $("detailsBody").innerHTML = `
-      <div style="font-weight:1000;font-size:12px;color:var(--dhl-red);">${esc(code || node.id || "")}</div>
-      <div style="font-weight:1000;font-size:13px;margin-top:3px;">${esc(title || node.name || "")}</div>
-      ${desc ? `<div class="descbox">${esc(desc)}</div>` : ``}
-      <div class="kv">${kv}</div>
+    const owner = (node.owner || "").toString();
+    const desc = (node.description || "").toString();
+    return `
+      <div class="tt-top">
+        <div class="tt-code">${esc(code || node.id || "")}</div>
+        <div class="tt-owner">${esc(owner || "")}</div>
+      </div>
+      <div class="tt-name">${esc(title || node.name || "")}</div>
+      ${desc ? `<div class="tt-desc">${esc(desc)}</div>` : ``}
+      <div class="tt-actions">
+        <div>${esc(node.id || "")}</div>
+        <button id="ttPin">${state.tooltipPinned ? "Unpin" : "Pin"}</button>
+      </div>
     `;
   }
 
+  function showTooltip(node, anchorRect){
+    const tt = $("tt");
+    tt.innerHTML = nodeTooltipHTML(node);
+    tt.style.display = "block";
+
+    // Position near anchor (prefer right side, fallback left)
+    const margin = 10;
+    const vw = window.innerWidth, vh = window.innerHeight;
+
+    // measure after render
+    requestAnimationFrame(() => {
+      const box = tt.getBoundingClientRect();
+      let x = anchorRect.right + margin;
+      let y = anchorRect.top + Math.min(20, Math.max(0, (anchorRect.height - box.height)/2));
+
+      if(x + box.width > vw - 8) x = anchorRect.left - margin - box.width;
+      if(x < 8) x = 8;
+
+      if(y + box.height > vh - 8) y = vh - 8 - box.height;
+      if(y < 8) y = 8;
+
+      tt.style.left = `${x}px`;
+      tt.style.top  = `${y}px`;
+
+      const pinBtn = $("ttPin");
+      if(pinBtn){
+        pinBtn.onclick = (e) => {
+          e.stopPropagation();
+          state.tooltipPinned = !state.tooltipPinned;
+          state.pinnedNode = state.tooltipPinned ? node : null;
+          // re-render to update button text
+          showTooltip(node, anchorRect);
+        };
+      }
+    });
+  }
+
+  function hideTooltip(){
+    if(state.tooltipPinned) return;
+    $("tt").style.display = "none";
+  }
+
+  // -------------- Row continuity connectors (SVG) --------------
+  function drawRowConnectors(chainEl, svgEl){
+    // Clear
+    while(svgEl.firstChild) svgEl.removeChild(svgEl.firstChild);
+
+    const items = Array.from(chainEl.querySelectorAll(".chev"));
+    if(items.length < 2) return;
+
+    // Group into rows by top position (tolerance)
+    const tol = 8;
+    const rows = [];
+    for(const el of items){
+      const r = el.getBoundingClientRect();
+      const top = r.top;
+      let row = rows.find(x => Math.abs(x.top - top) <= tol);
+      if(!row){
+        row = { top, els: [] };
+        rows.push(row);
+      }
+      row.els.push({ el, rect: r });
+    }
+
+    rows.sort((a,b) => a.top - b.top);
+
+    // Mark row-first and overlap classes so chevrons connect nicely within a row
+    items.forEach(el => { el.classList.remove("rowfirst","overlap"); });
+
+    for(const row of rows){
+      // Sort row elements by left coordinate
+      row.els.sort((a,b) => a.rect.left - b.rect.left);
+      row.els.forEach((x, idx) => {
+        x.el.classList.toggle("rowfirst", idx === 0);
+        x.el.classList.toggle("overlap", idx !== 0);
+      });
+    }
+
+    // Prepare SVG defs (arrow marker)
+    const ns = "http://www.w3.org/2000/svg";
+    const defs = document.createElementNS(ns, "defs");
+    const marker = document.createElementNS(ns, "marker");
+    marker.setAttribute("id","arrow");
+    marker.setAttribute("viewBox","0 0 10 10");
+    marker.setAttribute("refX","9");
+    marker.setAttribute("refY","5");
+    marker.setAttribute("markerWidth","6");
+    marker.setAttribute("markerHeight","6");
+    marker.setAttribute("orient","auto-start-reverse");
+    const tip = document.createElementNS(ns,"path");
+    tip.setAttribute("d","M 0 0 L 10 5 L 0 10 z");
+    tip.setAttribute("fill","rgba(0,0,0,.28)");
+    marker.appendChild(tip);
+    defs.appendChild(marker);
+    svgEl.appendChild(defs);
+
+    // SVG size in page coords
+    const svgRect = svgEl.getBoundingClientRect();
+    svgEl.setAttribute("viewBox", `0 0 ${svgRect.width} ${svgRect.height}`);
+
+    // Draw connector from end of row -> start of next row (only if there is wrap)
+    for(let i=0;i<rows.length-1;i++){
+      const a = rows[i].els[rows[i].els.length-1].rect;
+      const b = rows[i+1].els[0].rect;
+
+      // points in SVG local coordinates
+      const ax = (a.right - svgRect.left) - 6;
+      const ay = (a.top - svgRect.top) + a.height/2;
+
+      const bx = (b.left - svgRect.left) + 6;
+      const by = (b.top - svgRect.top) + b.height/2;
+
+      // Make a smooth elbow (down then over)
+      const midY = ay + Math.max(24, (by - ay)/2);
+
+      const d = [
+        `M ${ax} ${ay}`,
+        `C ${ax+22} ${ay}, ${ax+22} ${midY}, ${ax} ${midY}`,
+        `L ${bx} ${midY}`,
+        `C ${bx-22} ${midY}, ${bx-22} ${by}, ${bx} ${by}`
+      ].join(" ");
+
+      const path = document.createElementNS(ns,"path");
+      path.setAttribute("d", d);
+      path.setAttribute("fill","none");
+      path.setAttribute("stroke","rgba(0,0,0,.28)");
+      path.setAttribute("stroke-width","2");
+      path.setAttribute("marker-end","url(#arrow)");
+      svgEl.appendChild(path);
+    }
+  }
+
+  // Recompute connectors on resize (layout changes)
+  const ro = new ResizeObserver(() => {
+    // delay to let layout settle
+    requestAnimationFrame(() => {
+      drawRowConnectors($("l1"), $("l1Flow"));
+      drawRowConnectors($("l2"), $("l2Flow"));
+    });
+  });
+
+  // ---------------- Render Process House ----------------
   function bandKey(cat){
     const c = (cat || "").toLowerCase();
     if(c.includes("manage")) return "manage";
-    if(c.includes("run")) return "run";
     if(c.includes("change")) return "change";
     if(c.includes("foundation")) return "foundation";
     return "run";
@@ -822,7 +1050,6 @@
 
   function renderHouse(){
     const body = $("houseBody");
-
     const groups = {
       "Manage the Business": [],
       "Run the Business": [],
@@ -830,17 +1057,15 @@
       "Foundation": []
     };
 
-    // group by category in JSON (you have it)
     for(const l0 of state.l0){
-      const cat = l0.category || "Run the Business";
-      if(cat.toLowerCase().includes("manage")) groups["Manage the Business"].push(l0);
-      else if(cat.toLowerCase().includes("change")) groups["Change the Business"].push(l0);
-      else if(cat.toLowerCase().includes("foundation")) groups["Foundation"].push(l0);
+      const cat = (l0.category || "Run the Business").toLowerCase();
+      if(cat.includes("manage")) groups["Manage the Business"].push(l0);
+      else if(cat.includes("change")) groups["Change the Business"].push(l0);
+      else if(cat.includes("foundation")) groups["Foundation"].push(l0);
       else groups["Run the Business"].push(l0);
     }
 
     const order = ["Manage the Business","Run the Business","Change the Business","Foundation"];
-
     body.innerHTML = order.map(title => {
       const items = (groups[title] || []).slice().sort(sortById);
       const key = bandKey(title);
@@ -848,10 +1073,10 @@
       const cards = items.map(l0 => {
         const active = state.selected.l0?.id === l0.id ? "active" : "";
         const { code, title: nm } = splitCodeTitle(l0.name || "");
-        const icon = ICONS[l0.id] ? iconWrap(ICONS[l0.id]) : iconWrap(svg(`<circle cx="12" cy="12" r="8"/>`));
+        const icon = ICONS[l0.id] || `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>`;
         return `
           <div class="l0card ${active}" data-l0="${esc(l0.id)}" role="button" tabindex="0">
-            ${icon}
+            <div class="icon" aria-hidden="true">${icon}</div>
             <div class="l0meta">
               <div class="l0code">${esc(code || l0.id)}</div>
               <div class="l0name">${esc(nm || l0.name || "")}</div>
@@ -880,20 +1105,23 @@
     });
   }
 
+  // ---------------- Render chains ----------------
   function renderChain(containerId, items, level){
     const container = $(containerId);
     container.innerHTML = "";
 
     items.forEach((n, idx) => {
       const active = state.selected[level]?.id === n.id ? "active" : "";
-      const first = idx === 0 ? "first" : "";
       const { code, title } = splitCodeTitle(n.name || "");
-      const meta = (n.description || n.owner || "").toString();
+      const meta = (n.description || "").toString();
+      const owner = (n.owner || "").toString();
 
       const div = document.createElement("div");
-      div.className = `chev ${level} ${active} ${first}`;
+      div.className = `chev ${level} ${active}`;
       div.setAttribute("role","button");
       div.setAttribute("tabindex","0");
+      div.dataset.id = n.id;
+
       div.innerHTML = `
         <div class="rowtop">
           <div class="code">${esc(code || n.id || "")}</div>
@@ -901,18 +1129,43 @@
         </div>
         <div class="name">${esc(title || n.name || "")}</div>
         <div class="meta">${esc(meta)}</div>
+        ${owner ? `<div class="ownerTag" title="Owner">${esc(owner)}</div>` : ``}
       `;
 
-      div.addEventListener("click", () => {
+      // Hover tooltip
+      div.addEventListener("mouseenter", () => {
+        if(state.tooltipPinned && state.pinnedNode) return;
+        showTooltip(n, div.getBoundingClientRect());
+      });
+      div.addEventListener("mouseleave", () => hideTooltip());
+
+      // Click selects + pins tooltip (optional)
+      div.addEventListener("click", (e) => {
         if(level === "l1") selectL1(n.id);
         if(level === "l2") selectL2(n.id);
-        renderDetails(n);
+        setBreadcrumb();
+
+        // On click: pin tooltip to that node for clarity
+        state.tooltipPinned = true;
+        state.pinnedNode = n;
+        showTooltip(n, div.getBoundingClientRect());
+        e.stopPropagation();
       });
+
       div.addEventListener("keydown", (e) => {
-        if(e.key === "Enter" || e.key === " "){ e.preventDefault(); div.click(); }
+        if(e.key === "Enter" || e.key === " "){
+          e.preventDefault();
+          div.click();
+        }
       });
 
       container.appendChild(div);
+    });
+
+    // After render, compute wrap rows + connectors
+    requestAnimationFrame(() => {
+      const svg = (containerId === "l1") ? $("l1Flow") : $("l2Flow");
+      drawRowConnectors(container, svg);
     });
   }
 
@@ -933,6 +1186,7 @@
 
       const div = document.createElement("div");
       div.className = `l3card ${active}`;
+
       div.innerHTML = `
         <div class="l3top">
           <div class="l3code">${esc(code || n.id || "")}</div>
@@ -941,16 +1195,29 @@
         <div class="l3name">${esc(title || n.name || "")}</div>
         ${desc ? `<div class="l3desc">${esc(desc)}</div>` : ``}
       `;
-      div.addEventListener("click", () => {
-        state.selected.l3 = n;
-        $("crumb").textContent = breadcrumb();
-        renderL3(items);         // refresh highlights
-        renderDetails(n);
+
+      div.addEventListener("mouseenter", () => {
+        if(state.tooltipPinned && state.pinnedNode) return;
+        showTooltip(n, div.getBoundingClientRect());
       });
+      div.addEventListener("mouseleave", () => hideTooltip());
+
+      div.addEventListener("click", (e) => {
+        state.selected.l3 = n;
+        setBreadcrumb();
+
+        state.tooltipPinned = true;
+        state.pinnedNode = n;
+        showTooltip(n, div.getBoundingClientRect());
+        renderL3(items);
+        e.stopPropagation();
+      });
+
       container.appendChild(div);
     });
   }
 
+  // ---------------- Selection ----------------
   function selectL0(id){
     const l0 = state.l0.find(x => x.id === id);
     state.selected.l0 = l0 || null;
@@ -960,18 +1227,24 @@
 
     renderHouse();
     $("l1Hint").textContent = l0 ? `Selected L0: ${l0.name}` : "Select an L0.";
-    renderDetails(l0);
+    setBreadcrumb();
 
     const l1 = kids(l0).slice().sort(sortById);
     $("l1Count").textContent = String(l1.length);
     renderChain("l1", l1, "l1");
 
     $("l2").innerHTML = "";
-    $("l3").innerHTML = `<div class="empty">Select an L2 chevron.</div>`;
     $("l2Count").textContent = "0";
-    $("l3Count").textContent = "0";
     $("l2Hint").textContent = "Select an L1 chevron.";
+
+    $("l3").innerHTML = `<div class="empty">Select an L2 chevron.</div>`;
+    $("l3Count").textContent = "0";
     $("l3Hint").textContent = "Select an L2 chevron.";
+
+    // unpin tooltip
+    state.tooltipPinned = false;
+    state.pinnedNode = null;
+    hideTooltip();
 
     if(state.autoOpen && l1.length){
       selectL1(l1[0].id);
@@ -987,6 +1260,7 @@
     const l1Items = kids(state.selected.l0).slice().sort(sortById);
     renderChain("l1", l1Items, "l1");
     $("l2Hint").textContent = l1 ? `Selected L1: ${l1.name}` : "Select an L1 chevron.";
+    setBreadcrumb();
 
     const l2 = kids(l1).slice().sort(sortById);
     $("l2Count").textContent = String(l2.length);
@@ -995,8 +1269,6 @@
     $("l3").innerHTML = `<div class="empty">Select an L2 chevron.</div>`;
     $("l3Count").textContent = "0";
     $("l3Hint").textContent = "Select an L2 chevron.";
-
-    renderDetails(l1);
 
     if(state.autoOpen && l2.length){
       selectL2(l2[0].id);
@@ -1011,45 +1283,54 @@
     const l2Items = kids(state.selected.l1).slice().sort(sortById);
     renderChain("l2", l2Items, "l2");
     $("l3Hint").textContent = l2 ? `Selected L2: ${l2.name}` : "Select an L2 chevron.";
+    setBreadcrumb();
 
     const l3 = kids(l2).slice().sort(sortById);
     $("l3Count").textContent = String(l3.length);
     renderL3(l3);
 
-    renderDetails(l2);
-
     if(state.autoOpen && l3.length){
       state.selected.l3 = l3[0];
       renderL3(l3);
-      renderDetails(l3[0]);
+      setBreadcrumb();
     }
   }
 
+  // ---------------- Init ----------------
   async function init(){
     try{
       state.autoOpen = $("autoOpen").checked;
 
-      // IMPORTANT: Your JSON is { name: "...", children: [...] }
       const res = await fetch(`data.json?v=${Date.now()}`, { cache: "no-store" });
-      if(!res.ok) throw new Error(`Failed to load data.json (HTTP ${res.status}). Check filename/path and GitHub Pages publish.`);
+      if(!res.ok) throw new Error(`Failed to load data.json (HTTP ${res.status}).`);
       const json = await res.json();
 
-      if(!json || !Array.isArray(json.children)) {
+      // Expected: { name: "...", children: [...] }
+      if(!json || !Array.isArray(json.children)){
         throw new Error(`JSON shape mismatch. Expected root {children:[...]}.`);
       }
 
       state.json = json;
-      state.l0 = json.children.slice(); // L0 list
+      state.l0 = json.children.slice();
 
       renderHouse();
       $("err").style.display = "none";
 
-      // default select first L0
-      if(state.l0.length){
-        selectL0(state.l0[0].id);
-      } else {
-        throw new Error("Loaded JSON but L0 list is empty.");
-      }
+      // Observe chains for layout changes (wrap changes)
+      ro.observe($("l1"));
+      ro.observe($("l2"));
+
+      // Click anywhere to unpin tooltip
+      document.addEventListener("click", () => {
+        state.tooltipPinned = false;
+        state.pinnedNode = null;
+        hideTooltip();
+      });
+
+      // Default select first L0
+      if(state.l0.length) selectL0(state.l0[0].id);
+      else throw new Error("Loaded JSON but L0 list is empty.");
+
     } catch(e){
       $("err").style.display = "block";
       $("err").textContent =
@@ -1057,24 +1338,23 @@
         `Common fixes:\n` +
         `• Ensure data.json is in the SAME folder as index.html\n` +
         `• Ensure filename is exactly "data.json" (case-sensitive)\n` +
-        `• Ensure GitHub Pages is publishing from the branch/folder you committed\n`;
+        `• Ensure GitHub Pages is publishing the branch/folder you committed\n`;
       console.error(e);
     }
   }
 
   $("autoOpen").addEventListener("change", (e) => state.autoOpen = !!e.target.checked);
+
   $("reset").addEventListener("click", () => {
+    state.tooltipPinned = false;
+    state.pinnedNode = null;
+    hideTooltip();
     if(state.l0.length) selectL0(state.l0[0].id);
   });
+
   $("toggleHouse").addEventListener("click", () => {
     $("house").open = !$("house").open;
     $("house").scrollIntoView({ behavior: "smooth", block: "start" });
-  });
-  $("collapseDetails").addEventListener("click", () => {
-    state.detailsCollapsed = !state.detailsCollapsed;
-    $("collapseDetails").textContent = state.detailsCollapsed ? "Expand" : "Collapse";
-    const node = state.selected.l3 || state.selected.l2 || state.selected.l1 || state.selected.l0;
-    renderDetails(node);
   });
 
   init();
