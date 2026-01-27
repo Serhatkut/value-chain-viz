@@ -1,1031 +1,1301 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>DHL eCommerce | Value Chain Visualizer</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DHL eCommerce · Enterprise Process Architecture · Process Chains</title>
 
   <style>
     :root{
-      --dhl-yellow:#FFCC00;
+      /* DHL-ish theme */
       --dhl-red:#D40511;
-
-      --bg:#f6f7f9;
+      --dhl-yellow:#FFCC00;
+      --ink:#111;
+      --muted:#666;
+      --bg:#f6f6f7;
       --card:#ffffff;
-      --ink:#111827;
-      --muted:#6b7280;
-      --border:#e5e7eb;
-      --shadow:0 10px 24px rgba(0,0,0,.08);
+      --line:#e3e3e7;
+
+      /* Level colors */
+      --l0: var(--dhl-red);
+      --l1: var(--dhl-yellow);
+      --l2:#2b2f33;       /* dark grey */
+      --l3:#eeeeef;       /* light grey */
+
+      /* Layout */
       --radius:14px;
-      --font:"Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+      --shadow-soft: 0 6px 18px rgba(0,0,0,.06);
 
-      /* level colors */
-      --l0:#D40511;    /* red */
-      --l1:#FFCC00;    /* yellow */
-      --l2:#2f343b;    /* dark grey */
-      --l3:#f0f2f4;    /* light grey */
-
-      --l1Text:#111827;
-      --l2Text:#ffffff;
+      --chev-notch: 22px;
+      --chev-tip: 26px;
     }
 
     *{ box-sizing:border-box; }
-    html, body{ height:100%; }
     body{
       margin:0;
-      font-family:var(--font);
-      background:var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       color:var(--ink);
-      overflow:hidden;
+      background:var(--bg);
     }
 
-    /* ===== Top header ===== */
+    /* Header */
     .topbar{
-      padding: 12px 14px 10px;
-      background: linear-gradient(90deg, var(--dhl-yellow), #ffe07a);
-      border-bottom:1px solid rgba(0,0,0,.06);
+      position:sticky;
+      top:0;
+      z-index:50;
+      background: linear-gradient(180deg, rgba(255,204,0,.95), rgba(255,204,0,.92));
+      border-bottom:1px solid rgba(0,0,0,.08);
+      backdrop-filter: blur(6px);
     }
-    .toprow{
+    .topbar-inner{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px 18px 10px;
+    }
+    .brand-row{
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:space-between;
-      gap:12px;
-      margin-bottom:10px;
-      flex-wrap:wrap;
+      gap:14px;
     }
     .brand{
       display:flex;
-      align-items:center;
       gap:12px;
-      font-weight:1100;
-      letter-spacing:.2px;
-      min-width: 280px;
-      flex: 1 1 360px;
+      align-items:flex-start;
+      min-width: 260px;
     }
-    .brand-badge{
-      width:10px;height:28px;border-radius:8px;background:var(--dhl-red);
-      box-shadow:0 10px 18px rgba(212,5,17,.22);
-      flex:0 0 auto;
-    }
-    .brand small{
-      display:block;
-      font-weight:800;
-      font-size:12px;
-      color:rgba(0,0,0,.62);
-      letter-spacing:0;
-    }
-
-    .right-controls{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      justify-content:flex-end;
-      flex: 1 1 420px;
-      min-width: 0;
-    }
-    .control{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
+    .brand-mark{
+      width:10px; height:34px;
+      background: var(--dhl-red);
       border-radius:999px;
-      border:1px solid rgba(0,0,0,.10);
-      background:rgba(255,255,255,.78);
-      box-shadow:0 6px 14px rgba(0,0,0,.06);
-      min-width: 0;
-      flex: 1 1 360px;
+      margin-top:2px;
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.06);
     }
-    .control label{
+    .brand h1{
+      font-size: 18px;
+      line-height:1.15;
+      margin:0;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .brand .sub{
       font-size:12px;
-      font-weight:1000;
-      color:rgba(0,0,0,.62);
-      white-space:nowrap;
-    }
-    input{
-      border:none; outline:none; background:transparent;
-      font-family:var(--font); font-size:13px;
-      width: 100%;
-      min-width: 140px;
-    }
-    .btn{
-      border:none; cursor:pointer;
-      border-radius:999px;
-      padding:9px 12px;
-      font-weight:1000;
-      font-size:13px;
-      flex:0 0 auto;
-    }
-    .btn.primary{
-      background:var(--dhl-red);
-      color:#fff;
-      box-shadow:0 10px 18px rgba(212,5,17,.22);
-    }
-    .btn.secondary{
-      background:rgba(255,255,255,.86);
-      color:var(--ink);
-      border:1px solid rgba(0,0,0,.12);
-      box-shadow:none;
+      color:#3a2b00;
+      opacity:.85;
+      font-weight: 650;
+      margin-top:2px;
     }
 
-    /* L0 tabs (red) */
-    .l0bar{
-      display:flex;
-      gap:10px;
-      overflow:auto;
-      padding-bottom:4px;
-      -webkit-overflow-scrolling:touch;
-    }
-    .l0tab{
-      flex:0 0 auto;
-      border-radius: 999px;
-      border:1px solid rgba(0,0,0,.10);
-      background: rgba(212,5,17,.12);
-      color: #7a0b10;
-      padding: 9px 12px;
-      font-weight:1000;
-      font-size:13px;
-      cursor:pointer;
-      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
-      white-space:nowrap;
-    }
-    .l0tab:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 10px 18px rgba(0,0,0,.08);
-      border-color: rgba(212,5,17,.35);
-      background: rgba(212,5,17,.18);
-    }
-    .l0tab.active{
-      background: var(--l0);
-      color: #fff;
-      border-color: rgba(0,0,0,.12);
-      box-shadow: 0 14px 26px rgba(212,5,17,.18);
-    }
-
-    /* ===== Main layout (FULL WIDTH) ===== */
-    .main{
-      height: calc(100vh - 122px);
-      display:grid;
-      grid-template-rows: auto auto auto 1fr; /* House, L1, L2, Bottom (L3+Details) */
-      gap: 12px;
-      padding: 12px 14px 14px;
-      overflow:hidden;
-    }
-
-    .panel{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      min-height:0;
-      width:100%;
-    }
-    .panel-header{
-      padding:10px 12px;
-      border-bottom:1px solid var(--border);
+    .controls{
       display:flex;
       align-items:center;
-      justify-content:space-between;
       gap:10px;
-      background: linear-gradient(180deg, #fff, #fbfbfc);
       flex-wrap:wrap;
-    }
-    .panel-title{
-      display:flex; align-items:center; gap:8px;
-      font-size:13px;
-      font-weight:1100;
-      letter-spacing:.2px;
+      justify-content:flex-end;
     }
     .pill{
-      font-size:11px;
-      font-weight:1000;
-      padding:3px 8px;
+      background: rgba(255,255,255,.75);
+      border:1px solid rgba(0,0,0,.10);
       border-radius:999px;
-      background: rgba(212,5,17,.10);
-      color: var(--dhl-red);
-      border: 1px solid rgba(212,5,17,.18);
+      padding:8px 10px;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      box-shadow: 0 6px 16px rgba(0,0,0,.06);
     }
-    .panel-body{
-      padding:10px;
-      overflow:auto;
+    .pill input[type="text"]{
+      border:none;
+      outline:none;
+      background:transparent;
+      min-width: 260px;
+      font-size: 13px;
+    }
+    .btn{
+      border:none;
+      cursor:pointer;
+      font-weight:800;
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.85);
+      border:1px solid rgba(0,0,0,.12);
+      transition: transform .05s ease, background .2s ease;
+      white-space:nowrap;
+    }
+    .btn:hover{ background: rgba(255,255,255,.98); }
+    .btn:active{ transform: translateY(1px); }
+    .btn-primary{
+      background: var(--dhl-red);
+      color:white;
+      border:1px solid rgba(0,0,0,.12);
+    }
+    .btn-primary:hover{ background: #b7040e; }
+
+    .toggle{
+      display:flex; align-items:center; gap:8px;
+      font-size:12px; font-weight:800;
+      color:#3a2b00;
+    }
+    .toggle input{ transform: translateY(1px); }
+
+    /* L0 Tabs */
+    .tabs{
+      margin-top:10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      overflow-x:auto;
+      padding-bottom:10px;
+      scrollbar-width: thin;
+    }
+    .tab{
+      flex:0 0 auto;
+      border:none;
+      cursor:pointer;
+      background: rgba(255,255,255,.65);
+      border:1px solid rgba(0,0,0,.12);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-weight: 900;
+      font-size: 12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      transition: transform .08s ease, background .2s ease;
+      box-shadow: 0 8px 22px rgba(0,0,0,.06);
+      white-space:nowrap;
+    }
+    .tab .dot{
+      width:10px; height:10px;
+      background: var(--l0);
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.7);
+    }
+    .tab .small{
+      font-weight: 900;
+      font-size: 11px;
+      opacity:.75;
+    }
+    .tab.active{
+      background: rgba(212,5,17,.95);
+      color:#fff;
+      border-color: rgba(0,0,0,.15);
+      transform: translateY(-1px);
+    }
+    .tab.active .dot{ background: #fff; box-shadow: inset 0 0 0 2px rgba(0,0,0,.12); }
+    .tab.active .small{ opacity:.9; }
+
+    /* Page layout */
+    .wrap{
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 14px 18px 26px;
     }
 
-    /* ===== L0 House ===== */
-    .houseWrap{
-      margin: 0;
-      background: rgba(255,255,255,.72);
-      border: 1px solid rgba(0,0,0,.10);
-      border-radius: 14px;
-      box-shadow: 0 10px 22px rgba(0,0,0,.08);
-      padding: 10px;
-      overflow:hidden;
+    .section{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      padding: 14px;
+      margin-top: 12px;
     }
-    .houseHeader{
+
+    .section-head{
       display:flex;
-      align-items:baseline;
       justify-content:space-between;
-      gap: 10px;
-      padding: 4px 6px 10px;
+      align-items:center;
+      gap:12px;
+      margin-bottom: 12px;
       flex-wrap:wrap;
     }
-    .houseTitle{
-      font-weight: 1100;
+    .section-title{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-weight: 950;
       font-size: 13px;
-      letter-spacing:.2px;
-      color:#111827;
     }
-    .houseHint{
-      font-size: 12px;
-      color: rgba(0,0,0,.62);
-      font-weight: 900;
-    }
-    .house{
-      display:grid;
-      gap: 10px;
-    }
-    .houseRow{
-      border-radius: 12px;
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius:999px;
+      padding: 4px 10px;
+      font-weight: 950;
+      font-size: 11px;
       border: 1px solid rgba(0,0,0,.10);
-      overflow:hidden;
-      background:#fff;
+      background: #fafafa;
+      color: #222;
     }
-    .houseRowHead{
+    .badge.l1{ background: rgba(255,204,0,.20); }
+    .badge.l2{ background: rgba(43,47,51,.12); }
+    .badge.l3{ background: rgba(238,238,239,.9); }
+
+    .hint{
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* Accordion */
+    details.process-house{
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+      margin-top: 12px;
+    }
+    details.process-house summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 12px 14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding: 8px 10px;
-      font-weight: 1100;
+      gap:12px;
+      background: linear-gradient(180deg, #fff, #fbfbfc);
+      border-bottom: 1px solid var(--line);
+      font-weight: 950;
+      font-size: 13px;
+    }
+    details.process-house summary::-webkit-details-marker{ display:none; }
+    .summary-left{
+      display:flex; align-items:center; gap:10px;
+    }
+    .house-pill{
+      border-radius:999px;
+      padding: 5px 10px;
+      background: rgba(212,5,17,.12);
+      border: 1px solid rgba(212,5,17,.18);
+      font-size:11px;
+      font-weight:950;
+    }
+    .house-grid{
+      padding: 14px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 1100px){
+      .house-grid{ grid-template-columns: repeat(2, minmax(220px,1fr)); }
+    }
+    @media (max-width: 640px){
+      .house-grid{ grid-template-columns: 1fr; }
+    }
+    .house-col{
+      background: #fcfcfd;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+    }
+    .house-col h3{
+      margin: 0 0 10px;
       font-size: 12px;
-      letter-spacing:.2px;
-      flex-wrap:wrap;
-      gap:8px;
+      font-weight: 950;
+      color:#2b2f33;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
     }
-    .houseRowBody{
-      padding: 10px;
-      display:grid;
-      gap: 10px;
+    .cat-tag{
+      font-size:10px;
+      font-weight: 950;
+      color:#fff;
+      border-radius:999px;
+      padding: 3px 8px;
+      background: #2b2f33;
     }
-    .houseGrid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-    }
-    .houseBox{
-      cursor:pointer;
-      padding: 10px 12px;
+    .house-card{
       border-radius: 12px;
-      border: 1px solid rgba(0,0,0,.12);
+      border: 1px solid rgba(0,0,0,.10);
       background: #fff;
-      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
-      min-width:0;
+      padding: 10px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.04);
+      cursor:pointer;
+      transition: transform .08s ease, border-color .2s ease;
     }
-    .houseBox:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 12px 22px rgba(0,0,0,.10);
-      border-color: rgba(212,5,17,.25);
-    }
-    .houseBox.active{
-      outline: 3px solid rgba(212,5,17,.25);
-      border-color: rgba(212,5,17,.35);
-    }
-    .houseCode{
-      font-weight: 1200;
+    .house-card:hover{ transform: translateY(-1px); border-color: rgba(212,5,17,.25); }
+    .house-card:active{ transform: translateY(0px); }
+    .house-code{
+      font-weight: 950;
+      color: var(--dhl-red);
       font-size: 12px;
-      color: rgba(0,0,0,.72);
       margin-bottom: 4px;
     }
-    .houseName{
-      font-weight: 1200;
-      font-size: 13px;
-      color:#111827;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .houseDesc{
-      margin-top: 4px;
+    .house-name{
+      font-weight: 950;
       font-size: 12px;
-      line-height: 1.35;
-      color: rgba(0,0,0,.62);
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-      min-height: 32px;
+      margin-bottom: 6px;
     }
-    .cat-manage .houseRowHead{ background: #f3f4f6; }
-    .cat-run .houseRowHead{ background: #ffcc00; }
-    .cat-run .houseRowHead span{ color: rgba(0,0,0,.72); }
-    .cat-change .houseRowHead{ background: rgba(212,5,17,.10); border-bottom:1px solid rgba(212,5,17,.18); }
-    .cat-foundation .houseRowHead{ background: #111827; color: #fff; }
+    .house-desc{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 650;
+      line-height: 1.25;
+    }
 
-    .cat-run .houseBox{ background: rgba(255,204,0,.18); }
-    .cat-change .houseBox{ border-color: rgba(212,5,17,.22); }
-    .cat-foundation .houseBox{ background: rgba(17,24,39,.06); }
-
-    /* ===== L1/L2 Chevron cards ===== */
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    /* Chevron chains */
+    .chain{
+      width: 100%;
+      display:flex;
+      flex-wrap: wrap;
       gap: 10px;
       align-items: stretch;
     }
 
-    .chevcard{
-      position:relative;
-      min-width:0;
-      cursor:pointer;
-      padding: 10px 12px;
-      border: 1px solid rgba(0,0,0,.12);
-      transition: transform .08s ease, box-shadow .12s ease, outline-color .12s ease;
-      clip-path: polygon(
-        0 0,
-        calc(100% - 18px) 0,
-        100% 50%,
-        calc(100% - 18px) 100%,
-        0 100%
-      );
+    .chev{
+      position: relative;
+      flex: 1 1 240px;      /* enables wrap + fill */
+      min-width: 220px;
       border-radius: 12px;
-    }
-    .chevcard:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 12px 22px rgba(0,0,0,.10);
-    }
-    .chevcard.active{
-      outline: 3px solid rgba(212,5,17,.35);
-      box-shadow: 0 16px 30px rgba(212,5,17,.10);
-    }
-    .chevcard.l1{
-      background: var(--l1);
-      color: var(--l1Text);
-      border-color: rgba(0,0,0,.10);
-    }
-    .chevcard.l2{
-      background: var(--l2);
-      color: var(--l2Text);
-      border-color: rgba(255,255,255,.10);
-      clip-path: polygon(
-        0 0,
-        calc(100% - 16px) 0,
-        100% 50%,
-        calc(100% - 16px) 100%,
-        0 100%
-      );
-    }
-
-    .row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      justify-content:space-between;
-      margin-bottom:6px;
-    }
-    .badges{ display:flex; gap:6px; align-items:center; min-width:0; flex-wrap:wrap; }
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 1100;
+      padding: 10px 12px;
+      cursor: pointer;
       border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.35);
-      color: inherit;
-      max-width: 100%;
-    }
-    .badge.code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      white-space:nowrap;
+      box-shadow: 0 10px 22px rgba(0,0,0,.06);
+      transition: transform .08s ease, filter .2s ease;
       overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 220px;
-    }
-    .badge.order{
-      background: rgba(255,255,255,.22);
-      border-color: rgba(0,0,0,.10);
-    }
-
-    .title{
-      font-size: 13px;
-      font-weight: 1200;
-      line-height: 1.2;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      margin-bottom:4px;
-    }
-    .desc{
-      font-size: 12px;
-      opacity: .92;
-      line-height: 1.3;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-      min-height: 32px;
-    }
-
-    /* ===== Bottom: L3 + Details side-by-side (NOT a right sidebar) ===== */
-    .bottomGrid{
-      height:100%;
-      display:grid;
-      grid-template-columns: 1fr 420px; /* L3 big, details compact next to it */
-      gap: 12px;
-      overflow:hidden;
-      min-height:0;
-    }
-
-    /* L3 waterfall */
-    .waterfall{
       display:flex;
       flex-direction:column;
-      gap: 10px;
-      padding: 2px 4px 10px;
+      justify-content:center;
+      clip-path: polygon(0 0, calc(100% - var(--chev-tip)) 0, 100% 50%, calc(100% - var(--chev-tip)) 100%, var(--chev-notch) 100%, 0 50%, var(--chev-notch) 0);
     }
-    .vchev{
-      position:relative;
-      background: var(--l3);
-      border: 1px solid rgba(0,0,0,.10);
-      border-radius: 12px;
-      padding: 10px 12px;
-      cursor:pointer;
-      transition: transform .08s ease, box-shadow .12s ease, border-color .12s ease;
-      clip-path: polygon(
-        0 0,
-        100% 0,
-        100% calc(100% - 16px),
-        50% 100%,
-        0 calc(100% - 16px)
-      );
+    .chev.first{
+      clip-path: polygon(0 0, calc(100% - var(--chev-tip)) 0, 100% 50%, calc(100% - var(--chev-tip)) 100%, 0 100%, 0 0);
     }
-    .vchev:hover{
-      transform: translateY(-1px);
-      border-color: rgba(212,5,17,.25);
-      box-shadow: 0 12px 22px rgba(0,0,0,.08);
+    .chev:hover{ transform: translateY(-1px); filter: brightness(1.02); }
+    .chev:active{ transform: translateY(0px); }
+
+    .chev.l1{ background: var(--l1); }
+    .chev.l2{ background: var(--l2); color: #fff; border-color: rgba(255,255,255,.10); }
+    .chev.l2 .chev-desc{ color: rgba(255,255,255,.78); }
+    .chev.l2 .meta .owner{ background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.14); color:#fff; }
+
+    .chev.selected{
+      outline: 3px solid rgba(212,5,17,.45);
+      outline-offset: 2px;
     }
-    .vchev.active{
-      border-color: rgba(212,5,17,.55);
-      outline: 3px solid rgba(212,5,17,.22);
-      box-shadow: 0 16px 30px rgba(212,5,17,.10);
+
+    .chev-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
     }
-    .vchev::after{
-      content:"";
-      position:absolute;
-      left:50%;
-      bottom:-14px;
-      transform: translateX(-50%);
-      width: 2px;
-      height: 14px;
-      background: rgba(0,0,0,.18);
-      border-radius: 2px;
-    }
-    .vchev.last::after{ display:none; }
-    .vtitle{
-      font-weight: 1200;
-      font-size: 13px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      margin-bottom:4px;
-    }
-    .vmeta{
+    .chev-code{
+      font-weight: 1000;
       font-size: 12px;
-      color: rgba(0,0,0,.65);
-      line-height: 1.35;
+      letter-spacing: .2px;
+    }
+    .chev-title{
+      font-weight: 950;
+      font-size: 12px;
+      line-height: 1.2;
+      margin-top: 3px;
+    }
+    .chev-desc{
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(0,0,0,.70);
+      margin-top: 6px;
+      line-height: 1.25;
       display:-webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow:hidden;
     }
+    .meta{
+      margin-top: 8px;
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .owner{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 900;
+      background: rgba(255,255,255,.55);
+      border: 1px solid rgba(0,0,0,.10);
+      color:#111;
+      max-width:100%;
+    }
+    .owner span{
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 240px;
+      display:inline-block;
+    }
 
-    /* Details card (next to L3) */
-    .detailsWrap{
-      padding:12px;
+    /* L3 + Details (NOT side-of-page, but next to L3 section) */
+    .l3-grid{
+      display:grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 12px;
+      width: 100%;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .l3-grid{ grid-template-columns: 1fr; }
+    }
+
+    .waterfall{
+      padding: 4px 4px 6px;
+    }
+    .step{
+      position: relative;
+      background: var(--l3);
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      padding: 10px 12px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.05);
+      cursor: pointer;
+      transition: transform .08s ease, background .2s ease;
+      margin-bottom: 12px;
+    }
+    .step:hover{ transform: translateY(-1px); background: #f3f3f4; }
+    .step:active{ transform: translateY(0px); }
+
+    .step.selected{
+      outline: 3px solid rgba(212,5,17,.38);
+      outline-offset: 2px;
+    }
+
+    .step::after{
+      /* connector */
+      content:"";
+      position:absolute;
+      left: 24px;
+      bottom: -12px;
+      width: 2px;
+      height: 12px;
+      background: rgba(0,0,0,.25);
+    }
+    .step:last-child::after{ display:none; }
+
+    .step-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .step-left{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
       min-width:0;
     }
-    .crumb{
+    .step-num{
+      width: 26px; height: 26px;
+      border-radius: 999px;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight: 1000;
       font-size: 12px;
-      color: rgba(0,0,0,.62);
-      line-height: 1.35;
-      margin-bottom: 8px;
+      flex:0 0 auto;
     }
-    .h{
-      margin: 0 0 6px;
-      font-size: 14px;
-      font-weight: 1300;
+    .step-title{
+      font-weight: 950;
+      font-size: 12px;
+      line-height: 1.2;
+      margin-top: 2px;
+      min-width:0;
+    }
+    .step-code{
+      font-weight: 1000;
+      font-size: 12px;
       color: var(--dhl-red);
+      margin-bottom: 2px;
+      letter-spacing: .2px;
     }
-    .p{
+    .step-desc{
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(0,0,0,.72);
+      line-height: 1.25;
+    }
+    .bullets{
+      margin: 8px 0 0 0;
+      padding-left: 18px;
+      color: rgba(0,0,0,.72);
+      font-weight: 700;
+      font-size: 12px;
+      line-height: 1.25;
+    }
+
+    /* Details card */
+    .details{
+      position: sticky;
+      top: 92px; /* below sticky header */
+    }
+    @media (max-width: 980px){
+      .details{ position: relative; top: 0; }
+    }
+
+    .details-card{
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow:hidden;
+    }
+    .details-head{
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #fff, #fbfbfc);
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+    }
+    .details-head .title{
+      font-weight: 1000;
+      font-size: 12px;
       margin:0;
-      font-size: 13px;
-      line-height: 1.45;
-      color: rgba(0,0,0,.82);
+    }
+    .breadcrumb{
+      font-size: 11px;
+      font-weight: 850;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height:1.2;
+    }
+    .details-body{
+      padding: 12px;
     }
     .kv{
-      margin-top:10px;
-      border-top:1px dashed rgba(0,0,0,.14);
-      padding-top:10px;
-      font-size:12px;
-      color: rgba(0,0,0,.75);
+      display:grid;
+      grid-template-columns: 110px 1fr;
+      gap: 8px 10px;
+      font-size: 12px;
+      margin-top: 8px;
     }
-    .kv div{ margin:6px 0; }
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-weight: 1100;
+    .k{
+      color: var(--muted);
+      font-weight: 900;
+    }
+    .v{
+      font-weight: 800;
+      color:#222;
+    }
+    .descbox{
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #fafafa;
+      border: 1px solid rgba(0,0,0,.08);
+      font-size: 12px;
+      font-weight: 750;
+      color:#222;
+      line-height: 1.25;
     }
 
     .empty{
       padding: 10px;
+      border-radius: 12px;
+      border: 1px dashed rgba(0,0,0,.18);
       color: var(--muted);
-      font-size: 13px;
+      font-weight: 800;
+      font-size: 12px;
+      background: #fff;
     }
 
-    #error{
-      position:fixed;
-      left:14px; bottom:14px;
-      background:#fff;
-      border:1px solid rgba(212,5,17,.25);
-      color:#b00020;
-      padding:10px 12px;
-      border-radius:12px;
-      box-shadow: var(--shadow);
-      display:none;
-      max-width: 75vw;
-      font-size:13px;
-      z-index: 2000;
+    .footer-note{
+      margin-top: 14px;
+      color: rgba(0,0,0,.55);
+      font-size: 11px;
+      font-weight: 750;
+      line-height:1.3;
     }
-
-    /* Responsive */
-    @media (max-width: 1100px){
-      body{ overflow:auto; }
-      .main{ height:auto; }
-      .bottomGrid{ grid-template-columns: 1fr; }
-      .chevcard, .chevcard.l2, .vchev{ clip-path:none; border-radius: 12px; }
-      .vchev::after{ display:none; }
-      .badge.code{ max-width: 100%; }
+    .error{
+      background: rgba(212,5,17,.10);
+      border: 1px solid rgba(212,5,17,.22);
+      color: #7d0008;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 12px;
+      margin-top: 12px;
     }
   </style>
 </head>
 
 <body>
-  <div class="topbar">
-    <div class="toprow">
-      <div class="brand">
-        <div class="brand-badge"></div>
-        <div>
-          DHL eCommerce
-          <small>Enterprise Business Architecture • Process House + Chevron Chains</small>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-row">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div>
+            <h1>DHL eCommerce</h1>
+            <div class="sub">Enterprise Business Architecture · Process Chains</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="pill" title="Search filters current L0/L1/L2/L3 by code, name, description, owner">
+            <span style="font-weight:1000;font-size:12px;">Search</span>
+            <input id="search" type="text" placeholder="Filter L1/L2/L3 (code/name/description/owner)"/>
+          </div>
+
+          <label class="toggle pill" title="When enabled, auto-select the first available item when changing levels">
+            <input id="autoOpen" type="checkbox" checked />
+            Auto-open
+          </label>
+
+          <button id="reset" class="btn">Reset</button>
+          <button id="openHouse" class="btn btn-primary">Process House</button>
         </div>
       </div>
 
-      <div class="right-controls">
-        <div class="control">
-          <label for="searchInput">Search</label>
-          <input id="searchInput" placeholder="Filter L1/L2/L3 (code/name/description)..." />
+      <div id="tabs" class="tabs" aria-label="L0 tabs"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Process House Accordion -->
+    <details id="house" class="process-house" open>
+      <summary>
+        <div class="summary-left">
+          <span class="house-pill">L0 View</span>
+          <span>Process House (categories from JSON)</span>
         </div>
-        <button class="btn secondary" id="resetBtn">Reset</button>
-        <button class="btn primary" id="autoBtn">Auto-open</button>
-      </div>
-    </div>
-
-    <div class="l0bar" id="l0Bar"></div>
-  </div>
-
-  <div class="main">
-    <!-- L0 Process House -->
-    <div class="houseWrap">
-      <div class="houseHeader">
-        <div class="houseTitle">The Process House (L0 View)</div>
-        <div class="houseHint">Click a box to select L0 and drill down</div>
-      </div>
-      <div id="l0House"></div>
-    </div>
+        <span class="hint">Click a card to select L0</span>
+      </summary>
+      <div id="houseGrid" class="house-grid"></div>
+    </details>
 
     <!-- L1 -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">L1 Chain <span class="pill" id="l1Count">0</span></div>
-        <div style="font-size:12px;color:rgba(0,0,0,.62);font-weight:1000">
-          Yellow = L1 • Full width • Wraps
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="badge l1">L1</span>
+          <span>L1 Chain</span>
+          <span id="l1Count" class="badge l1">0</span>
         </div>
+        <div id="l1Hint" class="hint">Select an L0 tab to show L1.</div>
       </div>
-      <div class="panel-body">
-        <div class="grid" id="l1Grid"></div>
-      </div>
-    </div>
+      <div id="l1Chain" class="chain"></div>
+    </section>
 
     <!-- L2 -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">L2 Sub-Chain <span class="pill" id="l2Count">0</span></div>
-        <div id="l2Hint" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:1000"></div>
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="badge l2">L2</span>
+          <span>L2 Sub-Chain</span>
+          <span id="l2Count" class="badge l2">0</span>
+        </div>
+        <div id="l2Hint" class="hint">Select an L1 to show L2.</div>
       </div>
-      <div class="panel-body">
-        <div class="grid" id="l2Grid"></div>
-      </div>
-    </div>
+      <div id="l2Chain" class="chain"></div>
+    </section>
 
-    <!-- Bottom row: L3 + Details (next to each other) -->
-    <div class="bottomGrid">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            L3 Activities <span class="pill" id="l3Count">0</span>
-            <span class="pill" id="l3Shown" style="display:none;">Shown: 0</span>
+    <!-- L3 + Details (next to each other) -->
+    <section class="section">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="badge l3">L3</span>
+          <span>L3 Activities</span>
+          <span id="l3Count" class="badge l3">0</span>
+        </div>
+        <div id="l3Hint" class="hint">Select an L2 to show L3 waterfall.</div>
+      </div>
+
+      <div class="l3-grid">
+        <div>
+          <div id="l3List" class="waterfall"></div>
+          <div class="footer-note">
+            Tip: L3 cards list all children of the selected L2. If an L3 has sub-activities (L4),
+            they appear as bullets under the relevant L3 card.
           </div>
-          <div id="l3Hint" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:1000"></div>
         </div>
-        <div class="panel-body">
-          <div id="l3Body"></div>
+
+        <div class="details">
+          <div class="details-card">
+            <div class="details-head">
+              <div>
+                <p class="title" style="margin:0;">Details</p>
+                <div id="breadcrumb" class="breadcrumb">—</div>
+              </div>
+              <button id="collapseDetails" class="btn" title="Collapse/expand details">Collapse</button>
+            </div>
+            <div id="detailsBody" class="details-body">
+              <div class="empty">Select a process element (L1/L2/L3) to see details.</div>
+            </div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">Details</div>
-          <div id="pathBadge" style="font-size:12px;color:rgba(0,0,0,.62);font-weight:1000"></div>
-        </div>
-        <div class="panel-body detailsWrap" id="detailsPanel">
-          <div class="empty">Select L1 → L2 → L3 to see details.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="error"></div>
+    <div id="err" style="display:none;" class="error"></div>
+  </main>
 
   <script>
+    // ----------------------------
+    // State
+    // ----------------------------
     const state = {
       data: null,
-      l0Options: [],
-      l0: null,
-      l1: null,
-      l2: null,
-      l3: null,
-      search: ""
+      l0List: [],
+      selected: { l0:null, l1:null, l2:null, l3:null },
+      search: "",
+      autoOpen: true,
+      detailsCollapsed: false,
     };
 
+    // ----------------------------
+    // DOM
+    // ----------------------------
     const $ = (id) => document.getElementById(id);
-    const safeChildren = (n) => Array.isArray(n?.children) ? n.children : [];
+    const tabsEl = $("tabs");
+    const houseEl = $("house");
+    const houseGridEl = $("houseGrid");
+    const l1ChainEl = $("l1Chain");
+    const l2ChainEl = $("l2Chain");
+    const l3ListEl = $("l3List");
+    const errEl = $("err");
 
-    function parseName(name){
-      if (!name) return { code:"", title:"" };
-      const parts = String(name).split(":");
-      if (parts.length >= 2) return { code: parts[0].trim(), title: parts.slice(1).join(":").trim() };
-      return { code:"", title: String(name).trim() };
+    const l1CountEl = $("l1Count");
+    const l2CountEl = $("l2Count");
+    const l3CountEl = $("l3Count");
+
+    const l1HintEl = $("l1Hint");
+    const l2HintEl = $("l2Hint");
+    const l3HintEl = $("l3Hint");
+
+    const breadcrumbEl = $("breadcrumb");
+    const detailsBodyEl = $("detailsBody");
+    const collapseDetailsBtn = $("collapseDetails");
+
+    // ----------------------------
+    // Helpers
+    // ----------------------------
+    function safeText(s){
+      return (s ?? "").toString();
     }
 
-    function escapeHtml(str){
-      return String(str).replace(/[&<>"']/g, s => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[s]));
+    function splitCodeAndTitle(name){
+      // Example: "S2E_01: Strategy & Ambition Setting"
+      const t = safeText(name);
+      const idx = t.indexOf(":");
+      if(idx > 0){
+        return { code: t.slice(0, idx).trim(), title: t.slice(idx+1).trim() };
+      }
+      // Fallback: treat first token like code if it matches pattern
+      const m = t.match(/^([A-Z0-9_]+)\s+(.*)$/);
+      if(m) return { code: m[1], title: m[2] };
+      return { code: "", title: t };
     }
 
-    function matchesSearch(node, query){
-      const q = (query || "").trim().toLowerCase();
-      if (!q) return true;
-      const { code, title } = parseName(node?.name || "");
-      const hay = `${code} ${title} ${node?.description || ""}`.toLowerCase();
+    function normalize(s){
+      return safeText(s).toLowerCase();
+    }
+
+    function matchesSearch(node, q){
+      if(!q) return true;
+      const hay = [
+        node.id, node.name, node.description, node.owner, node.trigger, node.outcome, node.notes, node.category
+      ].map(normalize).join(" | ");
       return hay.includes(q);
     }
 
-    // Optional: derive "order" from code digits (works well for S2E_01_03_02 etc.)
-    function deriveOrder(node){
-      if (node && node.order !== undefined && node.order !== null && node.order !== "") return String(node.order);
-      const { code } = parseName(node?.name || "");
-      if (!code) return "-";
-      const nums = code.match(/\d+/g);
-      if (!nums || !nums.length) return "-";
-      const tail = nums.slice(-3);
-      return tail.map(n => n.padStart(2,"0")).join(".");
+    function findL0ById(id){
+      return state.l0List.find(x => x.id === id) || null;
     }
 
-    // Stable, code-aware sorting
-    function sortNodes(nodes){
-      const scored = nodes.map(n => {
-        const { code, title } = parseName(n.name || "");
-        const nums = (code.match(/\d+/g) || []).map(x => parseInt(x,10));
-        const hasOrder = (n.order !== undefined && n.order !== null && n.order !== "");
-        const ord = hasOrder ? Number(n.order) : null;
-        return { n, code, title: title || "", nums, ord, hasOrder };
-      });
-
-      scored.sort((a,b) => {
-        if (a.hasOrder && b.hasOrder) return a.ord - b.ord;
-        if (a.hasOrder && !b.hasOrder) return -1;
-        if (!a.hasOrder && b.hasOrder) return 1;
-
-        const len = Math.max(a.nums.length, b.nums.length);
-        for (let i=0;i<len;i++){
-          const av = a.nums[i] ?? -1;
-          const bv = b.nums[i] ?? -1;
-          if (av !== bv) return av - bv;
-        }
-        return (a.title || a.code).localeCompare(b.title || b.code);
-      });
-
-      return scored.map(x => x.n);
+    function nodeChildren(node){
+      return Array.isArray(node?.children) ? node.children : [];
     }
 
-    function buildPath(){
-      const p = [];
-      if (state.l0) p.push(parseName(state.l0.name).title || state.l0.name);
-      if (state.l1) p.push(parseName(state.l1.name).title || state.l1.name);
-      if (state.l2) p.push(parseName(state.l2.name).title || state.l2.name);
-      if (state.l3) p.push(parseName(state.l3.name).title || state.l3.name);
-      return p;
+    function clearSelections(fromLevel){
+      // fromLevel: "l0"|"l1"|"l2"|"l3"
+      if(fromLevel === "l0"){
+        state.selected.l1 = null; state.selected.l2 = null; state.selected.l3 = null;
+      } else if(fromLevel === "l1"){
+        state.selected.l2 = null; state.selected.l3 = null;
+      } else if(fromLevel === "l2"){
+        state.selected.l3 = null;
+      }
     }
 
-    function setDetails(target){
-      const panel = $("detailsPanel");
-      const path = buildPath();
-      $("pathBadge").textContent = path.length ? path.join("  ›  ") : "";
+    function getBreadcrumb(){
+      const parts = [];
+      if(state.selected.l0) parts.push(state.selected.l0.name);
+      if(state.selected.l1) parts.push(state.selected.l1.name);
+      if(state.selected.l2) parts.push(state.selected.l2.name);
+      if(state.selected.l3) parts.push(state.selected.l3.name);
+      return parts.join("  ›  ") || "—";
+    }
 
-      if (!target){
-        panel.innerHTML = `<div class="empty">Select an L1/L2/L3 item to see details.</div>`;
+    function renderDetails(node){
+      breadcrumbEl.textContent = getBreadcrumb();
+
+      if(state.detailsCollapsed){
+        detailsBodyEl.innerHTML = `<div class="empty">Details collapsed. Click “Expand” to view.</div>`;
         return;
       }
 
-      const { code, title } = parseName(target.name || "");
-      const ord = deriveOrder(target);
+      if(!node){
+        detailsBodyEl.innerHTML = `<div class="empty">Select a process element (L1/L2/L3) to see details.</div>`;
+        return;
+      }
 
-      panel.innerHTML = `
-        <div class="crumb"><strong>Path:</strong> ${escapeHtml(path.join("  ›  "))}</div>
-        <div class="h">${escapeHtml(code ? (code + " — " + (title || "")) : (title || target.name || ""))}</div>
-        <p class="p">${escapeHtml(target.description || "No description provided.")}</p>
-        <div class="kv">
-          <div><strong>Order:</strong> ${escapeHtml(ord)}</div>
-          <div><strong>Children:</strong> ${safeChildren(target).length}</div>
-          <div><strong>Raw key:</strong> <span class="mono">${escapeHtml(target.name || "")}</span></div>
-        </div>
+      const { code, title } = splitCodeAndTitle(node.name || "");
+      const desc = safeText(node.description);
+      const owner = safeText(node.owner);
+      const trig = safeText(node.trigger);
+      const outc = safeText(node.outcome);
+      const notes = safeText(node.notes);
+      const cat = safeText(node.category);
+
+      const rows = [
+        ["ID", safeText(node.id)],
+        ["Code", code || "—"],
+        ["Name", title || safeText(node.name)],
+        ["Owner", owner || "—"],
+      ];
+
+      if(cat) rows.push(["Category", cat]);
+      if(trig) rows.push(["Trigger", trig]);
+      if(outc) rows.push(["Outcome", outc]);
+      if(notes) rows.push(["Notes", notes]);
+
+      const kv = rows.map(([k,v]) => `
+        <div class="k">${k}</div>
+        <div class="v">${escapeHtml(v)}</div>
+      `).join("");
+
+      detailsBodyEl.innerHTML = `
+        <div style="font-weight:1000;font-size:12px;color:var(--dhl-red);">${escapeHtml(code || node.id || "")}</div>
+        <div style="font-weight:1000;font-size:13px;margin-top:3px;">${escapeHtml(title || node.name || "")}</div>
+        ${desc ? `<div class="descbox">${escapeHtml(desc)}</div>` : ``}
+        <div class="kv">${kv}</div>
       `;
     }
 
-    function renderL0Bar(){
-      const bar = $("l0Bar");
-      bar.innerHTML = "";
-      state.l0Options.forEach((n) => {
-        const title = parseName(n.name).title || n.name || "Untitled";
-        const tab = document.createElement("div");
-        tab.className = "l0tab" + (state.l0 === n ? " active" : "");
-        tab.textContent = title;
-        tab.addEventListener("click", () => {
-          state.l0 = n;
-          state.l1 = state.l2 = state.l3 = null;
-          renderAll();
-          autoOpen(false); // open L1+L2 by default; keep L3 unselected
-        });
-        bar.appendChild(tab);
-      });
+    function escapeHtml(s){
+      const str = safeText(s);
+      return str.replace(/[&<>"']/g, (ch) => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+      }[ch]));
     }
 
-    function renderL0House(){
-      const host = $("l0House");
-      if (!host || !state.l0Options?.length) return;
-
-      const categories = [
-        { key:"manage", cls:"cat-manage", title:"MANAGE THE BUSINESS", subtitle:"Strategy & Steering", codes:["S2E","GRC","EA_PM"] },
-        { key:"run", cls:"cat-run", title:"RUN THE BUSINESS", subtitle:"Core Operational Chain + Enablers", codes:["L2C","O2D","D2O","P2R","S2P","H2R","R2R"] },
-        { key:"change", cls:"cat-change", title:"CHANGE THE BUSINESS", subtitle:"Evolution & Innovation", codes:["I2P","TRF"] },
-        { key:"foundation", cls:"cat-foundation", title:"FOUNDATION", subtitle:"Digital & Data Backbone", codes:["DA","ITF"] }
-      ];
-
-      const byCode = new Map();
-      state.l0Options.forEach(n => {
-        const { code } = parseName(n.name);
-        if (code) byCode.set(code, n);
-      });
-
-      host.innerHTML = "";
-      const wrap = document.createElement("div");
-      wrap.className = "house";
-
-      categories.forEach(cat => {
-        const row = document.createElement("div");
-        row.className = `houseRow ${cat.cls}`;
-        row.innerHTML = `
-          <div class="houseRowHead">
-            <span>${cat.title}</span>
-            <span style="font-weight:900; opacity:.85">${cat.subtitle}</span>
-          </div>
-          <div class="houseRowBody">
-            <div class="houseGrid"></div>
-          </div>
-        `;
-        const grid = row.querySelector(".houseGrid");
-
-        cat.codes.forEach(code => {
-          const node = byCode.get(code);
-          if (!node) return;
-
-          const pn = parseName(node.name);
-          const box = document.createElement("div");
-          box.className = "houseBox" + (state.l0 === node ? " active" : "");
-          box.innerHTML = `
-            <div class="houseCode">${escapeHtml(pn.code)}</div>
-            <div class="houseName">${escapeHtml(pn.title || pn.code)}</div>
-            <div class="houseDesc">${escapeHtml(node.description || "")}</div>
-          `;
-          box.addEventListener("click", () => {
-            state.l0 = node;
-            state.l1 = state.l2 = state.l3 = null;
-            renderAll();
-            autoOpen(false);
-          });
-          grid.appendChild(box);
-        });
-
-        wrap.appendChild(row);
-      });
-
-      host.appendChild(wrap);
-    }
-
-    function renderChevronGrid(gridEl, nodes, activeNode, levelClass, onClick){
-      gridEl.innerHTML = "";
-      if (!nodes.length){
-        gridEl.innerHTML = `<div class="empty">No items.</div>`;
-        return;
+    // ----------------------------
+    // Render: Process House
+    // ----------------------------
+    function renderProcessHouse(){
+      // Group L0 by category
+      const groups = {};
+      for(const l0 of state.l0List){
+        const cat = l0.category || "Other";
+        if(!groups[cat]) groups[cat] = [];
+        groups[cat].push(l0);
       }
 
-      nodes.forEach((n) => {
-        const { code, title } = parseName(n.name);
-        const ord = deriveOrder(n);
+      const orderedCats = ["Manage the Business","Run the Business","Change the Business","Foundation"];
+      const cats = [...orderedCats.filter(c => groups[c]), ...Object.keys(groups).filter(c => !orderedCats.includes(c))];
 
-        const div = document.createElement("div");
-        div.className = `chevcard ${levelClass}` + (activeNode === n ? " active" : "");
+      houseGridEl.innerHTML = cats.map(cat => {
+        const cards = groups[cat]
+          .sort((a,b)=> (a.id||"").localeCompare(b.id||""))
+          .map(l0 => {
+            const { code, title } = splitCodeAndTitle(l0.name);
+            return `
+              <div class="house-card" data-l0="${escapeHtml(l0.id)}" role="button" tabindex="0" aria-label="Select ${escapeHtml(l0.name)}">
+                <div class="house-code">${escapeHtml(code || l0.id)}</div>
+                <div class="house-name">${escapeHtml(title || l0.name)}</div>
+                <div class="house-desc">${escapeHtml(l0.description || "")}</div>
+              </div>
+            `;
+          }).join("");
 
-        div.innerHTML = `
-          <div class="row">
-            <div class="badges">
-              <span class="badge code">${escapeHtml(code || "NO_CODE")}</span>
-              <span class="badge order"># ${escapeHtml(ord)}</span>
+        return `
+          <div class="house-col">
+            <h3>
+              <span>${escapeHtml(cat)}</span>
+              <span class="cat-tag">${escapeHtml((groups[cat]||[]).length)} L0</span>
+            </h3>
+            <div style="display:grid;gap:10px;">${cards}</div>
+          </div>
+        `;
+      }).join("");
+
+      // Click handlers
+      houseGridEl.querySelectorAll(".house-card").forEach(card => {
+        card.addEventListener("click", () => {
+          selectL0(card.getAttribute("data-l0"));
+          houseEl.open = false; // collapse after choosing
+        });
+        card.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            card.click();
+          }
+        });
+      });
+    }
+
+    // ----------------------------
+    // Render: Tabs
+    // ----------------------------
+    function renderTabs(){
+      tabsEl.innerHTML = state.l0List.map(l0 => {
+        const active = state.selected.l0?.id === l0.id ? "active" : "";
+        const { code, title } = splitCodeAndTitle(l0.name);
+        return `
+          <button class="tab ${active}" data-l0="${escapeHtml(l0.id)}">
+            <span class="dot" aria-hidden="true"></span>
+            <span>${escapeHtml(title || l0.name)}</span>
+            <span class="small">${escapeHtml(code || l0.id)}</span>
+          </button>
+        `;
+      }).join("");
+
+      tabsEl.querySelectorAll(".tab").forEach(btn => {
+        btn.addEventListener("click", () => selectL0(btn.getAttribute("data-l0")));
+      });
+    }
+
+    // ----------------------------
+    // Render: L1/L2 chevrons
+    // ----------------------------
+    function renderChain(container, items, level){
+      container.innerHTML = "";
+      if(!items || items.length === 0) return;
+
+      items.forEach((node, idx) => {
+        const { code, title } = splitCodeAndTitle(node.name);
+        const isFirst = idx === 0 ? "first" : "";
+        const selected =
+          (level === "l1" && state.selected.l1?.id === node.id) ||
+          (level === "l2" && state.selected.l2?.id === node.id)
+          ? "selected" : "";
+
+        const owner = safeText(node.owner);
+
+        const el = document.createElement("div");
+        el.className = `chev ${isFirst} ${level === "l1" ? "l1" : "l2"} ${selected}`;
+        el.setAttribute("role","button");
+        el.setAttribute("tabindex","0");
+        el.dataset.id = node.id;
+        el.innerHTML = `
+          <div class="chev-top">
+            <div style="min-width:0;">
+              <div class="chev-code">${escapeHtml(code || node.id || "")}</div>
+              <div class="chev-title">${escapeHtml(title || node.name || "")}</div>
             </div>
           </div>
-          <div class="title">${escapeHtml(title || n.name || "")}</div>
-          <div class="desc">${escapeHtml(n.description || "No description provided.")}</div>
+          ${node.description ? `<div class="chev-desc">${escapeHtml(node.description)}</div>` : ``}
+          <div class="meta">
+            ${owner ? `<span class="owner" title="${escapeHtml(owner)}">👤 <span>${escapeHtml(owner)}</span></span>` : ``}
+            ${nodeChildren(node).length ? `<span class="owner" title="Children count">↳ <span>${nodeChildren(node).length} children</span></span>` : ``}
+          </div>
         `;
 
-        div.addEventListener("click", () => onClick(n));
-        gridEl.appendChild(div);
-      });
-    }
-
-    function renderL3Waterfall(){
-      const container = $("l3Body");
-      container.innerHTML = "";
-
-      if (!state.l2){
-        $("l3Count").textContent = "0";
-        $("l3Hint").textContent = "Select an L2 to show L3";
-        $("l3Shown").style.display = "none";
-        container.innerHTML = `<div class="empty">Select an L2 to show L3 activities.</div>`;
-        return;
-      }
-
-      // IMPORTANT: use full L3 list (no accidental truncation)
-      const l3All = sortNodes(safeChildren(state.l2));
-      const l3Filtered = l3All.filter(n => matchesSearch(n, state.search));
-
-      $("l3Count").textContent = String(l3All.length);
-      $("l3Hint").textContent = `Selected L2: ${parseName(state.l2.name).title || parseName(state.l2.name).code || ""}`;
-
-      // show "Shown" pill only when filtering changes the set
-      if ((state.search || "").trim() && l3Filtered.length !== l3All.length){
-        $("l3Shown").style.display = "inline-flex";
-        $("l3Shown").textContent = `Shown: ${l3Filtered.length}`;
-      } else {
-        $("l3Shown").style.display = "none";
-      }
-
-      if (!l3All.length){
-        container.innerHTML = `<div class="empty">No L3 items under this L2.</div>`;
-        return;
-      }
-      if (!l3Filtered.length){
-        container.innerHTML = `<div class="empty">No L3 items match your search.</div>`;
-        return;
-      }
-
-      const wrap = document.createElement("div");
-      wrap.className = "waterfall";
-
-      l3Filtered.forEach((n, idx) => {
-        const { code, title } = parseName(n.name);
-        const ord = deriveOrder(n);
-
-        const item = document.createElement("div");
-        item.className = "vchev" + (state.l3 === n ? " active" : "") + (idx === l3Filtered.length-1 ? " last" : "");
-        item.innerHTML = `
-          <div class="vtitle">${escapeHtml(code ? (code + " — " + (title || "")) : (title || n.name || ""))} <span style="opacity:.6;font-weight:1000">(#${escapeHtml(ord)})</span></div>
-          <div class="vmeta">${escapeHtml(n.description || "No description provided.")}</div>
-        `;
-        item.addEventListener("click", () => {
-          state.l3 = n;
-          setDetails(state.l3);
-          renderAll(false); // re-render highlights without resetting
+        el.addEventListener("click", () => {
+          if(level === "l1") selectL1(node.id);
+          if(level === "l2") selectL2(node.id);
+          // also show details when clicking any chevron
+          renderDetails(node);
+        });
+        el.addEventListener("keydown", (e) => {
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            el.click();
+          }
         });
 
-        wrap.appendChild(item);
+        container.appendChild(el);
       });
-
-      container.appendChild(wrap);
     }
 
-    function renderAll(resetDetails = true){
-      renderL0Bar();
-      renderL0House();
-
-      // L1
-      const l1All = sortNodes(safeChildren(state.l0));
-      const l1Filtered = l1All.filter(n => matchesSearch(n, state.search));
-      $("l1Count").textContent = String(l1All.length);
-
-      renderChevronGrid($("l1Grid"), l1Filtered, state.l1, "l1", (node) => {
-        state.l1 = node;
-        state.l2 = null;
-        state.l3 = null;
-        renderAll();
-        setDetails(state.l1);
-      });
-
-      // L2
-      const l2All = sortNodes(safeChildren(state.l1));
-      const l2Filtered = l2All.filter(n => matchesSearch(n, state.search));
-      $("l2Count").textContent = String(l2All.length);
-      $("l2Hint").textContent = state.l1 ? `Selected L1: ${parseName(state.l1.name).title || parseName(state.l1.name).code}` : "Select an L1 to show L2";
-
-      renderChevronGrid($("l2Grid"), l2Filtered, state.l2, "l2", (node) => {
-        state.l2 = node;
-        state.l3 = null;
-        renderAll();
-        setDetails(state.l2);
-      });
-
-      // L3 + Details
-      renderL3Waterfall();
-
-      if (resetDetails){
-        const target = state.l3 || state.l2 || state.l1 || null;
-        setDetails(target);
+    // ----------------------------
+    // Render: L3 waterfall + nested L4 bullets
+    // ----------------------------
+    function renderL3(list){
+      l3ListEl.innerHTML = "";
+      if(!list || list.length === 0){
+        l3ListEl.innerHTML = `<div class="empty">No L3 activities found for this L2 (empty children).</div>`;
+        return;
       }
+
+      list.forEach((n, i) => {
+        const { code, title } = splitCodeAndTitle(n.name);
+        const selected = state.selected.l3?.id === n.id ? "selected" : "";
+
+        const bullets = nodeChildren(n);
+        const bulletHtml = bullets.length
+          ? `<ul class="bullets">
+              ${bullets.map(b => {
+                const s = splitCodeAndTitle(b.name);
+                return `<li><span style="font-weight:950;color:#111">${escapeHtml(s.code || b.id || "")}</span> — ${escapeHtml(s.title || b.name || "")}</li>`;
+              }).join("")}
+            </ul>`
+          : "";
+
+        const el = document.createElement("div");
+        el.className = `step ${selected}`;
+        el.dataset.id = n.id;
+
+        el.innerHTML = `
+          <div class="step-head">
+            <div class="step-left">
+              <div class="step-num">${i+1}</div>
+              <div style="min-width:0;">
+                <div class="step-code">${escapeHtml(code || n.id || "")}</div>
+                <div class="step-title">${escapeHtml(title || n.name || "")}</div>
+              </div>
+            </div>
+          </div>
+          ${n.description ? `<div class="step-desc">${escapeHtml(n.description)}</div>` : ``}
+          ${bulletHtml}
+        `;
+
+        el.addEventListener("click", () => {
+          state.selected.l3 = n;
+          renderL3(nodeChildren(state.selected.l2));
+          renderDetails(n);
+          breadcrumbEl.textContent = getBreadcrumb();
+        });
+
+        l3ListEl.appendChild(el);
+      });
     }
 
-    function resetAll(){
-      state.l1 = state.l2 = state.l3 = null;
-      state.search = "";
-      $("searchInput").value = "";
-      renderAll();
-      setDetails(null);
-    }
+    // ----------------------------
+    // Selection
+    // ----------------------------
+    function selectL0(id){
+      const l0 = findL0ById(id);
+      if(!l0) return;
 
-    // autoOpen(selectL3=true/false)
-    function autoOpen(selectL3){
-      const l1 = sortNodes(safeChildren(state.l0))[0] || null;
-      const l2 = sortNodes(safeChildren(l1))[0] || null;
+      state.selected.l0 = l0;
+      clearSelections("l0");
 
-      state.l1 = l1;
-      state.l2 = l2;
+      renderTabs();
+      renderL1();
 
-      if (selectL3){
-        const l3 = sortNodes(safeChildren(l2))[0] || null;
-        state.l3 = l3;
+      // Auto-open first L1 if enabled
+      if(state.autoOpen){
+        const l1s = filteredChildren(l0);
+        if(l1s.length) selectL1(l1s[0].id);
       } else {
-        state.l3 = null;
+        renderL2();
+        renderL3([]);
       }
 
-      renderAll();
-      setDetails(state.l3 || state.l2 || state.l1);
+      // Update hints
+      l1HintEl.textContent = `Selected L0: ${l0.name}`;
+      renderDetails(l0);
     }
 
-    async function init(){
-      const res = await fetch("./data.json", { cache:"no-store" });
-      if (!res.ok) throw new Error(`Failed to load data.json (${res.status} ${res.statusText})`);
-      const data = await res.json();
+    function selectL1(id){
+      const l1s = filteredChildren(state.selected.l0);
+      const l1 = l1s.find(x => x.id === id) || null;
+      state.selected.l1 = l1;
+      clearSelections("l1");
+      renderL1();
+      renderL2();
 
-      state.data = data;
-      state.l0Options = (Array.isArray(data.children) && data.children.length) ? data.children : [data];
-      state.l0 = state.l0Options[0];
+      if(state.autoOpen && l1){
+        const l2s = filteredChildren(l1);
+        if(l2s.length) selectL2(l2s[0].id);
+        else {
+          renderL3([]);
+          l3CountEl.textContent = "0";
+          l3HintEl.textContent = "No L2 children found for this L1.";
+        }
+      } else {
+        renderL3([]);
+        l3CountEl.textContent = "0";
+        l3HintEl.textContent = "Select an L2 to show L3 waterfall.";
+      }
 
-      $("searchInput").addEventListener("input", (e) => {
-        state.search = e.target.value || "";
-        // do not drop selections; just rerender filtered views
-        renderAll(false);
-      });
-
-      $("resetBtn").addEventListener("click", resetAll);
-      $("autoBtn").addEventListener("click", () => autoOpen(false)); // open L1/L2 by default
-
-      renderAll();
-      autoOpen(false);
+      if(l1) renderDetails(l1);
     }
 
-    init().catch(err => {
-      console.error(err);
-      const box = $("error");
-      box.style.display = "block";
-      box.textContent = String(err);
+    function selectL2(id){
+      const l2s = filteredChildren(state.selected.l1);
+      const l2 = l2s.find(x => x.id === id) || null;
+      state.selected.l2 = l2;
+      clearSelections("l2");
+      renderL2();
+
+      if(l2){
+        const l3s = filteredChildren(l2); // L3 list must be ALL children
+        renderL3(l3s);
+        l3CountEl.textContent = String(l3s.length);
+        l3HintEl.textContent = `Selected L2: ${l2.name}`;
+
+        if(state.autoOpen && l3s.length){
+          state.selected.l3 = l3s[0];
+          renderL3(l3s);
+          renderDetails(l3s[0]);
+        } else {
+          state.selected.l3 = null;
+          renderDetails(l2);
+        }
+      } else {
+        renderL3([]);
+        l3CountEl.textContent = "0";
+      }
+
+      breadcrumbEl.textContent = getBreadcrumb();
+    }
+
+    // Children filtering using search
+    function filteredChildren(node){
+      const kids = nodeChildren(node);
+      if(!state.search) return kids;
+      return kids considerDeepFilter(kids, state.search);
+    }
+
+    function considerDeepFilter(nodes, q){
+      // include node if it matches OR any descendant matches (so you don't "lose" a chain)
+      const out = [];
+      for(const n of nodes){
+        const selfMatch = matchesSearch(n, q);
+        const descMatch = deepAnyMatch(n, q);
+        if(selfMatch || descMatch) out.push(n);
+      }
+      return out;
+    }
+
+    function deepAnyMatch(node, q){
+      const kids = nodeChildren(node);
+      for(const k of kids){
+        if(matchesSearch(k, q)) return true;
+        if(deepAnyMatch(k, q)) return true;
+      }
+      return false;
+    }
+
+    // ----------------------------
+    // Render L1/L2
+    // ----------------------------
+    function renderL1(){
+      const l0 = state.selected.l0;
+      const l1s = l0 ? filteredChildren(l0) : [];
+      l1CountEl.textContent = String(l1s.length);
+      renderChain(l1ChainEl, l1s, "l1");
+
+      if(!l0){
+        l1HintEl.textContent = "Select an L0 tab to show L1.";
+      }
+    }
+
+    function renderL2(){
+      const l1 = state.selected.l1;
+      const l2s = l1 ? filteredChildren(l1) : [];
+      l2CountEl.textContent = String(l2s.length);
+      renderChain(l2ChainEl, l2s, "l2");
+
+      if(!l1){
+        l2HintEl.textContent = "Select an L1 to show L2.";
+      } else {
+        l2HintEl.textContent = `Selected L1: ${l1.name}`;
+      }
+    }
+
+    // ----------------------------
+    // Events
+    // ----------------------------
+    $("search").addEventListener("input", (e) => {
+      state.search = normalize(e.target.value.trim());
+      // Re-render current selections with filtering
+      renderTabs();      // tabs stay same, but keep active state
+      renderProcessHouse();
+      renderL1();
+      renderL2();
+
+      // L3 depends on selected L2; keep it but filter list
+      if(state.selected.l2){
+        const l3s = filteredChildren(state.selected.l2);
+        renderL3(l3s);
+        l3CountEl.textContent = String(l3s.length);
+      } else {
+        renderL3([]);
+        l3CountEl.textContent = "0";
+      }
+      breadcrumbEl.textContent = getBreadcrumb();
     });
+
+    $("autoOpen").addEventListener("change", (e) => {
+      state.autoOpen = !!e.target.checked;
+    });
+
+    $("reset").addEventListener("click", () => {
+      $("search").value = "";
+      state.search = "";
+      state.detailsCollapsed = false;
+      collapseDetailsBtn.textContent = "Collapse";
+
+      // reset to first L0
+      if(state.l0List.length){
+        selectL0(state.l0List[0].id);
+      }
+      renderProcessHouse();
+    });
+
+    $("openHouse").addEventListener("click", () => {
+      houseEl.open = true;
+      // scroll house into view (under sticky header)
+      houseEl.scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+
+    collapseDetailsBtn.addEventListener("click", () => {
+      state.detailsCollapsed = !state.detailsCollapsed;
+      collapseDetailsBtn.textContent = state.detailsCollapsed ? "Expand" : "Collapse";
+
+      const node = state.selected.l3 || state.selected.l2 || state.selected.l1 || state.selected.l0;
+      renderDetails(node);
+    });
+
+    // ----------------------------
+    // Data load
+    // ----------------------------
+    async function init(){
+      try{
+        // Cache-bust is safe on Pages and avoids stale JSON
+        const res = await fetch(`data.json?v=${Date.now()}`, { cache:"no-store" });
+        if(!res.ok) throw new Error(`Failed to load data.json (${res.status})`);
+        const json = await res.json();
+
+        state.data = json;
+        state.l0List = Array.isArray(json.children) ? json.children : [];
+
+        if(!state.l0List.length){
+          throw new Error("JSON loaded, but no root.children found (expected L0 list).");
+        }
+
+        renderTabs();
+        renderProcessHouse();
+
+        // Select first L0 by default
+        selectL0(state.l0List[0].id);
+
+        errEl.style.display = "none";
+      } catch (e){
+        errEl.style.display = "block";
+        errEl.textContent = `Error: ${e.message}`;
+        console.error(e);
+      }
+    }
+
+    init();
   </script>
 </body>
 </html>
