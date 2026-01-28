@@ -1,1612 +1,471 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>DHL eCommerce · Enterprise Process Architecture · Value Chain</title>
+    <meta charset="UTF-8">
+    <title>DHL eCommerce Value Chain - Interactive Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        /* --- RESET & LAYOUT --- */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f4f4; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        ::-webkit-scrollbar { height: 10px; width: 10px; }
+        ::-webkit-scrollbar-track { background: #e0e0e0; }
+        ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 5px; }
+        ::-webkit-scrollbar-thumb:hover { background: #999; }
 
-  <style>
-    :root{
-      --dhl-red:#D40511;
-      --dhl-yellow:#FFCC00;
+        /* --- 1. TITLE BAR --- */
+        #app-header {
+            background-color: #d40511; /* DHL Red */
+            color: white;
+            padding: 12px 25px;
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
 
-      --bg:#f6f6f7;
-      --card:#ffffff;
-      --ink:#101828;
-      --muted:#667085;
-      --line:#e6e8ee;
+        /* --- 2. L0 GROUPED NAVIGATION --- */
+        #l0-container {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            display: flex;
+            overflow-x: auto;
+            flex-shrink: 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .l0-group {
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #555;
+            padding: 0 15px;
+            min-width: 150px;
+        }
+        .l0-group:last-child { border-right: none; }
+        
+        .l0-group-title {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bbb;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        
+        .l0-buttons { display: flex; gap: 8px; }
 
-      --radius:14px;
-      --e1: 0 2px 10px rgba(0,0,0,.06);
-      --e2: 0 10px 26px rgba(0,0,0,.08);
-      --e3: 0 16px 40px rgba(0,0,0,.10);
+        .l0-btn {
+            background: #444;
+            color: #ddd;
+            border: 1px solid #555;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            min-width: 130px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .l0-btn:hover { background: #666; border-color: #888; }
+        .l0-btn.active { 
+            background: #ffcc00; 
+            color: black; 
+            border-color: #e6b800;
+            box-shadow: 0 0 12px rgba(255, 204, 0, 0.4); 
+        }
+        
+        .l0-btn-id { font-size: 11px; font-weight: bold; display: block; margin-bottom: 2px; }
+        .l0-btn-name { font-size: 12px; display: block; line-height: 1.1; }
 
-      /* Chevron geometry */
-      --chev-h: 112px;       /* readability */
-      --chev-tip: 34px;      /* arrow tip */
-      --chev-notch: 18px;
+        /* --- 3. CONTEXT BAR --- */
+        #context-bar {
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            height: 50px;
+        }
+        #ctx-title { margin: 0; font-size: 18px; color: #333; font-weight: 700; }
+        #ctx-desc { margin: 0; font-size: 13px; color: #666; margin-left: 15px; border-left: 2px solid #ccc; padding-left: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 600px;}
+        #ctx-owner { font-size: 12px; color: #d40511; font-weight: bold; background: #ffe6e6; padding: 4px 10px; border-radius: 12px; }
 
-      /* Layout */
-      --maxw: 1560px;
+        /* --- 4. L1 CHEVRON CHAIN (Elevated & Taller) --- */
+        #l1-container {
+            padding: 20px 30px;
+            background: #f8f8f8;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0; /* Gap handled by margins for overlap if needed, but here we use distinct items */
+            flex-shrink: 0;
+            min-height: 90px;
+        }
+        
+        .l1-chevron {
+            position: relative;
+            background: #e0e0e0;
+            height: 65px;  /* TALLER as requested */
+            width: 170px;
+            margin-right: 8px; 
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 28px; 
+            padding-right: 15px;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #333;
+            user-select: none;
+            
+            /* Chevron Shape */
+            clip-path: polygon(0% 0%, calc(100% - 18px) 0%, 100% 50%, calc(100% - 18px) 100%, 0% 100%, 18px 50%);
+        }
+        /* First one has flat left */
+        .l1-chevron.first { 
+            clip-path: polygon(0% 0%, calc(100% - 18px) 0%, 100% 50%, calc(100% - 18px) 100%, 0% 100%); 
+            padding-left: 15px; 
+        }
+        
+        .l1-chevron:hover { background: #ccc; transform: translateY(-2px); }
+        .l1-chevron.active { background: #d40511; color: white; box-shadow: 2px 5px 10px rgba(212,5,17,0.3); }
+        
+        .l1-id { font-size: 11px; font-weight: 800; color: #d40511; margin-bottom: 3px; }
+        .l1-chevron.active .l1-id { color: #ffcc00; }
+        
+        .l1-name { font-size: 12px; font-weight: 600; line-height: 1.1; margin-bottom: 4px; }
+        .l1-owner { font-size: 10px; font-style: italic; opacity: 0.7; }
 
-      /* Typography */
-      --fs-code: 14px;
-      --fs-title: 17px;
-      --fs-desc: 13px;
-      --fs-owner: 12px;
-    }
+        /* --- 5. WORKSPACE (L2 Overlapping Chain) --- */
+        #workspace {
+            flex-grow: 1;
+            padding: 30px 40px;
+            overflow-x: auto; /* Horizontal scroll for chain effect */
+            overflow-y: hidden;
+            background: #fff;
+            display: flex;
+            align-items: flex-start;
+            white-space: nowrap; /* Forces single line */
+            padding-bottom: 50px; /* Space for scrollbar */
+        }
 
-    *{ box-sizing:border-box; }
-    html, body{ height:100%; }
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: var(--bg);
-      color: var(--ink);
-    }
+        /* L2 CHAIN CONTAINER */
+        .l2-chain-item {
+            position: relative;
+            background: #fdfdfd;
+            border: 1px solid #ddd; /* Fallback border */
+            border-top: 4px solid #ffcc00;
+            width: 300px;
+            min-width: 300px;
+            min-height: 300px; /* Tall box for L3 list */
+            max-height: 400px;
+            
+            /* Overlap Magic */
+            margin-left: -28px; /* Pull left to overlap previous tail */
+            
+            /* Shape: Arrow on right, Cutout on left */
+            clip-path: polygon(
+                0% 0%, 
+                calc(100% - 30px) 0%, 
+                100% 50%, 
+                calc(100% - 30px) 100%, 
+                0% 100%, 
+                30px 50% /* The cutout notch */
+            );
+            
+            padding: 20px 30px 20px 50px; /* Extra left padding to clear the cutout */
+            box-shadow: 5px 0 15px rgba(0,0,0,0.05); /* Shadow doesn't show well with clip-path, but we keep for layout */
+            display: flex;
+            flex-direction: column;
+        }
 
-    header{
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: linear-gradient(180deg, rgba(255,204,0,.95), rgba(255,204,0,.92));
-      border-bottom: 1px solid rgba(0,0,0,.10);
-      backdrop-filter: blur(6px);
-    }
-    .hdr{
-      max-width: var(--maxw);
-      margin:0 auto;
-      padding: 14px 18px 10px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    .brand{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      min-width: 280px;
-    }
-    .mark{
-      width:10px;height:34px;
-      background: var(--dhl-red);
-      border-radius:999px;
-      margin-top:2px;
-      box-shadow: inset 0 0 0 2px rgba(0,0,0,.06);
-    }
-    .brand h1{
-      margin:0;
-      font-weight: 950;
-      font-size: 18px;
-      line-height: 1.1;
-      letter-spacing:.2px;
-    }
-    .brand .sub{
-      margin-top:2px;
-      font-size:12px;
-      font-weight: 850;
-      color:#3a2b00;
-      opacity:.85;
-    }
+        /* First item: Flat left edge */
+        .l2-chain-item.first {
+            margin-left: 0;
+            clip-path: polygon(
+                0% 0%, 
+                calc(100% - 30px) 0%, 
+                100% 50%, 
+                calc(100% - 30px) 100%, 
+                0% 100%
+            );
+            padding-left: 20px;
+        }
+        
+        /* Hover Effect for L2 to bring to front */
+        .l2-chain-item:hover {
+            background: #fffdf5;
+            z-index: 10; /* Pop to top */
+            border-top-color: #d40511;
+        }
 
-    .actions{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+        .l2-header { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        .l2-id { color: #d40511; font-size: 12px; font-weight: bold; display: block; }
+        .l2-name { color: #333; font-size: 15px; font-weight: 700; white-space: normal; line-height: 1.2; }
+        .l2-owner { font-size: 11px; color: #777; margin-top: 4px; display: block; }
 
-    .btn{
-      cursor:pointer;
-      border:none;
-      border-radius:999px;
-      padding:9px 12px;
-      font-size:12px;
-      font-weight: 950;
-      background: rgba(255,255,255,.88);
-      border:1px solid rgba(0,0,0,.12);
-      box-shadow: var(--e1);
-    }
-    .btn-primary{
-      background: var(--dhl-red);
-      color:#fff;
-      border-color: rgba(0,0,0,.14);
-    }
+        /* L3 SCROLLABLE LIST */
+        .l3-list {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+        }
+        
+        .l3-item {
+            background: #f4f4f4;
+            margin-bottom: 6px;
+            padding: 8px 10px;
+            border-radius: 3px;
+            border-left: 3px solid #ccc;
+            font-size: 12px;
+            white-space: normal; /* Allow text wrap inside box */
+            cursor: help;
+        }
+        .l3-item:hover { border-left-color: #d40511; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        
+        .l3-head { display: flex; justify-content: space-between; margin-bottom: 3px; font-size: 10px; color: #888; }
+        .l3-id { font-weight: bold; color: #555; }
+        .l3-body { color: #222; font-weight: 500; line-height: 1.3; }
 
-    .select{
-      border-radius: 999px;
-      padding: 9px 12px;
-      font-size: 12px;
-      font-weight: 950;
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.88);
-      box-shadow: var(--e1);
-      cursor:pointer;
-      max-width: 280px;
-    }
+        /* --- TOOLTIP --- */
+        #tooltip {
+            position: fixed; display: none; background: #222; color: #fff;
+            padding: 12px 16px; border-radius: 4px; font-size: 12px; max-width: 280px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 1000; pointer-events: none;
+            border-left: 4px solid #ffcc00;
+        }
+        #tooltip h4 { margin: 0 0 6px 0; color: #ffcc00; font-size: 13px; }
+        #tooltip p { margin: 0 0 8px 0; color: #ddd; line-height: 1.4; }
+        #tooltip .meta { border-top: 1px solid #444; padding-top: 8px; color: #aaa; font-size: 11px; }
+        #tooltip .meta b { color: #fff; }
 
-    /* Breadcrumb */
-    .crumbbar{
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: 0 18px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .crumbRow{
-      display:flex;
-      gap:8px;
-      align-items:center;
-      flex-wrap:wrap;
-      max-width: 100%;
-    }
-    .crumbChip{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.12);
-      box-shadow: var(--e1);
-      font-size:12px;
-      font-weight: 950;
-      max-width: 88vw;
-      user-select:none;
-    }
-    .crumbChip .dot{
-      width:10px;height:10px;border-radius:50%;
-      box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
-      flex: 0 0 auto;
-    }
-    .crumbChip span.allowEllip{
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width: 72vw;
-    }
-    .crumbL0{ background: rgba(212,5,17,.92); color:#fff; border-color: rgba(0,0,0,.16); }
-    .crumbL0 .dot{ background:#fff; }
-    .crumbL1{ background: rgba(255,204,0,.95); color:#111; border-color: rgba(0,0,0,.16); }
-    .crumbL1 .dot{ background: var(--dhl-red); }
-    .crumbL2{ background: rgba(43,47,51,.92); color:#fff; border-color: rgba(0,0,0,.22); }
-    .crumbL2 .dot{ background: var(--dhl-yellow); }
-    .crumbL3{ background: rgba(240,241,243,.95); color:#111; border-color: rgba(0,0,0,.12); }
-    .crumbL3 .dot{ background: var(--dhl-red); }
-
-    .ownerChip{
-      background: rgba(212,5,17,.12);
-      border-color: rgba(212,5,17,.22);
-      color: rgba(0,0,0,.78);
-    }
-    .ownerChip .dot{ background: var(--dhl-red); }
-
-    main{
-      max-width: var(--maxw);
-      margin:0 auto;
-      padding: 14px 18px 28px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-    }
-
-    /* Process house accordion */
-    details.house{
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--e1);
-      overflow:hidden;
-    }
-    details.house summary{
-      list-style:none;
-      cursor:pointer;
-      padding: 12px 14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      background: linear-gradient(180deg, #fff, #fbfbfd);
-      border-bottom: 1px solid var(--line);
-      font-weight: 950;
-      font-size: 13px;
-    }
-    details.house summary::-webkit-details-marker{ display:none; }
-    .sum-left{ display:flex; align-items:center; gap:10px; }
-    .pill{
-      padding:5px 10px;
-      border-radius:999px;
-      border:1px solid rgba(212,5,17,.25);
-      background: rgba(212,5,17,.12);
-      color: var(--dhl-red);
-      font-weight: 1000;
-      font-size: 11px;
-    }
-    .hint{
-      font-size:12px;
-      font-weight: 850;
-      color: rgba(0,0,0,.55);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 70vw;
-    }
-    .house-body{ padding: 14px; background:#fff; }
-
-    .band{
-      border-radius: 16px;
-      overflow:hidden;
-      border: 1px solid rgba(0,0,0,.10);
-      box-shadow: var(--e1);
-      margin-bottom: 12px;
-    }
-    .band:last-child{ margin-bottom:0; }
-    .band-head{
-      padding: 10px 12px;
-      font-weight: 1000;
-      font-size: 12px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-    }
-    .band-head .count{
-      font-size: 11px;
-      font-weight: 1000;
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.12);
-      background: rgba(255,255,255,.7);
-    }
-    .band.manage .band-head{ background: rgba(255,204,0,.55); }
-    .band.run .band-head{ background: rgba(255,204,0,.35); }
-    .band.change .band-head{ background: rgba(212,5,17,.10); }
-    .band.foundation .band-head{ background: rgba(43,47,51,.10); }
-
-    .band-grid{
-      padding: 12px;
-      display:grid;
-      grid-template-columns: repeat(4, minmax(240px, 1fr));
-      gap: 12px;
-      background:#fff;
-    }
-    @media (max-width: 1100px){
-      .band-grid{ grid-template-columns: repeat(2, minmax(240px, 1fr)); }
-    }
-    @media (max-width: 640px){
-      .band-grid{ grid-template-columns: 1fr; }
-    }
-
-    .l0card{
-      cursor:pointer;
-      border-radius: 14px;
-      border: 1px solid rgba(0,0,0,.12);
-      background:#fff;
-      box-shadow: var(--e2);
-      padding: 10px 10px 9px;
-      transition: transform .08s ease, box-shadow .08s ease, border-color .2s ease, outline-color .2s ease;
-      display:flex;
-      gap:10px;
-      align-items:flex-start;
-      min-height: 96px;
-    }
-    .l0card:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
-    .l0card.active{
-      border-color: rgba(212,5,17,.35);
-      outline: 3px solid rgba(212,5,17,.18);
-      outline-offset: 2px;
-    }
-
-    .icon{
-      width: 36px; height: 36px;
-      border-radius: 12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(255,204,0,.25);
-      border: 1px solid rgba(0,0,0,.10);
-      flex:0 0 auto;
-      color: rgba(0,0,0,.65);
-    }
-    .icon svg{ width: 20px; height: 20px; fill: currentColor; }
-
-    .l0meta{ min-width:0; }
-    .l0code{ font-weight: 1000; font-size: 12px; color: var(--dhl-red); letter-spacing:.2px; }
-    .l0name{ margin-top:2px; font-weight: 1000; font-size: 13px; line-height: 1.15; }
-    .l0desc{
-      margin-top: 5px;
-      font-size: 11px;
-      font-weight: 850;
-      color: rgba(0,0,0,.60);
-      line-height: 1.25;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-    }
-
-    /* Panels */
-    section.panel{
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--e1);
-      overflow:hidden;
-    }
-    .panel-head{
-      padding: 10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      background: linear-gradient(180deg, #fff, #fbfbfd);
-      border-bottom: 1px solid var(--line);
-    }
-    .panel-title{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      font-weight: 1000;
-      font-size: 12px;
-    }
-    .badge{
-      padding: 5px 8px;
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 1000;
-      border: 1px solid rgba(0,0,0,.12);
-      background: #fff;
-      user-select:none;
-    }
-    .badge.l1{ background: rgba(255,204,0,.22); border-color: rgba(255,204,0,.45); }
-    .badge.l2{ background: rgba(43,47,51,.10); border-color: rgba(43,47,51,.22); }
-    .badge.l3{ background: rgba(238,238,239,.80); }
-    .subhint{
-      font-size: 12px;
-      font-weight: 850;
-      color: rgba(0,0,0,.55);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 74vw;
-    }
-
-    /* Chain wrapper */
-    .chainwrap{
-      position: relative;
-      padding: 12px;
-    }
-    .chain{
-      display:flex;
-      flex-wrap:wrap;
-      align-items:stretch;
-      gap: 12px;
-      position: relative;
-      z-index: 2;
-    }
-    .flowSvg{
-      position:absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events:none;
-      z-index: 1;
-    }
-
-    /* Chevron */
-    .chev{
-      position: relative;
-      height: var(--chev-h);
-      min-width: 360px;
-      flex: 1 1 420px;
-      max-width: 680px;
-
-      border-radius: 16px;
-      border: 1px solid rgba(0,0,0,.18);
-      box-shadow: var(--e2);
-      cursor:pointer;
-
-      padding: 12px 18px 12px calc(18px + var(--chev-notch));
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      overflow:hidden;
-
-      background: var(--chev-bg, #fff);
-      color: var(--chev-fg, #111);
-
-      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease, opacity .15s ease;
-    }
-    @media (max-width: 860px){
-      .chev{ min-width: 280px; flex-basis: 320px; height: 116px; }
-      :root{ --fs-title: 16px; --fs-desc: 12px; }
-    }
-    @media (max-width: 520px){
-      .chev{ min-width: 220px; flex-basis: 260px; height: 120px; }
-    }
-
-    .chev:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
-
-    /* tip */
-    .chev::after{
-      content:"";
-      position:absolute;
-      top:0;
-      right: calc(var(--chev-tip) * -1);
-      width: 0; height: 0;
-      border-top: calc(var(--chev-h) / 2) solid transparent;
-      border-bottom: calc(var(--chev-h) / 2) solid transparent;
-      border-left: var(--chev-tip) solid var(--chev-tip-bg, var(--chev-bg, #fff));
-    }
-    /* notch */
-    .chev::before{
-      content:"";
-      position:absolute;
-      top:0;
-      left:0;
-      width:0; height:0;
-      border-top: calc(var(--chev-h) / 2) solid transparent;
-      border-bottom: calc(var(--chev-h) / 2) solid transparent;
-      border-left: var(--chev-notch) solid var(--bg);
-    }
-    .chev.rowfirst{ padding-left: 18px; }
-    .chev.rowfirst::before{ display:none; }
-
-    /* flow arrow inside tip */
-    .flowArrow{
-      position:absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-weight: 1100;
-      font-size: 18px;
-      opacity: .95;
-      pointer-events:none;
-      text-shadow: 0 1px 0 rgba(0,0,0,.15);
-    }
-
-    /* selection */
-    .chev.active{
-      background: var(--dhl-red) !important;
-      color: #fff !important;
-      border-color: rgba(0,0,0,.22);
-      outline: 4px solid rgba(212,5,17,.26);
-      outline-offset: 2px;
-      filter: saturate(1.05);
-      opacity: 1 !important;
-    }
-    .chev.active::after{ border-left-color: var(--dhl-red) !important; }
-
-    /* filtered dim */
-    .chev.dim{ opacity: .35; }
-
-    .rowtop{
-      display:flex;
-      justify-content:space-between;
-      align-items:baseline;
-      gap:10px;
-    }
-    .code{
-      font-weight: 1000;
-      font-size: var(--fs-code);
-      letter-spacing:.2px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .ord{
-      font-weight: 1000;
-      font-size: 12px;
-      opacity:.90;
-      white-space:nowrap;
-    }
-    .name{
-      margin-top: 6px;
-      font-weight: 1000;
-      font-size: var(--fs-title);
-      line-height:1.15;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-      min-height: 40px;
-    }
-    .meta{
-      margin-top: 6px;
-      font-size: var(--fs-desc);
-      font-weight: 850;
-      line-height:1.28;
-      opacity:.95;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-    }
-
-    .ownerTag{
-      position:absolute;
-      right: 46px;
-      bottom: 10px;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: var(--fs-owner);
-      font-weight: 1000;
-      background: rgba(255,255,255,.86);
-      border: 1px solid rgba(0,0,0,.14);
-      color: rgba(0,0,0,.80);
-      max-width: 64%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      user-select:none;
-    }
-    .chev.darkPill .ownerTag{
-      background: rgba(255,255,255,.14);
-      border-color: rgba(255,255,255,.22);
-      color: rgba(255,255,255,.92);
-    }
-    .chev.active .ownerTag{
-      background: rgba(255,255,255,.16);
-      border-color: rgba(255,255,255,.28);
-      color: rgba(255,255,255,.92);
-    }
-
-    /* Start/End icons */
-    .edgeIcon{
-      position:absolute;
-      top: 10px;
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: var(--e1);
-      border: 1px solid rgba(0,0,0,.14);
-      background: rgba(255,255,255,.88);
-      color: rgba(0,0,0,.75);
-      pointer-events:none;
-    }
-    .edgeIcon svg{ width: 18px; height: 18px; fill: currentColor; }
-    .edgeIcon.start{ left: 10px; }
-    .edgeIcon.end{ right: 58px; }
-    .chev.active .edgeIcon{
-      background: rgba(255,255,255,.16);
-      border-color: rgba(255,255,255,.28);
-      color: rgba(255,255,255,.92);
-    }
-
-    /* L3 waterfall */
-    .l3wrap{ padding: 12px; }
-    .waterfall{ display:flex; flex-direction:column; gap:10px; }
-    .l3card{
-      border:1px solid rgba(0,0,0,.12);
-      border-radius: 14px;
-      padding: 12px 12px;
-      background: #fff;
-      box-shadow: var(--e2);
-      cursor:pointer;
-      position:relative;
-      transition: transform .08s ease, box-shadow .08s ease, opacity .15s ease;
-    }
-    .l3card:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
-    .l3card.active{
-      outline: 4px solid rgba(212,5,17,.18);
-      outline-offset: 2px;
-      border-color: rgba(212,5,17,.20);
-      opacity: 1 !important;
-    }
-    .l3card.dim{ opacity: .35; }
-
-    .l3top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .l3code{
-      font-weight: 1000;
-      font-size: 13px;
-      color: var(--dhl-red);
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width: 70%;
-    }
-    .l3owner{
-      font-weight: 1000;
-      font-size: 12px;
-      color: rgba(0,0,0,.60);
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      max-width: 50%;
-      text-align:right;
-    }
-    .l3name{ margin-top: 6px; font-weight: 1000; font-size: 15px; line-height:1.15; }
-    .l3desc{ margin-top: 8px; font-size: 12px; font-weight: 850; color: rgba(0,0,0,.62); line-height:1.3; }
-
-    .empty{
-      padding: 12px;
-      border-radius: 12px;
-      border: 1px dashed rgba(0,0,0,.18);
-      color: rgba(0,0,0,.55);
-      font-weight: 900;
-      font-size: 12px;
-      background: #fff;
-    }
-
-    /* Popover (follows mouse) */
-    .popover{
-      position: fixed;
-      z-index: 9999;
-      min-width: 320px;
-      max-width: 520px;
-      background:#fff;
-      border: 1px solid rgba(0,0,0,.12);
-      border-radius: 14px;
-      box-shadow: var(--e3);
-      padding: 12px 12px 10px;
-      display:none;
-      pointer-events:auto;
-    }
-    .pop-top{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:flex-start;
-    }
-    .pop-code{
-      font-weight:1000;
-      font-size:12px;
-      color: var(--dhl-red);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 70%;
-    }
-    .pop-owner{
-      font-weight:1000;
-      font-size:12px;
-      color: rgba(0,0,0,.60);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      max-width: 48%;
-      text-align:right;
-    }
-    .pop-title{
-      margin-top: 6px;
-      font-weight:1000;
-      font-size: 14px;
-      line-height:1.2;
-    }
-    .pop-desc{
-      margin-top: 8px;
-      font-size: 12px;
-      font-weight: 850;
-      color: rgba(0,0,0,.65);
-      line-height:1.3;
-    }
-    .pop-foot{
-      margin-top: 10px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      border-top: 1px solid rgba(0,0,0,.08);
-      padding-top: 8px;
-      font-size: 11px;
-      font-weight: 950;
-      color: rgba(0,0,0,.60);
-    }
-    .pop-foot button{
-      cursor:pointer;
-      border:none;
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 1000;
-      background: rgba(0,0,0,.06);
-      border: 1px solid rgba(0,0,0,.12);
-    }
-
-    .error{
-      white-space: pre-wrap;
-      background: rgba(212,5,17,.10);
-      border: 1px solid rgba(212,5,17,.22);
-      color: #7d0008;
-      padding: 10px 12px;
-      border-radius: 12px;
-      font-weight: 950;
-      font-size: 12px;
-    }
-  </style>
+        #error-msg { display: none; padding: 50px; text-align: center; color: red; }
+    </style>
 </head>
-
 <body>
-<header>
-  <div class="hdr">
-    <div class="brand">
-      <div class="mark"></div>
-      <div>
-        <h1>DHL eCommerce</h1>
-        <div class="sub">Enterprise Process Architecture · The Value Chain Blueprint</div>
-      </div>
+
+<div id="app-header">DHL eCommerce Value Chain</div>
+<div id="error-msg">Cannot load data.json. Ensure file exists and use a local server.</div>
+
+<div id="l0-container"></div>
+
+<div id="context-bar">
+    <div style="display:flex; align-items:center">
+        <h2 id="ctx-title">Value Chain Map</h2>
+        <span id="ctx-desc">Select a category above to begin.</span>
     </div>
+    <div id="ctx-owner"></div>
+</div>
 
-    <div class="actions">
-      <select id="createFilter" class="select" title="Create (L0 category)">
-        <option value="">Create: All</option>
-      </select>
+<div id="l1-container"></div>
 
-      <select id="ownerFilter" class="select" title="Ownership">
-        <option value="">Ownership: All</option>
-      </select>
-
-      <button id="reset" class="btn">Reset</button>
-      <button id="toggleHouse" class="btn btn-primary">Process House</button>
+<div id="workspace">
+    <div style="color:#999; margin:auto; font-size:16px;">
+        Select a Process Domain (L1 Chevron) to view the detailed chain.
     </div>
-  </div>
+</div>
 
-  <div class="crumbbar">
-    <div class="crumbRow" id="crumbRow"></div>
-    <div class="crumbRow">
-      <div class="crumbChip ownerChip" title="Owner of current selection">
-        <span class="dot"></span>
-        <span class="allowEllip" id="crumbOwner">Owner: —</span>
-      </div>
-    </div>
-  </div>
-</header>
-
-<main>
-  <details id="house" class="house" open>
-    <summary>
-      <div class="sum-left">
-        <span class="pill">L0</span>
-        <span>Process House</span>
-      </div>
-      <span class="hint">Click a box to select (process house acts as filter)</span>
-    </summary>
-    <div class="house-body" id="houseBody"></div>
-  </details>
-
-  <section class="panel">
-    <div class="panel-head">
-      <div class="panel-title">
-        <span class="badge l1">L1</span>
-        <span>L1 Process Chain</span>
-        <span id="l1Count" class="badge l1">0</span>
-      </div>
-      <div id="l1Hint" class="subhint">Select an L0 box in the process house.</div>
-    </div>
-    <div class="chainwrap" id="l1Wrap">
-      <svg id="l1Flow" class="flowSvg"></svg>
-      <div id="l1" class="chain"></div>
-    </div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-head">
-      <div class="panel-title">
-        <span class="badge l2">L2</span>
-        <span>L2 Sub-Chain</span>
-        <span id="l2Count" class="badge l2">0</span>
-      </div>
-      <div id="l2Hint" class="subhint">Select an L1 chevron.</div>
-    </div>
-    <div class="chainwrap" id="l2Wrap">
-      <svg id="l2Flow" class="flowSvg"></svg>
-      <div id="l2" class="chain"></div>
-    </div>
-  </section>
-
-  <section class="panel">
-    <div class="panel-head">
-      <div class="panel-title">
-        <span class="badge l3">L3</span>
-        <span>L3 Activities</span>
-        <span id="l3Count" class="badge l3">0</span>
-      </div>
-      <div id="l3Hint" class="subhint">Select an L2 chevron.</div>
-    </div>
-    <div class="l3wrap">
-      <div class="waterfall" id="l3"></div>
-    </div>
-  </section>
-
-  <div id="err" style="display:none;" class="error"></div>
-</main>
-
-<div id="pop" class="popover" role="dialog" aria-live="polite"></div>
+<div id="tooltip"></div>
 
 <script>
-  const $ = (id) => document.getElementById(id);
+    // --- ELEMENTS ---
+    const l0Container = document.getElementById('l0-container');
+    const l1Container = document.getElementById('l1-container');
+    const workspace = document.getElementById('workspace');
+    const tooltip = document.getElementById('tooltip');
+    
+    // --- LOAD DATA ---
+    d3.json("data.json").then(function(data) {
+        if(!data || !data.children) return;
+        renderGroups(data);
+    }).catch(err => {
+        document.getElementById('error-msg').style.display = 'block';
+        console.error(err);
+    });
 
-  const state = {
-    root: null,
-    l0All: [],
-    allNodes: [],
-    selected: { l0:null, l1:null, l2:null, l3:null },
-    filters: { create:"", owner:"" },
-    pop: { open:false, follow:true, node:null, path:"" },
-    mouse: { x: 0, y: 0 }
-  };
-
-  // -------- Icons (inline SVG, repo-safe) --------
-  function svgPlay(){ return `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`; }
-  function svgFlag(){ return `<svg viewBox="0 0 24 24"><path d="M6 2h2v2h10l-2 4 2 4H8v10H6V2z"/></svg>`; }
-
-  function icon(kind){
-    const paths = {
-      compass:`<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.7 6.3-2.2 6.1-6.2 2.2 2.2-6.1 6.2-2.2Zm-6 7.4 2.9-1.1 1.1-2.9-2.9 1.1-1.1 2.9Z"/>`,
-      shield:`<path d="M12 2 20 6v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4Zm0 4.2L6 8.7V12c0 3.5 2.2 6.8 6 7.7 3.8-.9 6-4.2 6-7.7V8.7l-6-2.5Z"/>`,
-      cog:`<path d="M19.4 13a7.8 7.8 0 0 0 .1-2l2-1.6-2-3.5-2.4 1c-.5-.4-1.1-.8-1.7-1l-.4-2.6H9l-.4 2.6c-.6.2-1.2.6-1.7 1l-2.4-1-2 3.5L4.6 11a7.8 7.8 0 0 0 0 2L2.6 14.6l2 3.5 2.4-1c.5.4 1.1.8 1.7 1l.4 2.6h4.2l.4-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.5-2-1.6ZM12 15.5A3.5 3.5 0 1 1 12 8a3.5 3.5 0 0 1 0 7.5Z"/>`,
-      truck:`<path d="M3 4h11v8h2.5l2.5 3v3h-2a2 2 0 1 1-4 0H9a2 2 0 1 1-4 0H3V4Zm13 9V6h3l2 3v4h-1a2 2 0 0 0-4 0h0Zm-9 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm10 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"/>`,
-      handshake:`<path d="M5 8 2 11l4 4 3-3 3 3 4-4-3-3-2 2-1-1 2-2c1.2-1.2 3.1-1.2 4.2 0l.8.8 1.4-1.4-1.5-1.5c-2-2-5.1-2-7.1 0L9.9 7.1 8.5 5.7 5 9.2V8Z"/>`,
-      wrench:`<path d="M22 19.6 14.7 12.3a6 6 0 0 1-7.7-7.7l3 3 2-2-3-3a6 6 0 0 1 7.7 7.7L24 17.6 22 19.6Zm-10.6-6.6 5.8 5.8 1.4-1.4-5.8-5.8-1.4 1.4Z"/>`,
-      bulb:`<path d="M9 21h6v-1H9v1Zm3-20a7 7 0 0 0-4 12.8V17h8v-3.2A7 7 0 0 0 12 1Zm3 11.7-.9.6V15h-4v-1.7l-.9-.6A5 5 0 1 1 15 12.7Z"/>`,
-      lock:`<path d="M12 1a5 5 0 0 0-5 5v3H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-1V6a5 5 0 0 0-5-5Zm3 8H9V6a3 3 0 0 1 6 0v3Z"/>`,
-      data:`<path d="M12 2c-4.4 0-8 1.3-8 3v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5c0-1.7-3.6-3-8-3Zm0 2c3.7 0 6 .9 6 1s-2.3 1-6 1-6-.9-6-1 2.3-1 6-1Zm0 16c-3.7 0-6-.9-6-1v-2.1c1.5.9 4.2 1.4 6 1.4s4.5-.5 6-1.4V19c0 .1-2.3 1-6 1Zm0-6c-3.7 0-6-.9-6-1V11c1.5.9 4.2 1.4 6 1.4s4.5-.5 6-1.4v2c0 .1-2.3 1-6 1Z"/>`,
-      layers:`<path d="M12 2 1 7l11 5 9-4.1V17h2V7L12 2Zm0 12L3 10v2l9 4 9-4v-2l-9 4Zm0 6L3 16v2l9 4 9-4v-2l-9 4Z"/>`,
-      cart:`<path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6.2 6l.6 3h10.4l-1.2 6H8L6.1 4H2V2h5l.4 2h14.2l-2 10H7.4l-.2-1H18v-2H7.2l-.6-3H6.2Z"/>`,
-      people:`<path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Zm-12 9c0-3.3 3.6-6 8-6s8 2.7 8 6v2H4v-2Z"/>`,
-      ledger:`<path d="M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm2 4v2h8V6H8Zm0 4v2h8v-2H8Zm0 4v2h6v-2H8Z"/>`,
-      rocket:`<path d="M14 2c3 1 6 4 7 7-2 1-4 2-6 4l-4 4c-2 2-3 4-4 6-3-1-6-4-7-7 2-1 4-2 6-4l4-4c2-2 3-4 4-6Zm-8 9 3 3-1.5 1.5-3-3L6 11Zm10-6 3 3-2 2-3-3 2-2Z"/>`
-    };
-    const p = paths[kind] || paths.layers;
-    return `<svg viewBox="0 0 24 24">${p}</svg>`;
-  }
-
-  const ICONS = {
-    S2E: icon("compass"),
-    GRC: icon("shield"),
-    EA_PM: icon("cog"),
-    L2C: icon("handshake"),
-    O2D: icon("truck"),
-    D2O: icon("layers"),
-    P2R: icon("wrench"),
-    S2P: icon("cart"),
-    H2R: icon("people"),
-    R2R: icon("ledger"),
-    I2P: icon("bulb"),
-    TRF: icon("rocket"),
-    DA: icon("data"),
-    ITF: icon("lock")
-  };
-
-  // -------- Helpers --------
-  function safeStr(x){ return (x === null || x === undefined) ? "" : String(x); }
-
-  function titleFromName(name){
-    const s = safeStr(name).trim();
-    const idx = s.indexOf(":");
-    if(idx >= 0 && idx < s.length-1) return s.slice(idx+1).trim();
-    return s;
-  }
-
-  function orderFromId(id){
-    const m = safeStr(id).match(/(\d+)(?!.*\d)/); // last numeric group
-    return m ? parseInt(m[1], 10) : 9999;
-  }
-
-  function traverse(node, pathArr = []){
-    if(!node || typeof node !== "object") return;
-    const nextPath = [...pathArr, node];
-    state.allNodes.push({ node, path: nextPath });
-    const kids = Array.isArray(node.children) ? node.children : [];
-    for(const c of kids) traverse(c, nextPath);
-  }
-
-  function ownerMatches(node){
-    const f = state.filters.owner;
-    if(!f) return true;
-    const o = safeStr(node.owner).toLowerCase();
-    return o.includes(f.toLowerCase());
-  }
-
-  function anyDescendantOwnerMatch(node){
-    const f = state.filters.owner;
-    if(!f) return true;
-    const needle = f.toLowerCase();
-    let ok = false;
-    (function rec(n){
-      if(ok) return;
-      if(!n) return;
-      if(safeStr(n.owner).toLowerCase().includes(needle)) { ok = true; return; }
-      const kids = Array.isArray(n.children) ? n.children : [];
-      for(const c of kids) rec(c);
-    })(node);
-    return ok;
-  }
-
-  function setError(msg){
-    const el = $("err");
-    if(!msg){
-      el.style.display = "none";
-      el.textContent = "";
-      return;
+    // --- PARSER ---
+    function parseInfo(str) {
+        if(!str) return {id:"", name:""};
+        const parts = str.split(":");
+        return { 
+            id: parts[0].trim(), 
+            name: parts.slice(1).join(":").trim() || parts[0].trim()
+        };
     }
-    el.style.display = "block";
-    el.textContent = msg;
-  }
 
-  function cssClamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
+    // --- RENDER LOGIC ---
 
-  // -------- Popover (follows mouse) --------
-  function closePop(){
-    state.pop.open = false;
-    state.pop.node = null;
-    $("pop").style.display = "none";
-  }
+    // 1. RENDER GROUPS (L0)
+    function renderGroups(data) {
+        // Group data by 'category' (Run, Manage, Change)
+        const groups = {};
+        
+        data.children.forEach(item => {
+            // Default to 'Other' if category is missing in JSON
+            const cat = item.category || "General"; 
+            if(!groups[cat]) groups[cat] = [];
+            groups[cat].push(item);
+        });
 
-  function openPop(node, path){
-    state.pop.open = true;
-    state.pop.node = node;
-    state.pop.path = path || "";
-    renderPop();
-    $("pop").style.display = "block";
-    positionPop(state.mouse.x, state.mouse.y);
-  }
+        // Specific Order: Run -> Manage -> Change (or alphabetically if preferred)
+        // Let's try to detect keywords to order them logically
+        const order = ["Run", "Manage", "Change", "Transform", "Foundation", "General"];
+        const sortedKeys = Object.keys(groups).sort((a,b) => {
+            let ia = order.findIndex(k => a.includes(k));
+            let ib = order.findIndex(k => b.includes(k));
+            if(ia === -1) ia = 99;
+            if(ib === -1) ib = 99;
+            return ia - ib;
+        });
 
-  function renderPop(){
-    const node = state.pop.node;
-    if(!node) return;
-    const el = $("pop");
-    const code = safeStr(node.id);
-    const ttl = titleFromName(node.name || code);
-    const desc = safeStr(node.description);
-    const owner = safeStr(node.owner);
-    const cat = safeStr(node.category);
-    el.innerHTML = `
-      <div class="pop-top">
-        <div class="pop-code">${escapeHtml(code)}</div>
-        <div class="pop-owner">${escapeHtml(owner || "—")}</div>
-      </div>
-      <div class="pop-title">${escapeHtml(ttl)}</div>
-      ${desc ? `<div class="pop-desc">${escapeHtml(desc)}</div>` : ""}
-      <div class="pop-foot">
-        <div title="Breadcrumb path">${escapeHtml(state.pop.path || "")}</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          ${cat ? `<span style="font-weight:1000;color:rgba(0,0,0,.55)">${escapeHtml(cat)}</span>` : ""}
-          <button id="popClose">Close</button>
-        </div>
-      </div>
-    `;
-    const btn = $("popClose");
-    if(btn) btn.onclick = closePop;
-  }
+        sortedKeys.forEach(key => {
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'l0-group';
+            
+            const title = document.createElement('div');
+            title.className = 'l0-group-title';
+            title.innerText = key;
+            groupDiv.appendChild(title);
 
-  function positionPop(x, y){
-    const el = $("pop");
-    const pad = 14;
-    const w = el.offsetWidth || 360;
-    const h = el.offsetHeight || 220;
-    const vx = window.innerWidth;
-    const vy = window.innerHeight;
+            const btnContainer = document.createElement('div');
+            btnContainer.className = 'l0-buttons';
 
-    let left = x + 16;
-    let top = y + 16;
+            // Sort items inside group by ID
+            groups[key].sort((a,b) => a.name.localeCompare(b.name));
 
-    if(left + w + pad > vx) left = x - w - 16;
-    if(top + h + pad > vy) top = y - h - 16;
+            groups[key].forEach((l0, idx) => {
+                const btn = document.createElement('button');
+                const info = parseInfo(l0.name);
+                btn.className = 'l0-btn';
+                btn.innerHTML = `<span class="l0-btn-id">${info.id}</span><span class="l0-btn-name">${info.name}</span>`;
+                btn.onclick = () => selectL0(l0, btn);
+                
+                // Auto Select very first item of first group
+                if(key === sortedKeys[0] && idx === 0) selectL0(l0, btn);
+                
+                btnContainer.appendChild(btn);
+            });
 
-    left = cssClamp(left, pad, vx - w - pad);
-    top  = cssClamp(top, pad, vy - h - pad);
-
-    el.style.left = left + "px";
-    el.style.top  = top  + "px";
-  }
-
-  window.addEventListener("mousemove", (e) => {
-    state.mouse.x = e.clientX;
-    state.mouse.y = e.clientY;
-    if(state.pop.open){
-      positionPop(e.clientX, e.clientY);
+            groupDiv.appendChild(btnContainer);
+            l0Container.appendChild(groupDiv);
+        });
     }
-  });
 
-  window.addEventListener("scroll", () => {
-    if(state.pop.open) positionPop(state.mouse.x, state.mouse.y);
-  }, { passive:true });
+    // 2. SELECT L0
+    function selectL0(l0Data, btn) {
+        document.querySelectorAll('.l0-btn').forEach(b => b.classList.remove('active'));
+        if(btn) btn.classList.add('active');
 
-  window.addEventListener("keydown", (e) => {
-    if(e.key === "Escape") closePop();
-  });
+        // Context Bar
+        const info = parseInfo(l0Data.name);
+        document.getElementById('ctx-title').innerText = `${info.name} (${info.id})`;
+        document.getElementById('ctx-desc').innerText = l0Data.description || "";
+        document.getElementById('ctx-owner').innerText = "Owner: " + (l0Data.owner || "N/A");
 
-  document.addEventListener("click", (e) => {
-    const pop = $("pop");
-    if(state.pop.open && pop && !pop.contains(e.target)){
-      // clicking outside closes
-      closePop();
-    }
-  });
+        // Render L1
+        l1Container.innerHTML = '';
+        workspace.innerHTML = '<div style="color:#999; margin:auto; font-size:16px;">Select a Process Domain (L1 Chevron) above.</div>';
 
-  function escapeHtml(str){
-    return safeStr(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
-  }
+        if(l0Data.children) {
+            l0Data.children.forEach((l1, idx) => {
+                const div = document.createElement('div');
+                div.className = 'l1-chevron';
+                if(idx === 0) div.classList.add('first');
 
-  // -------- Data load / normalize --------
-  async function load(){
-    try{
-      setError("");
-      const res = await fetch("./data.json", { cache: "no-store" });
-      if(!res.ok) throw new Error(`Failed to fetch data.json (${res.status})`);
-      const json = await res.json();
+                const inf = parseInfo(l1.name);
+                div.innerHTML = `
+                    <span class="l1-id">${inf.id}</span>
+                    <span class="l1-name">${inf.name}</span>
+                    <span class="l1-owner">${l1.owner || "Unassigned"}</span>
+                `;
+                div.onclick = () => selectL1(l1, div);
+                
+                // Tooltip for L1
+                div.onmousemove = (e) => showTooltip(e, inf.name, l1.description, `Owner: ${l1.owner}`);
+                div.onmouseleave = hideTooltip;
 
-      // normalize: accept {children:[...]} or [...]
-      let root = null;
-      if(Array.isArray(json)){
-        root = { id:"ROOT", name:"Root", children: json };
-      } else if(json && typeof json === "object"){
-        root = json;
-        if(!Array.isArray(root.children)){
-          // attempt common alternative
-          if(Array.isArray(root.data)) root.children = root.data;
-          else root.children = [];
+                l1Container.appendChild(div);
+            });
         }
-      } else {
-        throw new Error("Unexpected JSON format. Expect {children:[...]}");
-      }
-
-      state.root = root;
-      state.l0All = (Array.isArray(root.children) ? root.children : []);
-      state.allNodes = [];
-      for(const l0 of state.l0All) traverse(l0, []);
-
-      buildFilters();
-      ensureInitialSelection();
-      renderAll();
-    } catch(err){
-      setError(String(err?.message || err));
-      console.error(err);
-    }
-  }
-
-  function buildFilters(){
-    // Create filter from L0 categories
-    const cats = new Set();
-    for(const l0 of state.l0All){
-      const c = safeStr(l0.category).trim();
-      if(c) cats.add(c);
-    }
-    const createSel = $("createFilter");
-    // reset keeping first option
-    while(createSel.options.length > 1) createSel.remove(1);
-    [...cats].sort().forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c;
-      opt.textContent = `Create: ${c}`;
-      createSel.appendChild(opt);
-    });
-
-    // Ownership filter from all nodes owners
-    const owners = new Set();
-    for(const rec of state.allNodes){
-      const o = safeStr(rec.node.owner).trim();
-      if(o) owners.add(o);
-    }
-    const ownerSel = $("ownerFilter");
-    while(ownerSel.options.length > 1) ownerSel.remove(1);
-    [...owners].sort().forEach(o => {
-      const opt = document.createElement("option");
-      opt.value = o;
-      opt.textContent = `Ownership: ${o}`;
-      ownerSel.appendChild(opt);
-    });
-
-    createSel.onchange = () => {
-      state.filters.create = createSel.value || "";
-      // if current L0 doesn't match, pick first matching
-      ensureInitialSelection();
-      renderAll();
-    };
-
-    ownerSel.onchange = () => {
-      state.filters.owner = ownerSel.value || "";
-      renderAll();
-    };
-  }
-
-  function l0MatchesCreate(l0){
-    const f = state.filters.create;
-    if(!f) return true;
-    return safeStr(l0.category) === f;
-  }
-
-  function ensureInitialSelection(){
-    // choose an L0 that matches current create filter
-    const candidates = state.l0All.filter(l0 => l0MatchesCreate(l0));
-    if(candidates.length === 0){
-      state.selected.l0 = null;
-      state.selected.l1 = null;
-      state.selected.l2 = null;
-      state.selected.l3 = null;
-      return;
     }
 
-    // if selected l0 invalid, auto select first
-    if(!state.selected.l0 || !l0MatchesCreate(state.selected.l0)){
-      state.selected.l0 = candidates[0];
-      state.selected.l1 = null;
-      state.selected.l2 = null;
-      state.selected.l3 = null;
-    }
-  }
+    // 3. SELECT L1 (RENDER L2 CHAIN)
+    function selectL1(l1Data, chevron) {
+        document.querySelectorAll('.l1-chevron').forEach(c => c.classList.remove('active'));
+        chevron.classList.add('active');
+        workspace.innerHTML = '';
 
-  // -------- Rendering --------
-  function renderAll(){
-    renderBreadcrumb();
-    renderHouse();
-    renderL1();
-    renderL2();
-    renderL3();
+        if(l1Data.children) {
+            l1Data.children.forEach((l2, idx) => {
+                const inf = parseInfo(l2.name);
+                
+                const card = document.createElement('div');
+                card.className = 'l2-chain-item';
+                if(idx === 0) card.classList.add('first');
 
-    // draw connectors after layout
-    requestAnimationFrame(() => {
-      drawFlow("l1", "l1Flow");
-      drawFlow("l2", "l2Flow");
-    });
-  }
+                // Header
+                const header = document.createElement('div');
+                header.className = 'l2-header';
+                header.innerHTML = `
+                    <span class="l2-id">${inf.id}</span>
+                    <span class="l2-name">${inf.name}</span>
+                    <span class="l2-owner">${l2.owner || "Inherited"}</span>
+                `;
+                card.appendChild(header);
 
-  function renderBreadcrumb(){
-    const row = $("crumbRow");
-    row.innerHTML = "";
+                // L3 List
+                const list = document.createElement('div');
+                list.className = 'l3-list';
+                
+                if(l2.children && l2.children.length > 0) {
+                    l2.children.forEach(l3 => {
+                        const l3Inf = parseInfo(l3.name);
+                        const item = document.createElement('div');
+                        item.className = 'l3-item';
+                        item.innerHTML = `
+                            <div class="l3-head">
+                                <span class="l3-id">${l3Inf.id}</span>
+                                <span>${l3.owner || "-"}</span>
+                            </div>
+                            <div class="l3-body">${l3Inf.name}</div>
+                        `;
+                        
+                        // L3 Tooltip
+                        item.onmousemove = (e) => {
+                            const meta = `
+                                <b>Owner:</b> ${l3.owner || l2.owner}<br>
+                                <b>Trigger:</b> ${l3.trigger || "-"}<br>
+                                <b>Outcome:</b> ${l3.outcome || "-"}
+                            `;
+                            showTooltip(e, l3Inf.name, l3.description, meta);
+                        };
+                        item.onmouseleave = hideTooltip;
 
-    const l0 = state.selected.l0;
-    const l1 = state.selected.l1;
-    const l2 = state.selected.l2;
-    const l3 = state.selected.l3;
+                        list.appendChild(item);
+                    });
+                } else {
+                    list.innerHTML = `<div style="padding:10px; color:#ccc; font-style:italic;">No steps defined.</div>`;
+                }
 
-    if(l0){
-      row.appendChild(makeCrumb("L0", titleFromName(l0.name || l0.id), "crumbL0"));
-    }
-    if(l1){
-      row.appendChild(makeCrumb("L1", titleFromName(l1.name || l1.id), "crumbL1"));
-    }
-    if(l2){
-      row.appendChild(makeCrumb("L2", titleFromName(l2.name || l2.id), "crumbL2"));
-    }
-    if(l3){
-      row.appendChild(makeCrumb("L3", titleFromName(l3.name || l3.id), "crumbL3"));
-    }
-
-    const current = l3 || l2 || l1 || l0;
-    $("crumbOwner").textContent = "Owner: " + (safeStr(current?.owner).trim() || "—");
-  }
-
-  function makeCrumb(level, text, cls){
-    const chip = document.createElement("div");
-    chip.className = `crumbChip ${cls}`;
-    chip.title = level;
-    chip.innerHTML = `<span class="dot"></span><span class="allowEllip">${escapeHtml(text)}</span>`;
-    return chip;
-  }
-
-  function renderHouse(){
-    const host = $("houseBody");
-    host.innerHTML = "";
-
-    // group L0 by category bands
-    const bands = [
-      { key:"Manage the Business", css:"manage", label:"MANAGE THE BUSINESS (Strategic Steering)" },
-      { key:"Run the Business", css:"run", label:"RUN THE BUSINESS (Core Operational Chain)" },
-      { key:"Change the Business", css:"change", label:"CHANGE THE BUSINESS (Evolution & Innovation)" },
-      { key:"Foundation", css:"foundation", label:"FOUNDATION (Digital & Data Backbone)" },
-    ];
-
-    // Some datasets may use slightly different category strings. We'll map by contains.
-    function bandOf(cat){
-      const c = safeStr(cat).toLowerCase();
-      if(c.includes("manage")) return "Manage the Business";
-      if(c.includes("run")) return "Run the Business";
-      if(c.includes("change")) return "Change the Business";
-      if(c.includes("foundation")) return "Foundation";
-      return cat || "Other";
+                card.appendChild(list);
+                workspace.appendChild(card);
+            });
+        }
     }
 
-    // filter by create/category
-    const visibleL0 = state.l0All.filter(l0 => l0MatchesCreate(l0));
-
-    // build a dict band -> items
-    const grouped = new Map();
-    for(const l0 of visibleL0){
-      const b = bandOf(l0.category);
-      if(!grouped.has(b)) grouped.set(b, []);
-      grouped.get(b).push(l0);
+    function showTooltip(e, title, desc, meta) {
+        tooltip.style.display = 'block';
+        tooltip.style.left = (e.clientX + 15) + 'px';
+        tooltip.style.top = (e.clientY + 15) + 'px';
+        tooltip.innerHTML = `<h4>${title}</h4><p>${desc||""}</p><div class="meta">${meta||""}</div>`;
     }
+    function hideTooltip() { tooltip.style.display = 'none'; }
 
-    // render known bands first
-    const renderedKeys = new Set();
-    for(const b of bands){
-      const items = grouped.get(b.key) || [];
-      renderedKeys.add(b.key);
-      if(items.length === 0) continue;
-      host.appendChild(renderBand(b.label, b.css, items));
-    }
-
-    // render other categories if exist
-    for(const [k, items] of grouped.entries()){
-      if(renderedKeys.has(k)) continue;
-      host.appendChild(renderBand(k, "run", items));
-    }
-  }
-
-  function renderBand(label, css, items){
-    const wrap = document.createElement("div");
-    wrap.className = `band ${css}`;
-
-    const head = document.createElement("div");
-    head.className = "band-head";
-    head.innerHTML = `<div>${escapeHtml(label)}</div><div class="count">${items.length}</div>`;
-    wrap.appendChild(head);
-
-    const grid = document.createElement("div");
-    grid.className = "band-grid";
-
-    // sort by id/name
-    items.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
-
-    for(const l0 of items){
-      // apply owner filter: show if any descendant matches (so house remains useful)
-      if(state.filters.owner && !anyDescendantOwnerMatch(l0)) continue;
-
-      const card = document.createElement("div");
-      card.className = "l0card" + (state.selected.l0 === l0 ? " active" : "");
-      const iconKey = safeStr(l0.id).split("_")[0] || safeStr(l0.id);
-      const svg = ICONS[iconKey] || icon("layers");
-      card.innerHTML = `
-        <div class="icon">${svg}</div>
-        <div class="l0meta">
-          <div class="l0code">${escapeHtml(l0.id || "")}</div>
-          <div class="l0name">${escapeHtml(titleFromName(l0.name || l0.id))}</div>
-          <div class="l0desc">${escapeHtml(safeStr(l0.description))}</div>
-        </div>
-      `;
-      card.onclick = (e) => {
-        e.stopPropagation();
-        state.selected.l0 = l0;
-        state.selected.l1 = null;
-        state.selected.l2 = null;
-        state.selected.l3 = null;
-        renderAll();
-        // open pop for l0
-        openPop(l0, (titleFromName(l0.name || l0.id)));
-      };
-      grid.appendChild(card);
-    }
-
-    wrap.appendChild(grid);
-    return wrap;
-  }
-
-  function renderL1(){
-    const host = $("l1");
-    host.innerHTML = "";
-
-    const l0 = state.selected.l0;
-    const hint = $("l1Hint");
-    if(!l0){
-      hint.textContent = "Select an L0 box in the process house.";
-      $("l1Count").textContent = "0";
-      return;
-    }
-
-    hint.textContent = `Selected L0: ${titleFromName(l0.name || l0.id)}`;
-
-    let kids = Array.isArray(l0.children) ? [...l0.children] : [];
-    kids.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
-
-    $("l1Count").textContent = String(kids.length);
-
-    kids.forEach((n, i) => {
-      const chev = makeChevron(n, i, kids.length, "L1");
-      if(state.selected.l1 === n) chev.classList.add("active");
-      if(state.filters.owner && !ownerMatches(n)) chev.classList.add("dim");
-      chev.onclick = (e) => {
-        e.stopPropagation();
-        state.selected.l1 = n;
-        state.selected.l2 = null;
-        state.selected.l3 = null;
-        renderAll();
-        openPop(n, buildPathString());
-      };
-      host.appendChild(chev);
-    });
-
-    // ensure a valid selection if previous selected isn't in list
-    if(state.selected.l1 && !kids.includes(state.selected.l1)){
-      state.selected.l1 = null;
-      state.selected.l2 = null;
-      state.selected.l3 = null;
-    }
-  }
-
-  function renderL2(){
-    const host = $("l2");
-    host.innerHTML = "";
-
-    const l1 = state.selected.l1;
-    const hint = $("l2Hint");
-    if(!l1){
-      hint.textContent = "Select an L1 chevron.";
-      $("l2Count").textContent = "0";
-      return;
-    }
-
-    hint.textContent = `Selected L1: ${titleFromName(l1.name || l1.id)}`;
-
-    let kids = Array.isArray(l1.children) ? [...l1.children] : [];
-    kids.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
-
-    $("l2Count").textContent = String(kids.length);
-
-    kids.forEach((n, i) => {
-      const chev = makeChevron(n, i, kids.length, "L2");
-      chev.classList.add("darkPill"); // makes owner pill readable
-      if(state.selected.l2 === n) chev.classList.add("active");
-      if(state.filters.owner && !ownerMatches(n)) chev.classList.add("dim");
-      chev.onclick = (e) => {
-        e.stopPropagation();
-        state.selected.l2 = n;
-        state.selected.l3 = null;
-        renderAll();
-        openPop(n, buildPathString());
-      };
-      host.appendChild(chev);
-    });
-
-    if(state.selected.l2 && !kids.includes(state.selected.l2)){
-      state.selected.l2 = null;
-      state.selected.l3 = null;
-    }
-  }
-
-  function collectLeafActivities(node){
-    // We treat "activities" as the children of selected L2.
-    // If there are deeper levels, flatten them into a list.
-    const out = [];
-    (function rec(n){
-      if(!n) return;
-      const kids = Array.isArray(n.children) ? n.children : [];
-      if(kids.length === 0){
-        out.push(n);
-        return;
-      }
-      for(const c of kids) rec(c);
-    })(node);
-    return out;
-  }
-
-  function renderL3(){
-    const host = $("l3");
-    host.innerHTML = "";
-
-    const l2 = state.selected.l2;
-    const hint = $("l3Hint");
-    if(!l2){
-      hint.textContent = "Select an L2 chevron.";
-      $("l3Count").textContent = "0";
-      host.innerHTML = `<div class="empty">Select an L2 sub-chain to show L3 activities.</div>`;
-      return;
-    }
-
-    hint.textContent = `Selected L2: ${titleFromName(l2.name || l2.id)}`;
-
-    // IMPORTANT: show ALL activities. If L3 are leaf nodes, flatten.
-    let acts = Array.isArray(l2.children) ? [...l2.children] : [];
-    if(acts.length === 0){
-      // fallback: maybe L2 itself is leaf in some branches
-      acts = [];
-    }
-
-    // If L2 has deeper nesting, flatten leaf nodes
-    let list = acts.length ? acts : [];
-    // If children exist but are not leaf, optionally flatten
-    if(acts.some(a => Array.isArray(a.children) && a.children.length > 0)){
-      list = collectLeafActivities(l2).filter(x => x !== l2);
-    }
-
-    list.sort((a,b) => orderFromId(a.id) - orderFromId(b.id) || safeStr(a.id).localeCompare(safeStr(b.id)));
-
-    $("l3Count").textContent = String(list.length);
-
-    if(list.length === 0){
-      host.innerHTML = `<div class="empty">No L3 activities found under this L2 (check JSON children).</div>`;
-      return;
-    }
-
-    for(const n of list){
-      const card = document.createElement("div");
-      card.className = "l3card" + (state.selected.l3 === n ? " active" : "");
-      if(state.filters.owner && !ownerMatches(n)) card.classList.add("dim");
-
-      card.innerHTML = `
-        <div class="l3top">
-          <div class="l3code">${escapeHtml(n.id || "")}</div>
-          <div class="l3owner">${escapeHtml(safeStr(n.owner) || "")}</div>
-        </div>
-        <div class="l3name">${escapeHtml(titleFromName(n.name || n.id))}</div>
-        ${safeStr(n.description) ? `<div class="l3desc">${escapeHtml(safeStr(n.description))}</div>` : ""}
-      `;
-      card.onclick = (e) => {
-        e.stopPropagation();
-        state.selected.l3 = n;
-        renderAll();
-        openPop(n, buildPathString(true));
-      };
-      host.appendChild(card);
-    }
-  }
-
-  function makeChevron(node, idx, total, level){
-    const el = document.createElement("div");
-    el.className = "chev";
-
-    // first item in a row doesn't need notch removed: we don't know rows at render time.
-    // We'll keep notch always; visual is fine even on new rows.
-
-    // Per-level color logic:
-    // - L1: yellow ramp (start lighter → end deeper)
-    // - L2: dark grey ramp (start dark → end slightly lighter)
-    const t = total <= 1 ? 0 : (idx / (total - 1));
-    let bg = "#ffffff";
-    let fg = "#111";
-    let tip = bg;
-
-    if(level === "L1"){
-      // yellow ramp
-      const a = 0.85 + 0.10 * (1 - t);
-      // we keep it in yellow family but add subtle warmness
-      bg = `rgba(255,204,0,${a.toFixed(3)})`;
-      fg = "#111";
-      tip = bg;
-    } else if(level === "L2"){
-      // dark ramp (dark grey)
-      const base = 0.92 - 0.18 * t; // background opacity for dark layer
-      bg = `rgba(43,47,51,${base.toFixed(3)})`;
-      fg = "rgba(255,255,255,.94)";
-      tip = bg;
-      el.classList.add("darkPill");
-    }
-
-    el.style.setProperty("--chev-bg", bg);
-    el.style.setProperty("--chev-fg", fg);
-    el.style.setProperty("--chev-tip-bg", tip);
-
-    const code = safeStr(node.id);
-    const ttl = titleFromName(node.name || code);
-    const desc = safeStr(node.description);
-    const owner = safeStr(node.owner);
-
-    const ord = idx + 1;
-
-    const isStart = idx === 0;
-    const isEnd = idx === total - 1;
-
-    el.innerHTML = `
-      ${isStart ? `<div class="edgeIcon start" title="Start">${svgPlay()}</div>` : ""}
-      ${isEnd ? `<div class="edgeIcon end" title="End">${svgFlag()}</div>` : ""}
-      <div class="rowtop">
-        <div class="code">${escapeHtml(code)}</div>
-        <div class="ord">#${ord}</div>
-      </div>
-      <div class="name">${escapeHtml(ttl)}</div>
-      ${desc ? `<div class="meta">${escapeHtml(desc)}</div>` : ""}
-      ${owner ? `<div class="ownerTag" title="Owner">${escapeHtml(owner)}</div>` : ""}
-      <div class="flowArrow" aria-hidden="true">➜</div>
-    `;
-    return el;
-  }
-
-  function buildPathString(includeL3=false){
-    const parts = [];
-    if(state.selected.l0) parts.push(titleFromName(state.selected.l0.name || state.selected.l0.id));
-    if(state.selected.l1) parts.push(titleFromName(state.selected.l1.name || state.selected.l1.id));
-    if(state.selected.l2) parts.push(titleFromName(state.selected.l2.name || state.selected.l2.id));
-    if(includeL3 && state.selected.l3) parts.push(titleFromName(state.selected.l3.name || state.selected.l3.id));
-    return parts.join(" > ");
-  }
-
-  // -------- Flow connectors (SVG arrows between chevrons, across rows) --------
-  function drawFlow(chainId, svgId){
-    const chain = $(chainId);
-    const svg = $(svgId);
-    if(!chain || !svg) return;
-
-    const items = [...chain.querySelectorAll(".chev")];
-    svg.innerHTML = "";
-    if(items.length < 2) return;
-
-    const wrap = chain.parentElement; // chainwrap
-    const wr = wrap.getBoundingClientRect();
-
-    svg.setAttribute("viewBox", `0 0 ${wr.width} ${wr.height}`);
-    svg.setAttribute("preserveAspectRatio", "none");
-
-    // define arrow marker (more visible)
-    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-    defs.innerHTML = `
-      <marker id="${svgId}-arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
-        <path d="M0,0 L12,6 L0,12 Z" fill="rgba(0,0,0,.40)"></path>
-      </marker>
-    `;
-    svg.appendChild(defs);
-
-    for(let i=0; i<items.length-1; i++){
-      const a = items[i].getBoundingClientRect();
-      const b = items[i+1].getBoundingClientRect();
-
-      // From right-mid of A (near tip), to left-mid of B (near notch)
-      const x1 = (a.right - wr.left) + 6;
-      const y1 = (a.top + a.height/2 - wr.top);
-      const x2 = (b.left - wr.left) - 6;
-      const y2 = (b.top + b.height/2 - wr.top);
-
-      // control points for curvature (handles row wrap nicely)
-      const dx = Math.max(40, Math.abs(x2-x1) * 0.35);
-      const c1x = x1 + dx;
-      const c1y = y1;
-      const c2x = x2 - dx;
-      const c2y = y2;
-
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", `M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}`);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", "rgba(0,0,0,.32)");
-      path.setAttribute("stroke-width", "3");
-      path.setAttribute("marker-end", `url(#${svgId}-arrow)`);
-      path.setAttribute("stroke-linecap", "round");
-      svg.appendChild(path);
-    }
-  }
-
-  window.addEventListener("resize", () => {
-    requestAnimationFrame(() => {
-      drawFlow("l1", "l1Flow");
-      drawFlow("l2", "l2Flow");
-    });
-  });
-
-  // -------- Buttons --------
-  $("reset").onclick = () => {
-    state.filters.create = "";
-    state.filters.owner = "";
-    $("createFilter").value = "";
-    $("ownerFilter").value = "";
-
-    state.selected.l0 = null;
-    state.selected.l1 = null;
-    state.selected.l2 = null;
-    state.selected.l3 = null;
-
-    ensureInitialSelection();
-    closePop();
-    renderAll();
-  };
-
-  $("toggleHouse").onclick = () => {
-    const d = $("house");
-    d.open = !d.open;
-  };
-
-  // -------- Start --------
-  load();
 </script>
 </body>
 </html>
