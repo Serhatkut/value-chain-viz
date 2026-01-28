@@ -6,10 +6,22 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         /* --- RESET & LAYOUT --- */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f2f4f8; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        ::-webkit-scrollbar { height: 10px; width: 10px; }
-        ::-webkit-scrollbar-track { background: #e0e0e0; }
-        ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 5px; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            background-color: #f2f4f8; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            /* FIXED: Changed from hidden to auto so browser scrollbar appears if needed */
+            overflow: auto; 
+        }
+
+        /* Custom Scrollbar Styling */
+        ::-webkit-scrollbar { height: 12px; width: 12px; }
+        ::-webkit-scrollbar-track { background: #e0e0e0; border-left: 1px solid #ccc; }
+        ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 6px; border: 3px solid #e0e0e0; }
+        ::-webkit-scrollbar-thumb:hover { background: #999; }
 
         /* --- HEADER --- */
         #app-header {
@@ -19,26 +31,27 @@
             font-size: 20px;
             font-weight: 800;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); z-index: 110;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
+            flex-shrink: 0;
+            z-index: 200;
         }
 
-        /* --- MINI NAV (Collapsed State) --- */
+        /* --- MINI NAV --- */
         #mini-nav {
             background: #333; color: white; padding: 10px 25px;
-            display: none; /* Hidden initially */
+            display: none; 
             align-items: center; justify-content: space-between;
             cursor: pointer; border-bottom: 3px solid #ffcc00;
-            transition: background 0.2s;
+            flex-shrink: 0;
         }
         #mini-nav:hover { background: #444; }
-        #mini-nav strong { color: #ffcc00; }
 
         /* --- STRATEGY HOUSE CONTAINER --- */
         #strategy-house-container {
             background: #eef1f5;
             padding: 25px;
             transition: all 0.5s ease-in-out;
-            max-height: 600px;
+            max-height: 800px; /* Increased to ensure it fits */
             opacity: 1;
             overflow: hidden;
             border-bottom: 1px solid #ccc;
@@ -48,16 +61,15 @@
             max-height: 0; padding: 0 25px; opacity: 0; border-bottom-width: 0;
         }
 
-        /* HOUSE GRID */
         .house-grid {
             display: grid;
             grid-template-columns: 1fr 1fr; 
             gap: 15px;
             max-width: 1100px; margin: auto;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+            /* Shadow for the whole house */
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
         }
 
-        /* HOUSE SECTIONS (ROOMS) */
         .house-section {
             padding: 20px; 
             position: relative;
@@ -69,83 +81,70 @@
         }
         .btn-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-        /* --- COLORS & ASSIGNMENTS --- */
-        
-        /* 1. ROOF (Manage) - DHL RED */
+        /* --- HOUSE COLORS --- */
+        /* Roof (Manage) - RED */
         #house-roof { 
             grid-column: 1 / span 2; 
-            background: #d40511; 
-            color: white;
+            background: #d40511; color: white;
             clip-path: polygon(50% 0%, 100% 25%, 100% 100%, 0% 100%, 0% 25%);
-            padding-top: 40px; /* Space for the point */
-            margin-bottom: -5px; /* Overlap pillars slightly */
-            z-index: 2;
+            padding-top: 40px; margin-bottom: -5px; z-index: 2;
         }
-
-        /* 2. PILLAR LEFT (Run) - DHL YELLOW */
+        /* Run (Left) - YELLOW */
         #house-pillar-run { 
-            background: #ffcc00; 
-            color: #d40511; /* Red text for title contrast */
+            background: #ffcc00; color: #d40511; 
             border: 1px solid rgba(0,0,0,0.05);
         }
-        #house-pillar-run .house-title { color: #d40511; }
-
-        /* 3. PILLAR RIGHT (Transform) - DARK GREY */
-        #house-pillar-transform { 
-            background: #333333; 
-            color: white;
-        }
-
-        /* 4. FOUNDATION (Enablers) - LIGHT GREY */
+        /* Transform (Right) - DARK */
+        #house-pillar-transform { background: #333; color: white; }
+        /* Foundation - GREY */
         #house-foundation { 
             grid-column: 1 / span 2; 
-            background: #d0d0d0; 
-            color: #333;
-            border-radius: 0 0 8px 8px;
-            border-top: 4px solid #bbb;
+            background: #d0d0d0; color: #333;
+            border-radius: 0 0 8px 8px; border-top: 4px solid #bbb;
         }
 
-        /* --- L0 BUTTON STYLES (Adaptive Colors) --- */
+        /* --- L0 BUTTONS --- */
         .l0-btn {
             border: none; padding: 10px 15px; border-radius: 4px; 
             cursor: pointer; text-align: left; min-width: 140px; flex-grow: 1; max-width: 220px;
-            transition: transform 0.2s, box-shadow 0.2s; position: relative;
+            transition: transform 0.2s; position: relative;
         }
         .l0-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         .l0-btn-id { font-size: 10px; font-weight: bold; display: block; opacity: 0.8; }
         .l0-btn-name { font-size: 13px; font-weight: 600; line-height: 1.1; }
 
-        /* Specific Button Colors based on Parent Background */
-        
-        /* Buttons on Red Background */
+        /* Specific Button Colors */
         #house-roof .l0-btn { background: rgba(255,255,255,0.2); color: white; }
         #house-roof .l0-btn:hover { background: white; color: #d40511; }
         #house-roof .l0-btn.active { background: white; color: #d40511; box-shadow: 0 0 0 2px #ffcc00; }
 
-        /* Buttons on Yellow Background (Need Dark Content) */
         #house-pillar-run .l0-btn { background: rgba(255,255,255,0.6); color: #000; }
         #house-pillar-run .l0-btn:hover { background: white; color: #d40511; }
         #house-pillar-run .l0-btn.active { background: #d40511; color: white; }
 
-        /* Buttons on Dark Background */
         #house-pillar-transform .l0-btn { background: rgba(255,255,255,0.15); color: #ddd; }
         #house-pillar-transform .l0-btn:hover { background: white; color: #333; }
         #house-pillar-transform .l0-btn.active { background: #ffcc00; color: black; }
 
-        /* Buttons on Foundation Background */
-        #house-foundation .l0-btn { background: white; color: #333; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        #house-foundation .l0-btn { background: white; color: #333; }
         #house-foundation .l0-btn:hover { background: #333; color: white; }
         #house-foundation .l0-btn.active { background: #d40511; color: white; }
 
-
         /* --- CONTEXT BAR --- */
-        #context-bar { background: #fff; border-bottom: 1px solid #ddd; padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; height: 50px; }
+        #context-bar { 
+            background: #fff; border-bottom: 1px solid #ddd; padding: 10px 30px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            flex-shrink: 0; height: 50px; 
+        }
         #ctx-title { margin: 0; font-size: 18px; color: #333; font-weight: 700; }
         #ctx-desc { font-size: 14px; color: #666; margin-left: 20px; border-left: 3px solid #ffcc00; padding-left: 15px; }
-        #ctx-owner { font-size: 11px; color: #fff; background: #333; padding: 4px 10px; border-radius: 4px; font-weight: bold; letter-spacing: 0.5px; }
+        #ctx-owner { font-size: 11px; color: #fff; background: #333; padding: 4px 10px; border-radius: 4px; font-weight: bold; }
 
         /* --- L1 CHEVRONS --- */
-        #l1-container { padding: 15px 30px; background: #fdfdfd; border-bottom: 1px solid #ddd; display: flex; flex-wrap: wrap; flex-shrink: 0; min-height: 80px; box-shadow: inset 0 0 10px rgba(0,0,0,0.02); }
+        #l1-container { 
+            padding: 15px 30px; background: #fdfdfd; border-bottom: 1px solid #ddd; 
+            display: flex; flex-wrap: wrap; flex-shrink: 0; min-height: 80px; 
+        }
         .l1-chevron {
             position: relative; background: #e0e0e0; height: 60px; width: 170px; margin-right: 6px; margin-bottom: 6px;
             display: flex; flex-direction: column; justify-content: center; padding-left: 28px; padding-right: 15px;
@@ -159,18 +158,29 @@
         .l1-id { font-size: 11px; font-weight: 800; color: #d40511; margin-bottom: 2px; }
         .l1-name { font-size: 12px; font-weight: 700; line-height: 1.1; }
 
-        /* --- WORKSPACE (L2 Overlapping Chain) --- */
-        #workspace { flex-grow: 1; padding: 30px 40px; overflow-x: auto; overflow-y: hidden; background: #fff; display: flex; align-items: flex-start; white-space: nowrap; padding-bottom: 50px; }
+        /* --- WORKSPACE (L2/L3) --- */
+        #workspace { 
+            flex-grow: 1; 
+            padding: 40px; 
+            /* FIXED: Enable both scrollbars */
+            overflow: auto; 
+            background: #fff; 
+            display: flex; 
+            align-items: flex-start; /* Align to top */
+            white-space: nowrap; 
+            padding-bottom: 80px; 
+        }
         
+        /* L2 CHAIN ITEM (Big Arrow) */
         .l2-chain-item {
             position: relative; 
             background: #ffffff; 
             width: 320px; 
             min-width: 320px; 
-            min-height: 350px; 
-            margin-left: -35px; /* Overlap amount */
+            min-height: 400px; /* Fixed height for uniformity */
+            margin-left: -35px; 
             
-            /* SHAPE DEFINITION */
+            /* SHAPE */
             clip-path: polygon(
                 0% 0%, 
                 calc(100% - 35px) 0%, 
@@ -180,10 +190,13 @@
                 35px 50%
             );
             
-            /* BORDER VISIBILITY FIX: Drop Shadow acts as border */
-            filter: drop-shadow(0 0 1px #888) drop-shadow(5px 5px 10px rgba(0,0,0,0.15));
+            /* FIXED: FRAME VISIBILITY */
+            /* Using drop-shadow to create a hard border around the clip-path */
+            filter: 
+                drop-shadow(0 0 1px #555)   /* The sharp 1px border */
+                drop-shadow(4px 4px 8px rgba(0,0,0,0.15)); /* The soft shadow */
             
-            padding: 25px 40px 25px 60px; /* Content padding to fit shape */
+            padding: 25px 40px 25px 60px; 
             display: flex; flex-direction: column; 
             transition: transform 0.2s, z-index 0s;
         }
@@ -194,23 +207,27 @@
             padding-left: 25px; 
         }
 
-        /* Hover Behavior */
         .l2-chain-item:hover { 
-            background: #fffdf0; /* Subtle yellow tint on hover */
+            background: #fffdf0; 
             z-index: 100; 
             transform: scale(1.02);
-            filter: drop-shadow(0 0 2px #d40511) drop-shadow(10px 10px 20px rgba(0,0,0,0.2));
+            /* Stronger shadow on hover */
+            filter: drop-shadow(0 0 1px #d40511) drop-shadow(8px 8px 16px rgba(0,0,0,0.2));
         }
 
-        /* Top Bar of L2 */
-        .l2-bar {
-            height: 4px; background: #ffcc00; width: 100%; margin-bottom: 10px; border-radius: 2px;
-        }
-
+        .l2-bar { height: 4px; background: #ffcc00; width: 100%; margin-bottom: 10px; border-radius: 2px; }
         .l2-id { color: #d40511; font-size: 11px; font-weight: 800; display: block; margin-bottom: 4px; }
         .l2-name { color: #222; font-size: 15px; font-weight: 700; white-space: normal; line-height: 1.25; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
-        .l3-list { overflow-y: auto; flex-grow: 1; padding-right: 5px; }
+        /* L3 List */
+        .l3-list { 
+            overflow-y: auto; 
+            flex-grow: 1; 
+            padding-right: 5px; 
+            /* Ensure list scrolls inside the card */
+            max-height: 100%; 
+        }
+        
         .l3-item { 
             background: #f7f7f7; margin-bottom: 6px; padding: 8px 10px; border-radius: 4px; 
             border-left: 3px solid #ccc; font-size: 12px; white-space: normal; cursor: help; 
@@ -220,7 +237,7 @@
         .l3-head { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; }
         .l3-body { color: #333; font-weight: 500; }
 
-        /* --- TOOLTIP & ERROR --- */
+        /* --- TOOLTIP --- */
         #tooltip { position: fixed; display: none; background: #222; color: #fff; padding: 12px 16px; border-radius: 4px; font-size: 12px; max-width: 280px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 1000; pointer-events: none; border-left: 4px solid #ffcc00; }
         #tooltip h4 { margin: 0 0 6px 0; color: #ffcc00; font-size: 13px; }
         #tooltip p { margin: 0 0 8px 0; color: #ddd; line-height: 1.4; }
@@ -232,7 +249,7 @@
 
 <div id="app-header">
     <span>DHL eCommerce Value Chain</span>
-    <span style="font-size:12px; font-weight:normal; opacity:0.8">Interactive Map v2.0</span>
+    <span style="font-size:12px; font-weight:normal; opacity:0.8">Interactive Map v3.0</span>
 </div>
 
 <div id="mini-nav" onclick="toggleHouse(true)">
@@ -246,17 +263,14 @@
             <div class="house-title">Manage the Business</div>
             <div class="btn-container" id="cont-manage"></div>
         </div>
-        
         <div id="house-pillar-run" class="house-section">
             <div class="house-title">Run the Business</div>
             <div class="btn-container" id="cont-run"></div>
         </div>
-        
         <div id="house-pillar-transform" class="house-section">
             <div class="house-title">Transform the Business</div>
             <div class="btn-container" id="cont-transform"></div>
         </div>
-        
         <div id="house-foundation" class="house-section">
             <div class="house-title">Foundations & Enablers</div>
             <div class="btn-container" id="cont-foundation"></div>
@@ -279,7 +293,7 @@
 <div id="workspace">
     <div style="color:#bbb; margin:auto; font-size:18px; text-align:center; padding-top: 60px;">
         <div style="font-size: 50px; color:#e0e0e0; margin-bottom: 20px;">⟰</div>
-        Explore the Value Chain by selecting a category above.
+        Select a Value Stream above to view the process chain.
     </div>
 </div>
 
@@ -294,7 +308,7 @@
     const workspace = document.getElementById('workspace');
     const tooltip = document.getElementById('tooltip');
 
-    // --- DATA LOAD ---
+    // --- LOAD DATA ---
     d3.json("data.json").then(function(data) {
         if(!data || !data.children) return;
         renderHouse(data);
@@ -329,14 +343,12 @@
             'foundation': document.getElementById('cont-foundation')
         };
 
-        // Sort Data
         data.children.sort((a,b) => a.name.localeCompare(b.name));
 
         data.children.forEach(l0 => {
             const cat = (l0.category || "").toLowerCase();
             let target = containers['foundation'];
 
-            // Logic to assign rooms
             if(cat.includes('manage')) target = containers['manage'];
             else if(cat.includes('run')) target = containers['run'];
             else if(cat.includes('change') || cat.includes('transform')) target = containers['transform'];
@@ -356,17 +368,13 @@
         if(btn) btn.classList.add('active');
 
         const info = parseInfo(l0Data.name);
-        
-        // Update Context
         document.getElementById('ctx-title').innerText = `${info.name}`;
         document.getElementById('ctx-desc').innerText = l0Data.description || "No description.";
         document.getElementById('ctx-owner').innerText = (l0Data.owner || "Unassigned").toUpperCase();
         miniNavText.innerHTML = `Active Stream: <strong style="color:#ffcc00">${info.name}</strong>`;
 
-        // Collapse
         toggleHouse(false);
 
-        // Render L1
         l1Container.innerHTML = '';
         workspace.innerHTML = '<div style="color:#999; margin:auto; font-size:16px; padding-top:60px;">Select a Process Domain (L1 Chevron) to view details.</div>';
 
@@ -375,12 +383,8 @@
                 const div = document.createElement('div');
                 div.className = 'l1-chevron';
                 if(idx === 0) div.classList.add('first');
-                
                 const inf = parseInfo(l1.name);
-                div.innerHTML = `
-                    <span class="l1-id">${inf.id}</span>
-                    <span class="l1-name">${inf.name}</span>
-                `;
+                div.innerHTML = `<span class="l1-id">${inf.id}</span><span class="l1-name">${inf.name}</span>`;
                 div.onclick = () => selectL1(l1, div);
                 div.onmousemove = (e) => showTooltip(e, inf.name, l1.description, `Owner: ${l1.owner}`);
                 div.onmouseleave = hideTooltip;
@@ -389,7 +393,7 @@
         }
     }
 
-    // --- SELECT L1 (Show Chain) ---
+    // --- SELECT L1 ---
     function selectL1(l1Data, chevron) {
         document.querySelectorAll('.l1-chevron').forEach(c => c.classList.remove('active'));
         chevron.classList.add('active');
@@ -402,7 +406,6 @@
                 card.className = 'l2-chain-item';
                 if(idx === 0) card.classList.add('first');
 
-                // Render L2 Card
                 card.innerHTML = `
                     <div class="l2-bar"></div>
                     <span class="l2-id">${inf.id}</span>
@@ -411,7 +414,6 @@
                 `;
                 workspace.appendChild(card);
                 
-                // Render L3 List
                 const list = card.querySelector(`#l3-list-${idx}`);
                 if(l2.children && l2.children.length > 0) {
                     l2.children.forEach(l3 => {
