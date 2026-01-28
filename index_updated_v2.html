@@ -1,0 +1,1339 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>DHL eCommerce · Enterprise Process Architecture · Value Chain</title>
+  <style>
+    :root{
+      --dhl-red:#D40511;
+      --dhl-yellow:#FFCC00;
+
+      --bg:#f6f6f7;
+      --card:#ffffff;
+      --ink:#101828;
+      --muted:#667085;
+      --line:#e6e8ee;
+
+      --radius:14px;
+      --e1: 0 2px 10px rgba(0,0,0,.06);
+      --e2: 0 10px 26px rgba(0,0,0,.08);
+      --e3: 0 16px 40px rgba(0,0,0,.10);
+
+      /* Chevron geometry */
+      --chev-h: 124px;       /* consistent block height */
+      --chev-tip: 40px;      /* visible arrow tip */
+      --chev-notch: 22px;    /* left notch */
+      --chev-gap: 14px;
+
+      /* Readability */
+      --fs-code: 14px;
+      --fs-title: 17px;
+      --fs-desc: 13px;
+      --fs-owner: 12px;
+
+      --maxw: 1560px;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    header{
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(255,204,0,.95), rgba(255,204,0,.92));
+      border-bottom: 1px solid rgba(0,0,0,.10);
+      backdrop-filter: blur(6px);
+    }
+    .hdr{
+      max-width: var(--maxw);
+      margin:0 auto;
+      padding: 14px 18px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .brand{ display:flex; gap:12px; align-items:flex-start; }
+    .mark{
+      width:10px;height:34px;
+      background: var(--dhl-red);
+      border-radius:999px;
+      margin-top:2px;
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.06);
+    }
+    .brand h1{ margin:0; font-weight: 950; font-size: 18px; line-height: 1.1; letter-spacing:.2px; }
+    .brand .sub{
+      margin-top:2px; font-size:12px; font-weight: 850;
+      color:#3a2b00; opacity:.85;
+    }
+
+    .actions{
+      display:flex; gap:10px; align-items:center;
+      flex-wrap:wrap; justify-content:flex-end;
+    }
+    .btn{
+      cursor:pointer; border:none; border-radius:999px;
+      padding:9px 12px; font-size:12px; font-weight: 950;
+      background: rgba(255,255,255,.88);
+      border:1px solid rgba(0,0,0,.12);
+      box-shadow: var(--e1);
+    }
+    .btn-primary{
+      background: var(--dhl-red); color:#fff;
+      border-color: rgba(0,0,0,.14);
+    }
+    .select{
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 950;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.88);
+      box-shadow: var(--e1);
+      cursor:pointer;
+      max-width: 280px;
+    }
+
+    /* Breadcrumb (per level, colored chips) */
+    .crumbbar{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 18px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .crumbRow{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; max-width: 100%; }
+    .crumbChip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px; border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.12);
+      box-shadow: var(--e1);
+      font-size:12px; font-weight: 950;
+      max-width: 88vw;
+    }
+    .crumbChip .dot{
+      width:10px;height:10px;border-radius:50%;
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.6);
+      flex: 0 0 auto;
+    }
+    .crumbChip span.allowEllip{
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      max-width: 72vw;
+    }
+    .crumbL0{ background: rgba(212,5,17,.92); color:#fff; border-color: rgba(0,0,0,.16); }
+    .crumbL0 .dot{ background:#fff; }
+    .crumbL1{ background: rgba(255,204,0,.95); color:#111; border-color: rgba(0,0,0,.16); }
+    .crumbL1 .dot{ background: var(--dhl-red); }
+    .crumbL2{ background: rgba(43,47,51,.92); color:#fff; border-color: rgba(0,0,0,.22); }
+    .crumbL2 .dot{ background: var(--dhl-yellow); }
+    .crumbL3{ background: rgba(240,241,243,.95); color:#111; border-color: rgba(0,0,0,.12); }
+    .crumbL3 .dot{ background: var(--dhl-red); }
+    .ownerChip{
+      background: rgba(212,5,17,.12);
+      border-color: rgba(212,5,17,.22);
+      color: rgba(0,0,0,.78);
+    }
+    .ownerChip .dot{ background: var(--dhl-red); }
+
+    main{
+      max-width: var(--maxw);
+      margin:0 auto;
+      padding: 14px 18px 28px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    /* Process house accordion */
+    details.house{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--e1);
+      overflow:hidden;
+    }
+    details.house summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 12px 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(180deg, #fff, #fbfbfd);
+      border-bottom: 1px solid var(--line);
+      font-weight: 950;
+      font-size: 13px;
+    }
+    details.house summary::-webkit-details-marker{ display:none; }
+    .sum-left{ display:flex; align-items:center; gap:10px; }
+    .pill{
+      padding:5px 10px;
+      border-radius:999px;
+      border:1px solid rgba(212,5,17,.25);
+      background: rgba(212,5,17,.12);
+      color: var(--dhl-red);
+      font-weight: 1000;
+      font-size: 11px;
+    }
+    .hint{
+      font-size:12px;
+      font-weight: 850;
+      color: rgba(0,0,0,.55);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 70vw;
+    }
+    .house-body{ padding: 14px; background:#fff; }
+
+    .band{
+      border-radius: 16px;
+      overflow:hidden;
+      border: 1px solid rgba(0,0,0,.10);
+      box-shadow: var(--e1);
+      margin-bottom: 12px;
+    }
+    .band:last-child{ margin-bottom:0; }
+    .band-head{
+      padding: 10px 12px;
+      font-weight: 1000;
+      font-size: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+    .band-head .count{
+      font-size: 11px;
+      font-weight: 1000;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.7);
+    }
+    .band.manage .band-head{ background: rgba(255,204,0,.55); }
+    .band.run .band-head{ background: rgba(255,204,0,.35); }
+    .band.change .band-head{ background: rgba(212,5,17,.10); }
+    .band.foundation .band-head{ background: rgba(43,47,51,.10); }
+
+    .band-grid{
+      padding: 12px;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(240px, 1fr));
+      gap: 12px;
+      background:#fff;
+    }
+    @media (max-width: 1100px){ .band-grid{ grid-template-columns: repeat(2, minmax(240px, 1fr)); } }
+    @media (max-width: 640px){ .band-grid{ grid-template-columns: 1fr; } }
+
+    .l0card{
+      cursor:pointer;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,.12);
+      background:#fff;
+      box-shadow: var(--e2);
+      padding: 10px 10px 9px;
+      transition: transform .08s ease, box-shadow .08s ease, border-color .2s ease;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      min-height: 96px;
+    }
+    .l0card:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
+    .l0card.active{
+      border-color: rgba(212,5,17,.35);
+      outline: 3px solid rgba(212,5,17,.18);
+      outline-offset: 2px;
+    }
+
+    .icon{
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(255,204,0,.25);
+      border: 1px solid rgba(0,0,0,.10);
+      flex:0 0 auto;
+      color: rgba(0,0,0,.65);
+    }
+    .icon svg{ width: 20px; height: 20px; fill: currentColor; }
+
+    .l0meta{ min-width:0; }
+    .l0code{ font-weight: 1000; font-size: 12px; color: var(--dhl-red); letter-spacing:.2px; }
+    .l0name{ margin-top:2px; font-weight: 1000; font-size: 13px; line-height: 1.15; }
+    .l0desc{
+      margin-top: 5px;
+      font-size: 11px;
+      font-weight: 850;
+      color: rgba(0,0,0,.60);
+      line-height: 1.25;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    /* Panels */
+    section.panel{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--e1);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      background: linear-gradient(180deg, #fff, #fbfbfd);
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-title{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 1000;
+      font-size: 12px;
+    }
+    .badge{
+      padding: 5px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 1000;
+      border: 1px solid rgba(0,0,0,.12);
+      background: #fff;
+    }
+    .badge.l1{ background: rgba(255,204,0,.22); border-color: rgba(255,204,0,.45); }
+    .badge.l2{ background: rgba(43,47,51,.10); border-color: rgba(43,47,51,.22); }
+    .badge.l3{ background: rgba(238,238,239,.80); }
+    .subhint{
+      font-size: 12px;
+      font-weight: 850;
+      color: rgba(0,0,0,.55);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 74vw;
+    }
+
+    /* Chevron chain wrapper */
+    .chainwrap{ position: relative; padding: 12px; }
+    .flowSvg{
+      position:absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events:none;
+      /* put ABOVE chevrons so it is visible */
+      z-index: 6;
+    }
+
+    /* GRID makes chevron sizes consistent per row */
+    .chain{
+      position: relative;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: var(--chev-gap);
+      align-items: stretch;
+    }
+
+    /* Chevron card using clip-path (consistent shape) */
+    .chev{
+      height: var(--chev-h);
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,.18);
+      box-shadow: var(--e2);
+      cursor:pointer;
+
+      padding: 12px 16px 10px 16px;
+      display: grid;
+      grid-template-rows: 18px 44px 1fr 28px; /* top, title, desc, footer */
+      gap: 6px;
+      overflow: hidden;
+
+      background: var(--chev-bg, #fff);
+      color: var(--chev-fg, #111);
+
+      transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
+
+      /* chevron shape */
+      clip-path: polygon(
+        0% 0%,
+        calc(100% - var(--chev-tip)) 0%,
+        100% 50%,
+        calc(100% - var(--chev-tip)) 100%,
+        0% 100%,
+        var(--chev-notch) 50%
+      );
+    }
+    /* first in chain: no notch */
+    .chev.first{
+      clip-path: polygon(
+        0% 0%,
+        calc(100% - var(--chev-tip)) 0%,
+        100% 50%,
+        calc(100% - var(--chev-tip)) 100%,
+        0% 100%
+      );
+    }
+
+    .chev:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
+
+    .chev.active{
+      background: var(--dhl-red) !important;
+      color: #fff !important;
+      border-color: rgba(0,0,0,.22);
+      outline: 4px solid rgba(212,5,17,.26);
+      outline-offset: 2px;
+      filter: saturate(1.05);
+    }
+
+    .rowtop{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .code{
+      font-weight: 1000;
+      font-size: var(--fs-code);
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 70%;
+    }
+    .ord{ font-weight: 1000; font-size: 12px; opacity:.90; white-space:nowrap; }
+
+    .name{
+      font-weight: 1000;
+      font-size: var(--fs-title);
+      line-height:1.15;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      margin-top: 2px;
+    }
+
+    .meta{
+      font-size: var(--fs-desc);
+      font-weight: 850;
+      line-height:1.28;
+      opacity:.95;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      margin-top: 2px;
+    }
+
+    .foot{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+    }
+
+    .ownerTag{
+      display:inline-flex;
+      align-items:center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: var(--fs-owner);
+      font-weight: 1000;
+      background: rgba(255,255,255,.86);
+      border: 1px solid rgba(0,0,0,.14);
+      color: rgba(0,0,0,.80);
+      max-width: 72%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .flowArrow{
+      font-weight: 1100;
+      font-size: 18px;
+      opacity: .95;
+      text-shadow: 0 1px 0 rgba(0,0,0,.15);
+      user-select:none;
+    }
+
+    .chev.darkPill .ownerTag{
+      background: rgba(255,255,255,.14);
+      border-color: rgba(255,255,255,.22);
+      color: rgba(255,255,255,.92);
+    }
+    .chev.active .ownerTag{
+      background: rgba(255,255,255,.16);
+      border-color: rgba(255,255,255,.28);
+      color: rgba(255,255,255,.92);
+    }
+
+    /* Start / end icons in top row */
+    .edgeIcon{
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: var(--e1);
+      border: 1px solid rgba(0,0,0,.14);
+      background: rgba(255,255,255,.88);
+      color: rgba(0,0,0,.75);
+      flex: 0 0 auto;
+    }
+    .edgeIcon svg{ width: 16px; height: 16px; fill: currentColor; }
+    .edgeGroup{ display:flex; gap:8px; align-items:center; }
+
+    /* L3 waterfall */
+    .l3wrap{ padding: 12px; }
+    .waterfall{ display:flex; flex-direction:column; gap:10px; }
+    .l3card{
+      border:1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      padding: 12px 12px;
+      background: #fff;
+      box-shadow: var(--e2);
+      cursor:pointer;
+      position:relative;
+      transition: transform .08s ease, box-shadow .08s ease;
+    }
+    .l3card:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
+    .l3card.active{
+      outline: 4px solid rgba(212,5,17,.18);
+      outline-offset: 2px;
+      border-color: rgba(212,5,17,.20);
+    }
+    .l3top{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .l3code{
+      font-weight: 1000;
+      font-size: 13px;
+      color: var(--dhl-red);
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      max-width: 70%;
+    }
+    .l3owner{
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(0,0,0,.60);
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+      max-width: 50%;
+      text-align:right;
+    }
+    .l3name{ margin-top: 6px; font-weight: 1000; font-size: 15px; line-height:1.15; }
+    .l3desc{ margin-top: 8px; font-size: 12px; font-weight: 850; color: rgba(0,0,0,.62); line-height:1.3; }
+
+    .empty{
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px dashed rgba(0,0,0,.18);
+      color: rgba(0,0,0,.55);
+      font-weight: 900;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    /* Click popover (follows mouse) */
+    .popover{
+      position: fixed;
+      z-index: 9999;
+      min-width: 320px;
+      max-width: 520px;
+      background:#fff;
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 14px;
+      box-shadow: var(--e3);
+      padding: 12px 12px 10px;
+      display:none;
+      pointer-events:auto;
+    }
+    .pop-top{ display:flex; justify-content:space-between; gap:10px; align-items:flex-start; }
+    .pop-code{
+      font-weight:1000; font-size:12px; color: var(--dhl-red);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 70%;
+    }
+    .pop-owner{
+      font-weight:1000; font-size:12px; color: rgba(0,0,0,.60);
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 48%; text-align:right;
+    }
+    .pop-title{ margin-top: 6px; font-weight:1000; font-size: 14px; line-height:1.2; }
+    .pop-desc{ margin-top: 8px; font-size: 12px; font-weight: 850; color: rgba(0,0,0,.65); line-height:1.3; }
+    .pop-foot{
+      margin-top: 10px; display:flex; justify-content:space-between; gap:10px; align-items:center;
+      border-top: 1px solid rgba(0,0,0,.08); padding-top: 8px;
+      font-size: 11px; font-weight: 950; color: rgba(0,0,0,.60);
+    }
+    .pop-foot button{
+      cursor:pointer; border:none; border-radius: 999px;
+      padding: 6px 10px; font-size: 11px; font-weight: 1000;
+      background: rgba(0,0,0,.06); border: 1px solid rgba(0,0,0,.12);
+    }
+
+    .error{
+      white-space: pre-wrap;
+      background: rgba(212,5,17,.10);
+      border: 1px solid rgba(212,5,17,.22);
+      color: #7d0008;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 950;
+      font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="hdr">
+    <div class="brand">
+      <div class="mark"></div>
+      <div>
+        <h1>DHL eCommerce</h1>
+        <div class="sub">Enterprise Process Architecture · The Value Chain Blueprint</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <select id="createFilter" class="select" title="Create (L0 category)">
+        <option value="">Create: All</option>
+      </select>
+
+      <select id="ownerFilter" class="select" title="Ownership">
+        <option value="">Ownership: All</option>
+      </select>
+
+      <button id="reset" class="btn">Reset</button>
+      <button id="toggleHouse" class="btn btn-primary">Process House</button>
+    </div>
+  </div>
+
+  <div class="crumbbar">
+    <div class="crumbRow" id="crumbRow"></div>
+    <div class="crumbRow">
+      <div class="crumbChip ownerChip" title="Current selected owner">
+        <span class="dot"></span>
+        <span class="allowEllip" id="crumbOwner">Owner: —</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <details id="house" class="house" open>
+    <summary>
+      <div class="sum-left">
+        <span class="pill">L0</span>
+        <span>Process House</span>
+      </div>
+      <span class="hint">Click a box to select (process house acts as filter)</span>
+    </summary>
+    <div class="house-body" id="houseBody"></div>
+  </details>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <span class="badge l1">L1</span>
+        <span>L1 Process Chain</span>
+        <span id="l1Count" class="badge l1">0</span>
+      </div>
+      <div id="l1Hint" class="subhint">Select an L0 box in the process house.</div>
+    </div>
+    <div class="chainwrap" id="l1Wrap">
+      <svg id="l1Flow" class="flowSvg"></svg>
+      <div id="l1" class="chain"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <span class="badge l2">L2</span>
+        <span>L2 Sub-Chain</span>
+        <span id="l2Count" class="badge l2">0</span>
+      </div>
+      <div id="l2Hint" class="subhint">Select an L1 chevron.</div>
+    </div>
+    <div class="chainwrap" id="l2Wrap">
+      <svg id="l2Flow" class="flowSvg"></svg>
+      <div id="l2" class="chain"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <div class="panel-title">
+        <span class="badge l3">L3</span>
+        <span>L3 Activities</span>
+        <span id="l3Count" class="badge l3">0</span>
+      </div>
+      <div id="l3Hint" class="subhint">Select an L2 chevron.</div>
+    </div>
+    <div class="l3wrap">
+      <div class="waterfall" id="l3"></div>
+    </div>
+  </section>
+
+  <div id="err" style="display:none;" class="error"></div>
+</main>
+
+<div id="pop" class="popover" role="dialog" aria-live="polite"></div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  const state = {
+    json: null,
+    l0All: [],
+    selected: { l0:null, l1:null, l2:null, l3:null },
+    filters: { create:"", owner:"" },
+    popOpen: false,
+    popFollowMouse: false,
+    mouse: { x: 0, y: 0 }
+  };
+
+  function svgPlay(){ return `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`; }
+  function svgFlag(){ return `<svg viewBox="0 0 24 24"><path d="M6 2h2v2h10l-2 4 2 4H8v10H6V2z"/></svg>`; }
+
+  function icon(kind){
+    const paths = {
+      compass:`<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.7 6.3-2.2 6.1-6.2 2.2 2.2-6.1 6.2-2.2Zm-6 7.4 2.9-1.1 1.1-2.9-2.9 1.1-1.1 2.9Z"/>`,
+      shield:`<path d="M12 2 20 6v6c0 5-3.4 9.4-8 10-4.6-.6-8-5-8-10V6l8-4Zm0 4.2L6 8.7V12c0 3.5 2.2 6.8 6 7.7 3.8-.9 6-4.2 6-7.7V8.7l-6-2.5Z"/>`,
+      cog:`<path d="M19.4 13a7.8 7.8 0 0 0 .1-2l2-1.6-2-3.5-2.4 1a7.7 7.7 0 0 0-1.7-1l-.4-2.6H9l-.4 2.6c-.6.2-1.2.6-1.7 1l-2.4-1-2 3.5L4.6 11a7.8 7.8 0 0 0 0 2L2.6 14.6l2 3.5 2.4-1c.5.4 1.1.8 1.7 1l.4 2.6h6.2l.4-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.5L19.4 13ZM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2Z"/>`,
+      truck:`<path d="M3 7h11v9H3V7Zm12 3h3l3 3v3h-6v-9Zm-9 9a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"/>`,
+      wrench:`<path d="M22 6.6 17.7 11a5.4 5.4 0 0 1-6.8 6.8L5.1 23 1 18.9l5.3-5.8A5.4 5.4 0 0 1 13 6.3L17.4 2 22 6.6Z"/>`,
+      bulb:`<path d="M9 21h6v-1H9v1Zm3-20a7 7 0 0 0-4 12.7V17h8v-3.3A7 7 0 0 0 12 1Z"/>`,
+      lock:`<path d="M6 10V8a6 6 0 0 1 12 0v2h1v12H5V10h1Zm2 0h8V8a4 4 0 0 0-8 0v2Z"/>`,
+      data:`<path d="M12 2C7.6 2 4 3.8 4 6s3.6 4 8 4 8-1.8 8-4-3.6-4-8-4Zm0 10c-4.4 0-8-1.8-8-4v4c0 2.2 3.6 4 8 4s8-1.8 8-4V8c0 2.2-3.6 4-8 4Zm0 6c-4.4 0-8-1.8-8-4v4c0 2.2 3.6 4 8 4s8-1.8 8-4v-4c0 2.2-3.6 4-8 4Z"/>`,
+      handshake:`<path d="M7 12l3 3 2-2 4 4 4-4-3-3-5 5-6-6-3 3Z"/>`,
+      people:`<path d="M16 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3ZM8 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3Zm0 2c-2.7 0-8 1.3-8 4v3h10v-3c0-1.2.4-2.2 1.1-3-1.2-.6-2.4-1-3.1-1Zm8 0c-2.7 0-8 1.3-8 4v3h16v-3c0-2.7-5.3-4-8-4Z"/>`,
+      cart:`<path d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM6.2 6h15.6l-1.4 7.5H7.2L6.2 6ZM5 2H2v2h2l2.2 11.2c.2 1 1.1 1.8 2.1 1.8H20v-2H8.6l-.3-1.5H20a2 2 0 0 0 2-1.6L23 6H6.6L6.3 4.5A2 2 0 0 0 4.3 3H5V2Z"/>`,
+      ledger:`<path d="M4 2h12a2 2 0 0 1 2 2v16H6a2 2 0 0 0-2 2V2Zm4 4h8v2H8V6Zm0 4h8v2H8v-2Zm0 4h8v2H8v-2Z"/>`,
+      layers:`<path d="M12 2 1 8l11 6 9-4.9V17h2V8L12 2Zm0 14L1 10v2l11 6 11-6v-2l-11 6Z"/>`,
+      rocket:`<path d="M12 2c3 0 6 3 6 6 0 5-6 12-6 12S6 13 6 8c0-3 3-6 6-6Zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM4 14l3-1-1 3-2 2-2-2 2-2Zm16 0-3-1 1 3 2 2 2-2-2-2Z"/>`
+    };
+    const p = paths[kind] || paths.cog;
+    return `<svg viewBox="0 0 24 24">${p}</svg>`;
+  }
+
+  const ICONS = {
+    S2E: icon("compass"),
+    GRC: icon("shield"),
+    EA_PM: icon("cog"),
+    L2C: icon("handshake"),
+    O2D: icon("truck"),
+    D2O: icon("layers"),
+    P2R: icon("wrench"),
+    S2P: icon("cart"),
+    H2R: icon("people"),
+    R2R: icon("ledger"),
+    I2P: icon("bulb"),
+    TRF: icon("rocket"),
+    DA: icon("data"),
+    ITF: icon("lock")
+  };
+
+  // ---------- JSON parsing (supports both formats) ----------
+  function normalizeJson(raw){
+    if (!raw) return { processes: [] };
+    if (Array.isArray(raw.processes)) return raw;
+    if (raw.name && Array.isArray(raw.children)){
+      const out = [];
+      function walk(node, level, parentCode){
+        const code = node.code || node.id || (node.name || "").split(":")[0]?.trim() || node.name;
+        out.push({
+          level,
+          code,
+          name: node.title || node.display_name || node.name,
+          description: node.description || node.def || "",
+          owner: node.owner || "",
+          create: node.create || node.category || "",
+          parent_code: parentCode || ""
+        });
+        (node.children || []).forEach(ch => walk(ch, level+1, code));
+      }
+      walk(raw, 0, "");
+      return { processes: out };
+    }
+    if (Array.isArray(raw)) return { processes: raw };
+    return { processes: [] };
+  }
+
+  function pick(o, keys, fallback=""){
+    for (const k of keys){ if (o && o[k]!=null && String(o[k]).trim()!=="") return String(o[k]); }
+    return fallback;
+  }
+
+  function toProcRows(processes){
+    return (processes || []).map((r) => {
+      const level = Number(pick(r, ["level","Level","LEVEL"], "0"));
+      const code  = pick(r, ["code","Code","CODE","id","ID","process_code","ProcessCode"], "");
+      const name  = pick(r, ["title","Title","name","Name","process_name","ProcessName"], code);
+      const desc  = pick(r, ["description","Description","definition","Definition","def","Def"], "");
+      const owner = pick(r, ["owner","Owner","owners","Owners","process_owner","ProcessOwner"], "");
+      const create= pick(r, ["create","Create","category","Category","stream","Stream","value_stream","ValueStream"], "");
+      const parent= pick(r, ["parent_code","ParentCode","PARENT_CODE","parent","Parent","parentId","ParentId"], "");
+      const order = Number(pick(r, ["order","Order","seq","Seq","sequence","Sequence"], "0")) || 0;
+      return { level, code, name, desc, owner, create, parent, order, raw:r };
+    }).filter(x => x.code);
+  }
+
+  function buildIndex(rows){
+    const byCode = new Map(rows.map(r => [r.code, r]));
+    const children = new Map();
+    for (const r of rows){
+      if (!children.has(r.code)) children.set(r.code, []);
+      if (r.parent){
+        if (!children.has(r.parent)) children.set(r.parent, []);
+        children.get(r.parent).push(r.code);
+      }
+    }
+    for (const [k, arr] of children.entries()){
+      arr.sort((a,b) => (byCode.get(a)?.order ?? 0) - (byCode.get(b)?.order ?? 0) || a.localeCompare(b));
+    }
+    return { byCode, children };
+  }
+
+  function levelChildren(idx, parentCode, level){
+    const kids = (idx.children.get(parentCode) || []).map(c => idx.byCode.get(c)).filter(Boolean);
+    return kids.filter(k => k.level === level);
+  }
+
+  // ---------- Color ramps ----------
+  function lerp(a,b,t){ return a + (b-a)*t; }
+  function clamp01(x){ return Math.max(0, Math.min(1, x)); }
+  function hexToRgb(hex){
+    const h = hex.replace("#","");
+    const n = parseInt(h.length===3 ? h.split("").map(c=>c+c).join("") : h, 16);
+    return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+  }
+  function rgbToHex({r,g,b}){
+    const h = (v)=> v.toString(16).padStart(2,"0");
+    return "#"+h(r)+h(g)+h(b);
+  }
+  function mixHex(a,b,t){
+    t = clamp01(t);
+    const A = hexToRgb(a), B = hexToRgb(b);
+    return rgbToHex({ r:Math.round(lerp(A.r,B.r,t)), g:Math.round(lerp(A.g,B.g,t)), b:Math.round(lerp(A.b,B.b,t)) });
+  }
+  function isDark(hex){
+    const {r,g,b} = hexToRgb(hex);
+    const l = (0.2126*r + 0.7152*g + 0.0722*b) / 255;
+    return l < 0.55;
+  }
+
+  // ---------- UI helpers ----------
+  function setError(msg){
+    const el = $("err");
+    if (!msg){ el.style.display="none"; el.textContent=""; return; }
+    el.style.display="block";
+    el.textContent = msg;
+  }
+
+  function uniq(arr){ return Array.from(new Set(arr.filter(Boolean))).sort((a,b)=>a.localeCompare(b)); }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+  }
+
+  function renderFilters(rows){
+    const createVals = uniq(rows.map(r=>r.create));
+    const ownerVals  = uniq(rows.map(r=>r.owner));
+
+    const createSel = $("createFilter");
+    const ownerSel  = $("ownerFilter");
+
+    const curC = state.filters.create;
+    const curO = state.filters.owner;
+
+    createSel.innerHTML = `<option value="">Create: All</option>` + createVals.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+    ownerSel.innerHTML  = `<option value="">Ownership: All</option>` + ownerVals.map(v=>`<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join("");
+
+    if (curC) createSel.value = curC;
+    if (curO) ownerSel.value = curO;
+  }
+
+  function setBreadcrumb(){
+    const row = $("crumbRow");
+    row.innerHTML = "";
+
+    const parts = [];
+    if (state.selected.l0) parts.push({ cls:"crumbL0", txt: `${state.selected.l0.code}: ${state.selected.l0.name}` });
+    if (state.selected.l1) parts.push({ cls:"crumbL1", txt: `${state.selected.l1.code}: ${state.selected.l1.name}` });
+    if (state.selected.l2) parts.push({ cls:"crumbL2", txt: `${state.selected.l2.code}: ${state.selected.l2.name}` });
+    if (state.selected.l3) parts.push({ cls:"crumbL3", txt: `${state.selected.l3.code}: ${state.selected.l3.name}` });
+
+    parts.forEach(p => {
+      const chip = document.createElement("div");
+      chip.className = `crumbChip ${p.cls}`;
+      chip.innerHTML = `<span class="dot"></span><span class="allowEllip">${escapeHtml(p.txt)}</span>`;
+      row.appendChild(chip);
+    });
+
+    const owner = state.selected.l3?.owner || state.selected.l2?.owner || state.selected.l1?.owner || state.selected.l0?.owner || "—";
+    $("crumbOwner").textContent = `Owner: ${owner || "—"}`;
+  }
+
+  function applyFilters(list){
+    const { create, owner } = state.filters;
+    return list.filter(x => (!create || x.create === create) && (!owner || x.owner === owner));
+  }
+
+  function resetSelection(){
+    state.selected = { l0:null, l1:null, l2:null, l3:null };
+    setBreadcrumb();
+    renderAll();
+  }
+
+  // -------- Popover (click-to-open, follows mouse) --------
+  function openPopover(item){
+    const pop = $("pop");
+    const owner = item.owner || "—";
+    const code = item.code || "";
+    const title = item.name || "";
+    const desc = item.desc || "";
+    const create = item.create || "—";
+    pop.innerHTML = `
+      <div class="pop-top">
+        <div class="pop-code">${escapeHtml(code)}</div>
+        <div class="pop-owner">${escapeHtml(owner)}</div>
+      </div>
+      <div class="pop-title">${escapeHtml(title)}</div>
+      ${desc ? `<div class="pop-desc">${escapeHtml(desc)}</div>` : ``}
+      <div class="pop-foot">
+        <div>Create: ${escapeHtml(create)}</div>
+        <button id="popCloseBtn">Close</button>
+      </div>
+    `;
+    pop.style.display = "block";
+    state.popOpen = true;
+    state.popFollowMouse = true;
+    positionPopover();
+    $("popCloseBtn").onclick = closePopover;
+  }
+
+  function closePopover(){
+    const pop = $("pop");
+    pop.style.display = "none";
+    state.popOpen = false;
+    state.popFollowMouse = false;
+  }
+
+  function positionPopover(){
+    if (!state.popOpen) return;
+    const pop = $("pop");
+    const margin = 14;
+    const vw = window.innerWidth, vh = window.innerHeight;
+
+    let x = state.mouse.x + 16;
+    let y = state.mouse.y + 18;
+
+    const rect = pop.getBoundingClientRect();
+    if (x + rect.width + margin > vw) x = vw - rect.width - margin;
+    if (y + rect.height + margin > vh) y = vh - rect.height - margin;
+    if (x < margin) x = margin;
+    if (y < margin) y = margin;
+
+    pop.style.left = x + "px";
+    pop.style.top  = y + "px";
+  }
+
+  document.addEventListener("mousemove", (e)=>{
+    state.mouse.x = e.clientX;
+    state.mouse.y = e.clientY;
+    if (state.popOpen && state.popFollowMouse) positionPopover();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if (e.key === "Escape") closePopover();
+  });
+
+  document.addEventListener("click", (e)=>{
+    const pop = $("pop");
+    if (!state.popOpen) return;
+    if (pop.contains(e.target)) return;
+    closePopover();
+  }, true);
+
+  // -------- Continuity connectors between wrapped rows (now visible) --------
+  function drawRowConnectors(chainEl, wrapEl, svgEl){
+    const items = Array.from(chainEl.querySelectorAll(".chev"));
+    svgEl.innerHTML = "";
+    if (items.length < 2) return;
+
+    const wrapRect = wrapEl.getBoundingClientRect();
+    svgEl.setAttribute("viewBox", `0 0 ${wrapRect.width} ${wrapRect.height}`);
+
+    const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
+    defs.innerHTML = `
+      <marker id="arrowHead" markerWidth="16" markerHeight="16" refX="12" refY="8" orient="auto">
+        <path d="M0,0 L16,8 L0,16 Z" fill="rgba(212,5,17,.85)"></path>
+      </marker>
+      <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,.22)"/>
+      </filter>
+    `;
+    svgEl.appendChild(defs);
+
+    // group by row using top coordinate
+    const rows = [];
+    for (const el of items){
+      const r = el.getBoundingClientRect();
+      let row = rows.find(x => Math.abs(x.top - r.top) < 10);
+      if (!row){ row = { top:r.top, els:[] }; rows.push(row); }
+      row.els.push({ el, rect:r });
+    }
+    rows.sort((a,b)=>a.top-b.top);
+    if (rows.length <= 1) return;
+
+    for (let i=0;i<rows.length-1;i++){
+      const a = rows[i].els.sort((p,q)=>p.rect.left-q.rect.left);
+      const b = rows[i+1].els.sort((p,q)=>p.rect.left-q.rect.left);
+
+      const last = a[a.length-1].rect;
+      const first = b[0].rect;
+
+      const x1 = (last.right - wrapRect.left) - 10;
+      const y1 = (last.top - wrapRect.top) + last.height/2;
+
+      const x2 = (first.left - wrapRect.left) + 10;
+      const y2 = (first.top - wrapRect.top) + first.height/2;
+
+      // route outside the cards: go right, down, then left
+      const bend = 26;
+      const midX = Math.max(x1, x2) + 50; // push outside
+      const pathD = `M ${x1} ${y1}
+                     C ${x1 + bend} ${y1}, ${midX} ${y1}, ${midX} ${(y1+y2)/2}
+                     C ${midX} ${y2}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+
+      const path = document.createElementNS("http://www.w3.org/2000/svg","path");
+      path.setAttribute("d", pathD);
+      path.setAttribute("stroke", "rgba(212,5,17,.78)");
+      path.setAttribute("stroke-width", "4");
+      path.setAttribute("fill", "none");
+      path.setAttribute("marker-end","url(#arrowHead)");
+      path.setAttribute("filter","url(#softShadow)");
+      svgEl.appendChild(path);
+    }
+  }
+
+  // -------- Rendering --------
+  function renderHouse(idx){
+    const body = $("houseBody");
+    body.innerHTML = "";
+
+    const l0 = state.l0All;
+
+    const groups = { manage: [], run: [], change: [], foundation: [] };
+    const normalizedCreate = (v)=> String(v||"").toLowerCase();
+    for (const n of applyFilters(l0)){
+      const c = normalizedCreate(n.create);
+      if (c.includes("manage")) groups.manage.push(n);
+      else if (c.includes("run")) groups.run.push(n);
+      else if (c.includes("change")) groups.change.push(n);
+      else if (c.includes("foundation")) groups.foundation.push(n);
+      else {
+        if (["da","itf"].includes((n.code||"").split("_")[0]?.toLowerCase())) groups.foundation.push(n);
+        else groups.run.push(n);
+      }
+    }
+
+    const order = [
+      ["manage","Manage the Business"],
+      ["run","Run the Business"],
+      ["change","Change the Business"],
+      ["foundation","Foundation"]
+    ];
+
+    for (const [key, title] of order){
+      const arr = groups[key];
+      if (!arr.length) continue;
+      const band = document.createElement("div");
+      band.className = `band ${key}`;
+      band.innerHTML = `
+        <div class="band-head">
+          <div>${escapeHtml(title)}</div>
+          <div class="count">${arr.length}</div>
+        </div>
+        <div class="band-grid" id="grid_${key}"></div>
+      `;
+      body.appendChild(band);
+      const grid = band.querySelector(`#grid_${key}`);
+      for (const n of arr){
+        const card = document.createElement("div");
+        card.className = `l0card ${state.selected.l0?.code===n.code ? "active":""}`;
+        const iconSvg = ICONS[n.code] || icon("cog");
+        card.innerHTML = `
+          <div class="icon">${iconSvg}</div>
+          <div class="l0meta">
+            <div class="l0code">${escapeHtml(n.code)}</div>
+            <div class="l0name">${escapeHtml(n.name)}</div>
+            <div class="l0desc">${escapeHtml(n.desc || "")}</div>
+          </div>
+        `;
+        card.onclick = (e)=>{
+          e.stopPropagation();
+          state.selected.l0 = n;
+          state.selected.l1 = null;
+          state.selected.l2 = null;
+          state.selected.l3 = null;
+          closePopover();
+          setBreadcrumb();
+          renderAll();
+        };
+        grid.appendChild(card);
+      }
+    }
+
+    if (!body.children.length){
+      body.innerHTML = `<div class="empty">No L0 items match the current filters.</div>`;
+    }
+  }
+
+  function chevronPalette(level, idx, total){
+    const t = total<=1 ? 1 : idx/(total-1);
+    if (level === 1){
+      const start = "#FFE57A";
+      const mid   = "#FFB300";
+      const end   = "#D40511";
+      const bg = t<0.6 ? mixHex(start, mid, t/0.6) : mixHex(mid, end, (t-0.6)/0.4);
+      const fg = isDark(bg) ? "#ffffff" : "#111111";
+      return { bg, fg, darkPill: isDark(bg) };
+    }
+    if (level === 2){
+      const start = "#2B2F33";
+      const end = "#D40511";
+      const bg = mixHex(start, end, t);
+      const fg = isDark(bg) ? "#ffffff" : "#111111";
+      return { bg, fg, darkPill: isDark(bg) };
+    }
+    const bg = "#F0F1F3";
+    return { bg, fg:"#111", darkPill:false };
+  }
+
+  function renderChevronChain(chainId, wrapId, svgId, items, level){
+    const chain = $(chainId);
+    const wrap = $(wrapId);
+    const svg = $(svgId);
+
+    chain.innerHTML = "";
+    svg.innerHTML = "";
+
+    const filtered = applyFilters(items);
+
+    if (level===1) $("l1Count").textContent = filtered.length;
+    if (level===2) $("l2Count").textContent = filtered.length;
+
+    if (!filtered.length){
+      chain.innerHTML = `<div class="empty">No processes at this level for the current selection / filters.</div>`;
+      return;
+    }
+
+    filtered.forEach((it, i) => {
+      const pal = chevronPalette(level, i, filtered.length);
+      const el = document.createElement("div");
+      const isActive = (level===1 && state.selected.l1?.code===it.code) || (level===2 && state.selected.l2?.code===it.code);
+
+      el.className = `chev ${pal.darkPill ? "darkPill":""} ${i===0 ? "first":""} ${isActive ? "active":""}`;
+      el.style.setProperty("--chev-bg", pal.bg);
+      el.style.setProperty("--chev-fg", pal.fg);
+
+      const owner = it.owner || "—";
+      const ord = it.order ? `#${it.order}` : `#${i+1}`;
+
+      const startIcon = (i===0) ? `<div class="edgeIcon" title="Start">${svgPlay()}</div>` : ``;
+      const endIcon = (i===filtered.length-1) ? `<div class="edgeIcon" title="End">${svgFlag()}</div>` : ``;
+
+      el.innerHTML = `
+        <div class="rowtop">
+          <div class="edgeGroup">${startIcon}</div>
+          <div class="ord">${escapeHtml(ord)}</div>
+        </div>
+        <div class="name">${escapeHtml(it.name)}</div>
+        <div class="meta">${escapeHtml(it.desc || "")}</div>
+        <div class="foot">
+          <div class="ownerTag" title="${escapeHtml(owner)}">${escapeHtml(owner)}</div>
+          <div class="edgeGroup">
+            ${endIcon}
+            <div class="flowArrow" aria-hidden="true">➜</div>
+          </div>
+        </div>
+      `;
+
+      // code shown via tooltip on hover + in popover; add subtle at top-left without breaking alignment
+      const codeEl = document.createElement("div");
+      codeEl.className = "code";
+      codeEl.textContent = it.code;
+      codeEl.title = it.code;
+      // Insert code into the top row (left) inside edgeGroup
+      el.querySelector(".edgeGroup").appendChild(codeEl);
+
+      el.onclick = (e)=>{
+        e.stopPropagation();
+        if (level===1){
+          state.selected.l1 = it;
+          state.selected.l2 = null;
+          state.selected.l3 = null;
+        } else if (level===2){
+          state.selected.l2 = it;
+          state.selected.l3 = null;
+        }
+        setBreadcrumb();
+        renderAll();
+        openPopover(it);
+      };
+
+      chain.appendChild(el);
+    });
+
+    requestAnimationFrame(()=>{
+      drawRowConnectors(chain, wrap, svg);
+    });
+  }
+
+  function renderL3(list){
+    const el = $("l3");
+    el.innerHTML = "";
+    const filtered = applyFilters(list);
+    $("l3Count").textContent = filtered.length;
+
+    if (!filtered.length){
+      el.innerHTML = `<div class="empty">Select an L2 chevron to show L3 activities (or none match filters).</div>`;
+      return;
+    }
+
+    filtered.forEach((it) => {
+      const card = document.createElement("div");
+      card.className = "l3card" + (state.selected.l3?.code===it.code ? " active" : "");
+      card.innerHTML = `
+        <div class="l3top">
+          <div class="l3code">${escapeHtml(it.code)}</div>
+          <div class="l3owner">${escapeHtml(it.owner || "—")}</div>
+        </div>
+        <div class="l3name">${escapeHtml(it.name)}</div>
+        ${it.desc ? `<div class="l3desc">${escapeHtml(it.desc)}</div>` : ``}
+      `;
+      card.onclick = (e)=>{
+        e.stopPropagation();
+        state.selected.l3 = it;
+        setBreadcrumb();
+        renderAll();
+        openPopover(it);
+      };
+      el.appendChild(card);
+    });
+  }
+
+  function renderAll(){
+    if (!state.json) return;
+
+    const idx = state.index;
+    renderHouse(idx);
+
+    let l1Items = [];
+    if (state.selected.l0){
+      l1Items = levelChildren(idx, state.selected.l0.code, 1);
+      $("l1Hint").textContent = `Selected L0: ${state.selected.l0.code}: ${state.selected.l0.name}`;
+    } else {
+      $("l1Hint").textContent = "Select an L0 box in the process house.";
+    }
+    renderChevronChain("l1","l1Wrap","l1Flow", l1Items, 1);
+
+    let l2Items = [];
+    if (state.selected.l1){
+      l2Items = levelChildren(idx, state.selected.l1.code, 2);
+      $("l2Hint").textContent = `Selected L1: ${state.selected.l1.code}: ${state.selected.l1.name}`;
+    } else {
+      $("l2Hint").textContent = "Select an L1 chevron.";
+    }
+    renderChevronChain("l2","l2Wrap","l2Flow", l2Items, 2);
+
+    let l3Items = [];
+    if (state.selected.l2){
+      l3Items = levelChildren(idx, state.selected.l2.code, 3);
+      $("l3Hint").textContent = `Selected L2: ${state.selected.l2.code}: ${state.selected.l2.name}`;
+    } else {
+      $("l3Hint").textContent = "Select an L2 chevron.";
+    }
+    renderL3(l3Items);
+
+    setBreadcrumb();
+  }
+
+  async function load(){
+    try{
+      setError("");
+      const res = await fetch("./data.json", { cache:"no-store" });
+      if (!res.ok) throw new Error(`Failed to fetch data.json (HTTP ${res.status})`);
+      const raw = await res.json();
+      const normalized = normalizeJson(raw);
+      const rows = toProcRows(normalized.processes);
+
+      if (!rows.length){
+        throw new Error("Loaded data.json but found 0 processes after parsing. Check JSON keys/format.");
+      }
+
+      state.json = normalized;
+      state.rows = rows;
+      state.index = buildIndex(rows);
+
+      state.l0All = rows.filter(r => r.level===0).sort((a,b)=>a.code.localeCompare(b.code));
+
+      renderFilters(rows);
+      renderAll();
+      setBreadcrumb();
+    }catch(e){
+      setError(String(e && e.stack ? e.stack : e));
+    }
+  }
+
+  $("reset").onclick = ()=>{
+    state.filters = { create:"", owner:"" };
+    $("createFilter").value = "";
+    $("ownerFilter").value = "";
+    resetSelection();
+    closePopover();
+  };
+
+  $("createFilter").addEventListener("change", ()=>{
+    state.filters.create = $("createFilter").value;
+    closePopover();
+    renderAll();
+  });
+  $("ownerFilter").addEventListener("change", ()=>{
+    state.filters.owner = $("ownerFilter").value;
+    closePopover();
+    renderAll();
+  });
+
+  $("toggleHouse").onclick = ()=>{
+    const d = $("house");
+    d.open = !d.open;
+  };
+
+  window.addEventListener("resize", ()=>{
+    if ($("l1").children.length) drawRowConnectors($("l1"), $("l1Wrap"), $("l1Flow"));
+    if ($("l2").children.length) drawRowConnectors($("l2"), $("l2Wrap"), $("l2Flow"));
+    positionPopover();
+  });
+
+  load();
+</script>
+</body>
+</html>
