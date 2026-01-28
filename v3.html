@@ -3,9 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>DHL Value Chain - Compact View</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background-color: #f4f4f4; display: flex; flex-direction: column; height: 100vh; }
         
+        /* --- ERROR NOTIFICATION --- */
+        #error-msg {
+            display: none;
+            background: #ffe6e6; border-bottom: 2px solid red; color: #cc0000;
+            padding: 20px; text-align: center; font-weight: bold;
+        }
+
         /* --- TOP NAV (L0 FILTERS) --- */
         #l0-bar {
             background-color: #333;
@@ -50,23 +58,22 @@
         .chevron {
             position: relative;
             background: #e0e0e0;
-            height: 45px;          /* Much shorter */
-            width: 155px;          /* Much narrower (fits ~8 on 1366px screen) */
-            margin-right: 5px;     /* Slight gap for visual separation */
-            margin-bottom: 8px;    /* Space for second row */
+            height: 45px;          
+            width: 155px;          
+            margin-right: 5px;     
+            margin-bottom: 8px;    
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 25px;    /* Space for arrow tail */
+            padding-left: 25px;    
             padding-right: 10px;
             cursor: pointer;
             transition: all 0.1s;
             color: #333;
-            font-size: 11px;       /* Smaller font */
+            font-size: 11px;       
             line-height: 1.1;
             user-select: none;
             
-            /* The Arrow Shape */
             clip-path: polygon(
                 0% 0%, 
                 calc(100% - 15px) 0%, 
@@ -77,7 +84,6 @@
             );
         }
 
-        /* First chevron has flat left edge */
         .chevron.first-in-row {
             clip-path: polygon(
                 0% 0%, 
@@ -136,7 +142,7 @@
             max-width: 250px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             z-index: 1000;
-            pointer-events: none; /* Mouse ignores it so it doesn't flicker */
+            pointer-events: none;
             line-height: 1.4;
         }
         #tooltip strong { color: #ffcc00; display: block; margin-bottom: 4px; }
@@ -146,6 +152,12 @@
 </head>
 <body>
 
+<div id="error-msg">
+    Error: Cannot load "data.json".<br>
+    If you are opening this file directly from your computer, this is expected (CORS security).<br>
+    Please upload this to GitHub or run a local server.
+</div>
+
 <div id="tooltip"></div>
 
 <div id="l0-bar"></div>
@@ -153,25 +165,32 @@
 <div id="chevron-container"></div>
 
 <div id="details-panel">
-    <div style="color:#999; margin:auto;">Select a value stream and process above.</div>
+    <div style="color:#999; margin:auto;">Loading data...</div>
 </div>
 
 <script>
-    // ===============================================
-    // *** PASTE YOUR JSON DATA HERE ***
-    // Replace 'null' with the full content of your data.json file
-    // ===============================================
-    const data = null; 
-    // Example: const data = { "name": "DHL...", "children": [...] };
-
-    if (!data) {
-        document.getElementById('details-panel').innerHTML = "<h3 style='margin:auto; color:red'>Please paste JSON data into the HTML code!</h3>";
-    }
-
     const l0Bar = document.getElementById('l0-bar');
     const chevronContainer = document.getElementById('chevron-container');
     const detailsPanel = document.getElementById('details-panel');
     const tooltip = document.getElementById('tooltip');
+    const errorMsg = document.getElementById('error-msg');
+
+    // ===============================================
+    // LOAD DATA EXTERNALLY
+    // ===============================================
+    d3.json("data.json").then(function(data) {
+        
+        // Hide loading
+        detailsPanel.innerHTML = '<div style="color:#999; margin:auto;">Select a value stream to begin.</div>';
+        
+        // Init
+        renderL0(data);
+
+    }).catch(function(error) {
+        console.error(error);
+        errorMsg.style.display = 'block';
+        detailsPanel.innerHTML = '';
+    });
 
     // --- TOOLTIP LOGIC ---
     function showTooltip(e, title, content, meta) {
@@ -189,7 +208,7 @@
     }
 
     // 1. Render Top Filter Bar (L0)
-    function renderL0() {
+    function renderL0(data) {
         if (!data || !data.children) return;
         
         data.children.sort((a,b) => a.name.localeCompare(b.name));
@@ -202,7 +221,9 @@
             btn.textContent = shortName;
             btn.onclick = () => selectL0(l0, btn);
             
+            // Auto-select first
             if (index === 0) selectL0(l0, btn);
+            
             l0Bar.appendChild(btn);
         });
     }
@@ -219,18 +240,15 @@
             l0Data.children.forEach((l1, index) => {
                 const div = document.createElement('div');
                 div.className = 'chevron';
-                if(index === 0) div.classList.add('first-in-row'); // Flat edge for first item
+                if(index === 0) div.classList.add('first-in-row'); 
 
                 const parts = l1.name.split(":");
                 const id = parts[0];
                 const text = parts[1] ? parts[1].trim() : "";
-                
-                // Truncate text if too long for small box
                 const displayText = text.length > 35 ? text.substring(0,32) + "..." : text;
 
                 div.innerHTML = `<strong>${id}</strong><span>${displayText}</span>`;
                 
-                // CLICK: Load details
                 div.onclick = () => selectL1(l1, div);
 
                 // HOVER: Show L1 Details
@@ -284,9 +302,6 @@
             detailsPanel.innerHTML = '<div style="padding:20px; color:#999">No details defined for this process.</div>';
         }
     }
-
-    // Init
-    renderL0();
 
 </script>
 </body>
