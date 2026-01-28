@@ -5,7 +5,7 @@
     <title>DHL Strategy House - Master Map</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        /* --- RESET & LAYOUT --- */
+        /* --- LAYOUT RESET --- */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             margin: 0; 
@@ -13,138 +13,79 @@
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
-            /* FIXED: Changed from hidden to auto so browser scrollbar appears if needed */
-            overflow: auto; 
+            overflow: hidden; /* Main body doesn't scroll, the workspace does */
         }
 
-        /* Custom Scrollbar Styling */
-        ::-webkit-scrollbar { height: 12px; width: 12px; }
+        /* --- SCROLLBAR STYLING --- */
+        ::-webkit-scrollbar { width: 14px; height: 14px; }
         ::-webkit-scrollbar-track { background: #e0e0e0; border-left: 1px solid #ccc; }
-        ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 6px; border: 3px solid #e0e0e0; }
+        ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 7px; border: 3px solid #e0e0e0; }
         ::-webkit-scrollbar-thumb:hover { background: #999; }
 
         /* --- HEADER --- */
         #app-header {
-            background-color: #d40511; /* DHL Red */
-            color: white;
-            padding: 12px 25px;
-            font-size: 20px;
-            font-weight: 800;
-            display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); 
-            flex-shrink: 0;
-            z-index: 200;
+            background-color: #d40511; color: white; padding: 12px 25px;
+            font-size: 20px; font-weight: 800; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); flex-shrink: 0; z-index: 200;
         }
 
         /* --- MINI NAV --- */
         #mini-nav {
-            background: #333; color: white; padding: 10px 25px;
-            display: none; 
-            align-items: center; justify-content: space-between;
-            cursor: pointer; border-bottom: 3px solid #ffcc00;
-            flex-shrink: 0;
+            background: #333; color: white; padding: 10px 25px; display: none; 
+            align-items: center; justify-content: space-between; cursor: pointer; 
+            border-bottom: 3px solid #ffcc00; flex-shrink: 0;
         }
         #mini-nav:hover { background: #444; }
 
-        /* --- STRATEGY HOUSE CONTAINER --- */
+        /* --- STRATEGY HOUSE (L0) --- */
         #strategy-house-container {
-            background: #eef1f5;
-            padding: 25px;
-            transition: all 0.5s ease-in-out;
-            max-height: 800px; /* Increased to ensure it fits */
-            opacity: 1;
-            overflow: hidden;
-            border-bottom: 1px solid #ccc;
-            flex-shrink: 0;
+            background: #eef1f5; padding: 25px; transition: all 0.5s ease-in-out;
+            max-height: 800px; opacity: 1; overflow: hidden; border-bottom: 1px solid #ccc; flex-shrink: 0;
         }
-        #strategy-house-container.collapsed {
-            max-height: 0; padding: 0 25px; opacity: 0; border-bottom-width: 0;
-        }
+        #strategy-house-container.collapsed { max-height: 0; padding: 0 25px; opacity: 0; border-bottom-width: 0; }
 
         .house-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px;
-            max-width: 1100px; margin: auto;
-            /* Shadow for the whole house */
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            max-width: 1100px; margin: auto; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
         }
-
-        .house-section {
-            padding: 20px; 
-            position: relative;
-            display: flex; flex-direction: column;
-        }
-        .house-title { 
-            text-align: center; text-transform: uppercase; font-size: 13px; 
-            font-weight: 800; letter-spacing: 1px; margin-bottom: 15px;
-        }
+        .house-section { padding: 20px; position: relative; display: flex; flex-direction: column; }
+        .house-title { text-align: center; text-transform: uppercase; font-size: 13px; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px; }
         .btn-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 
-        /* --- HOUSE COLORS --- */
-        /* Roof (Manage) - RED */
-        #house-roof { 
-            grid-column: 1 / span 2; 
-            background: #d40511; color: white;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 100%, 0% 100%, 0% 25%);
-            padding-top: 40px; margin-bottom: -5px; z-index: 2;
-        }
-        /* Run (Left) - YELLOW */
-        #house-pillar-run { 
-            background: #ffcc00; color: #d40511; 
-            border: 1px solid rgba(0,0,0,0.05);
-        }
-        /* Transform (Right) - DARK */
+        /* House Colors */
+        #house-roof { grid-column: 1 / span 2; background: #d40511; color: white; clip-path: polygon(50% 0%, 100% 25%, 100% 100%, 0% 100%, 0% 25%); padding-top: 40px; margin-bottom: -5px; z-index: 2; }
+        #house-pillar-run { background: #ffcc00; color: #d40511; border: 1px solid rgba(0,0,0,0.05); }
         #house-pillar-transform { background: #333; color: white; }
-        /* Foundation - GREY */
-        #house-foundation { 
-            grid-column: 1 / span 2; 
-            background: #d0d0d0; color: #333;
-            border-radius: 0 0 8px 8px; border-top: 4px solid #bbb;
-        }
+        #house-foundation { grid-column: 1 / span 2; background: #d0d0d0; color: #333; border-radius: 0 0 8px 8px; border-top: 4px solid #bbb; }
 
-        /* --- L0 BUTTONS --- */
-        .l0-btn {
-            border: none; padding: 10px 15px; border-radius: 4px; 
-            cursor: pointer; text-align: left; min-width: 140px; flex-grow: 1; max-width: 220px;
-            transition: transform 0.2s; position: relative;
-        }
+        /* Buttons */
+        .l0-btn { border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; text-align: left; min-width: 140px; flex-grow: 1; max-width: 220px; transition: transform 0.2s; position: relative; }
         .l0-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
         .l0-btn-id { font-size: 10px; font-weight: bold; display: block; opacity: 0.8; }
         .l0-btn-name { font-size: 13px; font-weight: 600; line-height: 1.1; }
-
-        /* Specific Button Colors */
+        
+        /* Button Variants */
         #house-roof .l0-btn { background: rgba(255,255,255,0.2); color: white; }
         #house-roof .l0-btn:hover { background: white; color: #d40511; }
         #house-roof .l0-btn.active { background: white; color: #d40511; box-shadow: 0 0 0 2px #ffcc00; }
-
         #house-pillar-run .l0-btn { background: rgba(255,255,255,0.6); color: #000; }
         #house-pillar-run .l0-btn:hover { background: white; color: #d40511; }
         #house-pillar-run .l0-btn.active { background: #d40511; color: white; }
-
         #house-pillar-transform .l0-btn { background: rgba(255,255,255,0.15); color: #ddd; }
         #house-pillar-transform .l0-btn:hover { background: white; color: #333; }
         #house-pillar-transform .l0-btn.active { background: #ffcc00; color: black; }
-
         #house-foundation .l0-btn { background: white; color: #333; }
         #house-foundation .l0-btn:hover { background: #333; color: white; }
         #house-foundation .l0-btn.active { background: #d40511; color: white; }
 
         /* --- CONTEXT BAR --- */
-        #context-bar { 
-            background: #fff; border-bottom: 1px solid #ddd; padding: 10px 30px; 
-            display: flex; justify-content: space-between; align-items: center; 
-            flex-shrink: 0; height: 50px; 
-        }
+        #context-bar { background: #fff; border-bottom: 1px solid #ddd; padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; height: 50px; }
         #ctx-title { margin: 0; font-size: 18px; color: #333; font-weight: 700; }
         #ctx-desc { font-size: 14px; color: #666; margin-left: 20px; border-left: 3px solid #ffcc00; padding-left: 15px; }
         #ctx-owner { font-size: 11px; color: #fff; background: #333; padding: 4px 10px; border-radius: 4px; font-weight: bold; }
 
         /* --- L1 CHEVRONS --- */
-        #l1-container { 
-            padding: 15px 30px; background: #fdfdfd; border-bottom: 1px solid #ddd; 
-            display: flex; flex-wrap: wrap; flex-shrink: 0; min-height: 80px; 
-        }
+        #l1-container { padding: 15px 30px; background: #fdfdfd; border-bottom: 1px solid #ddd; display: flex; flex-wrap: wrap; flex-shrink: 0; min-height: 80px; }
         .l1-chevron {
             position: relative; background: #e0e0e0; height: 60px; width: 170px; margin-right: 6px; margin-bottom: 6px;
             display: flex; flex-direction: column; justify-content: center; padding-left: 28px; padding-right: 15px;
@@ -162,49 +103,46 @@
         #workspace { 
             flex-grow: 1; 
             padding: 40px; 
-            /* FIXED: Enable both scrollbars */
-            overflow: auto; 
+            /* FORCE SCROLLBARS: */
+            overflow-x: auto; 
+            overflow-y: scroll; /* Forces vertical scrollbar to always show */
             background: #fff; 
             display: flex; 
-            align-items: flex-start; /* Align to top */
+            align-items: flex-start; 
             white-space: nowrap; 
             padding-bottom: 80px; 
         }
-        
-  /* L2 CHAIN ITEM (Big Arrow) */
-.l2-chain-item {
-    position: relative; 
-    background: #ffffff; 
-    width: 320px; 
-    min-width: 320px; 
-    margin-left: -35px; 
-    
-    /* REMOVE FIXED HEIGHT so it grows with content */
-    height: auto; 
-    max-height: none; /* <--- Fixes the scrolling issue (lets card grow) */
-    
-    /* SHAPE */
-    clip-path: polygon(
-        0% 0%, 
-        calc(100% - 35px) 0%, 
-        100% 50%, 
-        calc(100% - 35px) 100%, 
-        0% 100%, 
-        35px 50%
-    );
-    
-    /* VISIBLE FRAME FIX: 4 sharp shadows + 1 soft shadow */
-    filter: 
-        drop-shadow(1px 0 0 #888)   /* Right Border */
-        drop-shadow(-1px 0 0 #888)  /* Left Border */
-        drop-shadow(0 1px 0 #888)   /* Bottom Border */
-        drop-shadow(0 -1px 0 #888)  /* Top Border */
-        drop-shadow(5px 5px 10px rgba(0,0,0,0.2)); /* 3D Depth Shadow */
-    
-    padding: 25px 40px 25px 60px; 
-    display: flex; flex-direction: column; 
-    transition: transform 0.2s, z-index 0s;
-}
+
+        /* --- L2 CARD WITH VISIBLE FRAME --- */
+        .l2-chain-item {
+            position: relative; 
+            background: #ffffff; 
+            width: 320px; 
+            min-width: 320px; 
+            margin-left: -35px; 
+            
+            /* Remove height restriction so it grows with content */
+            height: auto; 
+            
+            /* SHAPE */
+            clip-path: polygon(
+                0% 0%, 
+                calc(100% - 35px) 0%, 
+                100% 50%, 
+                calc(100% - 35px) 100%, 
+                0% 100%, 
+                35px 50%
+            );
+
+            /* THE FRAME FIX: A Sharp Drop-Shadow acts as a border */
+            filter: 
+                drop-shadow(0 0 1px #888)  /* This creates the sharp grey outline */
+                drop-shadow(5px 5px 10px rgba(0,0,0,0.15)); /* This adds depth */
+            
+            padding: 25px 40px 25px 60px; 
+            display: flex; flex-direction: column; 
+            transition: transform 0.2s, z-index 0s;
+        }
 
         .l2-chain-item.first { 
             margin-left: 0; 
@@ -216,21 +154,17 @@
             background: #fffdf0; 
             z-index: 100; 
             transform: scale(1.02);
-            /* Stronger shadow on hover */
-            filter: drop-shadow(0 0 1px #d40511) drop-shadow(8px 8px 16px rgba(0,0,0,0.2));
+            filter: drop-shadow(0 0 2px #d40511) drop-shadow(8px 8px 16px rgba(0,0,0,0.2));
         }
 
         .l2-bar { height: 4px; background: #ffcc00; width: 100%; margin-bottom: 10px; border-radius: 2px; }
         .l2-id { color: #d40511; font-size: 11px; font-weight: 800; display: block; margin-bottom: 4px; }
         .l2-name { color: #222; font-size: 15px; font-weight: 700; white-space: normal; line-height: 1.25; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
-        /* L3 List */
         .l3-list { 
-            overflow-y: auto; 
-            flex-grow: 1; 
+            /* Fix for vertical scrolling inside card */
+            overflow-y: visible; /* Let the card grow, don't scroll inside */
             padding-right: 5px; 
-            /* Ensure list scrolls inside the card */
-            max-height: 100%; 
         }
         
         .l3-item { 
@@ -242,7 +176,7 @@
         .l3-head { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; }
         .l3-body { color: #333; font-weight: 500; }
 
-        /* --- TOOLTIP --- */
+        /* --- TOOLTIP & ERROR --- */
         #tooltip { position: fixed; display: none; background: #222; color: #fff; padding: 12px 16px; border-radius: 4px; font-size: 12px; max-width: 280px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 1000; pointer-events: none; border-left: 4px solid #ffcc00; }
         #tooltip h4 { margin: 0 0 6px 0; color: #ffcc00; font-size: 13px; }
         #tooltip p { margin: 0 0 8px 0; color: #ddd; line-height: 1.4; }
@@ -254,7 +188,7 @@
 
 <div id="app-header">
     <span>DHL eCommerce Value Chain</span>
-    <span style="font-size:12px; font-weight:normal; opacity:0.8">Interactive Map v3.0</span>
+    <span style="font-size:12px; font-weight:normal; opacity:0.8">Master Map v4.0</span>
 </div>
 
 <div id="mini-nav" onclick="toggleHouse(true)">
@@ -305,7 +239,6 @@
 <div id="tooltip"></div>
 
 <script>
-    // --- SETUP ---
     const houseContainer = document.getElementById('strategy-house-container');
     const miniNav = document.getElementById('mini-nav');
     const miniNavText = document.getElementById('mini-nav-text');
@@ -313,7 +246,6 @@
     const workspace = document.getElementById('workspace');
     const tooltip = document.getElementById('tooltip');
 
-    // --- LOAD DATA ---
     d3.json("data.json").then(function(data) {
         if(!data || !data.children) return;
         renderHouse(data);
@@ -322,7 +254,6 @@
         houseContainer.style.display = 'none';
     });
 
-    // --- UTILS ---
     function parseInfo(str) {
         if(!str) return {id:"", name:""};
         const parts = str.split(":");
@@ -339,7 +270,6 @@
         }
     }
 
-    // --- RENDER HOUSE (L0) ---
     function renderHouse(data) {
         const containers = {
             'manage': document.getElementById('cont-manage'),
@@ -347,13 +277,10 @@
             'transform': document.getElementById('cont-transform'),
             'foundation': document.getElementById('cont-foundation')
         };
-
         data.children.sort((a,b) => a.name.localeCompare(b.name));
-
         data.children.forEach(l0 => {
             const cat = (l0.category || "").toLowerCase();
             let target = containers['foundation'];
-
             if(cat.includes('manage')) target = containers['manage'];
             else if(cat.includes('run')) target = containers['run'];
             else if(cat.includes('change') || cat.includes('transform')) target = containers['transform'];
@@ -367,17 +294,14 @@
         });
     }
 
-    // --- SELECT L0 ---
     function selectL0(l0Data, btn) {
         document.querySelectorAll('.l0-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-
         const info = parseInfo(l0Data.name);
         document.getElementById('ctx-title').innerText = `${info.name}`;
         document.getElementById('ctx-desc').innerText = l0Data.description || "No description.";
         document.getElementById('ctx-owner').innerText = (l0Data.owner || "Unassigned").toUpperCase();
         miniNavText.innerHTML = `Active Stream: <strong style="color:#ffcc00">${info.name}</strong>`;
-
         toggleHouse(false);
 
         l1Container.innerHTML = '';
@@ -398,7 +322,6 @@
         }
     }
 
-    // --- SELECT L1 ---
     function selectL1(l1Data, chevron) {
         document.querySelectorAll('.l1-chevron').forEach(c => c.classList.remove('active'));
         chevron.classList.add('active');
@@ -426,17 +349,11 @@
                         const item = document.createElement('div');
                         item.className = 'l3-item';
                         item.innerHTML = `
-                            <div class="l3-head">
-                                <span>${l3Inf.id}</span>
-                            </div>
+                            <div class="l3-head"><span>${l3Inf.id}</span></div>
                             <div class="l3-body">${l3Inf.name}</div>
                         `;
                         item.onmousemove = (e) => {
-                            const meta = `
-                                <b>Owner:</b> ${l3.owner||l2.owner}<br>
-                                <b>Trigger:</b> ${l3.trigger||"-"}<br>
-                                <b>Outcome:</b> ${l3.outcome||"-"}
-                            `;
+                            const meta = `<b>Owner:</b> ${l3.owner||l2.owner}<br><b>Trigger:</b> ${l3.trigger||"-"}<br><b>Outcome:</b> ${l3.outcome||"-"}`;
                             showTooltip(e, l3Inf.name, l3.description, meta);
                         };
                         item.onmouseleave = hideTooltip;
