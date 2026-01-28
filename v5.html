@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DHL Strategy House - Master Map</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <style>
+    /* --- LAYOUT RESET --- */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-color: #f2f4f8;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- SCROLLBAR STYLING --- */
+    ::-webkit-scrollbar { width: 14px; height: 14px; }
+    ::-webkit-scrollbar-track { background: #e0e0e0; border-left: 1px solid #ccc; }
+    ::-webkit-scrollbar-thumb { background: #bbb; border-radius: 7px; border: 3px solid #e0e0e0; }
+    ::-webkit-scrollbar-thumb:hover { background: #999; }
+
+    /* --- HEADER --- */
+    #app-header{
+      background-color: #d40511; color: white; padding: 12px 25px;
+      font-size: 20px; font-weight: 800;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      flex-shrink: 0; z-index: 200;
+      gap: 14px;
+    }
+    #header-left{ display:flex; align-items:center; gap: 14px; min-width: 260px; }
+    #header-right{ display:flex; align-items:center; gap: 12px; margin-left: auto; }
+
+    #process-search{
+      width: 420px;
+      max-width: 44vw;
+      height: 34px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.35);
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+      padding: 0 14px;
+      outline: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    #process-search::placeholder{ color: rgba(255,255,255,0.75); font-weight: 600; }
+    #process-search:focus{
+      background: rgba(255,255,255,0.22);
+      border-color: rgba(255,204,0,0.85);
+      box-shadow: 0 0 0 3px rgba(255,204,0,0.25);
+    }
+
+    .pill{
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0.9;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(0,0,0,0.12);
+      white-space: nowrap;
+    }
+
+    /* --- MINI NAV --- */
+    #mini-nav{
+      background: #333; color: white; padding: 10px 25px; display: none;
+      align-items: center; justify-content: space-between; cursor: pointer;
+      border-bottom: 3px solid #ffcc00; flex-shrink: 0;
+    }
+    #mini-nav:hover{ background: #444; }
+
+    /* --- STRATEGY HOUSE (L0) --- */
+    #strategy-house-container{
+      background: #eef1f5; padding: 25px; transition: all 0.5s ease-in-out;
+      max-height: 800px; opacity: 1; overflow: hidden; border-bottom: 1px solid #ccc; flex-shrink: 0;
+    }
+    #strategy-house-container.collapsed{ max-height: 0; padding: 0 25px; opacity: 0; border-bottom-width: 0; }
+
+    .house-grid{
+      display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+      max-width: 1100px; margin: auto; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+    }
+    .house-section{ padding: 20px; position: relative; display: flex; flex-direction: column; }
+    .house-title{ text-align: center; text-transform: uppercase; font-size: 13px; font-weight: 800; letter-spacing: 1px; margin-bottom: 15px; }
+    .btn-container{ display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+
+    #house-roof{ grid-column: 1 / span 2; background: #d40511; color: white; clip-path: polygon(50% 0%, 100% 25%, 100% 100%, 0% 100%, 0% 25%); padding-top: 40px; margin-bottom: -5px; z-index: 2; }
+    #house-pillar-run{ background: #ffcc00; color: #d40511; border: 1px solid rgba(0,0,0,0.05); }
+    #house-pillar-transform{ background: #333; color: white; }
+    #house-foundation{ grid-column: 1 / span 2; background: #d0d0d0; color: #333; border-radius: 0 0 8px 8px; border-top: 4px solid #bbb; }
+
+    .l0-btn{ border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; text-align: left; min-width: 140px; flex-grow: 1; max-width: 220px; transition: transform 0.2s; position: relative; }
+    .l0-btn:hover{ transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+    .l0-btn-id{ font-size: 10px; font-weight: bold; display: block; opacity: 0.8; }
+    .l0-btn-name{ font-size: 13px; font-weight: 600; line-height: 1.1; }
+
+    #house-roof .l0-btn{ background: rgba(255,255,255,0.2); color: white; }
+    #house-roof .l0-btn:hover{ background: white; color: #d40511; }
+    #house-roof .l0-btn.active{ background: white; color: #d40511; box-shadow: 0 0 0 2px #ffcc00; }
+    #house-pillar-run .l0-btn{ background: rgba(255,255,255,0.6); color: #000; }
+    #house-pillar-run .l0-btn:hover{ background: white; color: #d40511; }
+    #house-pillar-run .l0-btn.active{ background: #d40511; color: white; }
+    #house-pillar-transform .l0-btn{ background: rgba(255,255,255,0.15); color: #ddd; }
+    #house-pillar-transform .l0-btn:hover{ background: white; color: #333; }
+    #house-pillar-transform .l0-btn.active{ background: #ffcc00; color: black; }
+    #house-foundation .l0-btn{ background: white; color: #333; }
+    #house-foundation .l0-btn:hover{ background: #333; color: white; }
+    #house-foundation .l0-btn.active{ background: #d40511; color: white; }
+
+    /* --- CONTEXT BAR --- */
+    #context-bar{
+      background: #fff; border-bottom: 1px solid #ddd; padding: 10px 30px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-shrink: 0; height: 50px;
+    }
+    #ctx-title{ margin: 0; font-size: 18px; color: #333; font-weight: 700; }
+    #ctx-desc{ font-size: 14px; color: #666; margin-left: 20px; border-left: 3px solid #ffcc00; padding-left: 15px; }
+    #ctx-owner{ font-size: 11px; color: #fff; background: #333; padding: 4px 10px; border-radius: 4px; font-weight: bold; }
+
+    /* --- L1 CHEVRONS --- */
+    #l1-container{
+      padding: 15px 30px; background: #fdfdfd; border-bottom: 1px solid #ddd;
+      display: flex; flex-wrap: wrap; flex-shrink: 0; min-height: 80px;
+    }
+    .l1-chevron{
+      position: relative; background: #e0e0e0; height: 60px; width: 170px; margin-right: 6px; margin-bottom: 6px;
+      display: flex; flex-direction: column; justify-content: center; padding-left: 28px; padding-right: 15px;
+      cursor: pointer; transition: all 0.1s; color: #444; user-select: none;
+      clip-path: polygon(0% 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%, 15px 50%);
+    }
+    .l1-chevron.first{ clip-path: polygon(0% 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 0% 100%); padding-left: 15px; }
+    .l1-chevron:hover{ background: #ccc; color: #000; transform: translateY(-2px); }
+    .l1-chevron.active{ background: #d40511; color: white; }
+    .l1-chevron.active .l1-id{ color: #ffcc00; }
+    .l1-id{ font-size: 11px; font-weight: 800; color: #d40511; margin-bottom: 2px; }
+    .l1-name{ font-size: 12px; font-weight: 700; line-height: 1.1; }
+
+    /* --- WORKSPACE (L2/L3) --- */
+    #workspace{
+      flex-grow: 1;
+      padding: 40px;
+      overflow-x: auto;
+      overflow-y: hidden; /* vertical scroll belongs to L3 list */
+      background: #fff;
+      display: flex;
+      align-items: flex-start;
+      white-space: nowrap;
+      padding-bottom: 80px;
+      gap: 0;
+    }
+
+    /* ========= YOUR REQUESTED BEHAVIOR =========
+       - All L2 chevrons equal height
+       - L3 scroll inside the L2 chevron if longer
+       - Default shading light gray
+       - Hover shading light yellow
+    ============================================ */
+
+    :root{
+      --l2-fixed-h: 520px;               /* equal height for all L2 chevrons (adjust if you want) */
+      --l2-bg: #f0f0f0;                  /* light gray shading */
+      --l2-bg-hover: #fff4cc;            /* light yellow on hover */
+      --l2-border: rgba(212,5,17,0.18);  /* subtle DHL-red outline */
+    }
+
+    .l2-chain-item{
+      position: relative;
+      width: 320px;
+      min-width: 320px;
+
+      /* spacing between chevrons */
+      margin-left: -18px; /* reduced overlap */
+      height: var(--l2-fixed-h);         /* enforce equal height */
+      min-height: var(--l2-fixed-h);
+
+      clip-path: polygon(
+        0% 0%,
+        calc(100% - 35px) 0%,
+        100% 50%,
+        calc(100% - 35px) 100%,
+        0% 100%,
+        35px 50%
+      );
+
+      background: var(--l2-bg);
+
+      filter:
+        drop-shadow(0 0 0.8px rgba(0,0,0,0.45))
+        drop-shadow(0 10px 18px rgba(0,0,0,0.12));
+
+      padding: 25px 40px 18px 60px; /* slightly tighter bottom to maximize L3 area */
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, z-index 0s, filter 0.2s, background 0.15s;
+    }
+
+    .l2-chain-item::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      clip-path: inherit;
+      pointer-events:none;
+      border: 2px solid var(--l2-border);
+      box-shadow: inset 0 0 0 1px rgba(255,204,0,0.18);
+    }
+
+    .l2-chain-item.first{
+      margin-left: 0;
+      clip-path: polygon(0% 0%, calc(100% - 35px) 0%, 100% 50%, calc(100% - 35px) 100%, 0% 100%);
+      padding-left: 25px;
+    }
+
+    .l2-chain-item:hover{
+      background: var(--l2-bg-hover);  /* light yellow on hover */
+      z-index: 100;
+      transform: scale(1.01);
+      filter:
+        drop-shadow(0 0 1px rgba(212,5,17,0.45))
+        drop-shadow(0 14px 24px rgba(0,0,0,0.16));
+    }
+
+    .l2-bar{ height: 4px; background: #ffcc00; width: 100%; margin-bottom: 10px; border-radius: 2px; flex: 0 0 auto; }
+    .l2-id{ color: #d40511; font-size: 11px; font-weight: 800; display: block; margin-bottom: 4px; flex: 0 0 auto; }
+    .l2-name{
+      color: #222; font-size: 15px; font-weight: 700; white-space: normal;
+      line-height: 1.25; margin-bottom: 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.08); padding-bottom: 10px;
+      flex: 0 0 auto;
+    }
+
+    /* L3 list scrolls INSIDE the fixed-height chevron */
+    .l3-list{
+      flex: 1 1 auto;
+      overflow-y: auto;     /* the slider lives here */
+      padding-right: 10px;
+      min-height: 0;        /* critical for flex children scrolling */
+    }
+
+    .l3-item{
+      background: #ffffff; margin-bottom: 6px; padding: 8px 10px; border-radius: 4px;
+      border-left: 3px solid #ccc; font-size: 12px; white-space: normal; cursor: help;
+      transition: all 0.1s;
+    }
+    .l3-item:hover{ border-left-color: #d40511; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .l3-head{ display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 10px; color: #999; text-transform: uppercase; font-weight: bold; }
+    .l3-body{ color: #333; font-weight: 500; }
+
+    .is-hidden{ display: none !important; }
+
+    /* --- TOOLTIP & ERROR --- */
+    #tooltip{
+      position: fixed; display: none; background: #222; color: #fff; padding: 12px 16px;
+      border-radius: 4px; font-size: 12px; max-width: 280px; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      z-index: 1000; pointer-events: none; border-left: 4px solid #ffcc00;
+    }
+    #tooltip h4{ margin: 0 0 6px 0; color: #ffcc00; font-size: 13px; }
+    #tooltip p{ margin: 0 0 8px 0; color: #ddd; line-height: 1.4; }
+    #tooltip .meta{ border-top: 1px solid #444; padding-top: 8px; color: #aaa; font-size: 11px; }
+    #error-msg{ display: none; padding: 50px; text-align: center; color: red; background: white; }
+  </style>
+</head>
+
+<body>
+  <div id="app-header">
+    <div id="header-left">
+      <span>DHL eCommerce Value Chain</span>
+      <input id="process-search" type="search" placeholder="Search processes (L1/L2/L3)… e.g., routing, D2O_01, territory" />
+    </div>
+    <div id="header-right">
+      <span class="pill">Master Map v4.0</span>
+    </div>
+  </div>
+
+  <div id="mini-nav" onclick="toggleHouse(true)">
+    <div id="mini-nav-text">View: <strong>Strategy House</strong></div>
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px;">▼ Expand House</div>
+  </div>
+
+  <div id="strategy-house-container">
+    <div class="house-grid">
+      <div id="house-roof" class="house-section">
+        <div class="house-title">Manage the Business</div>
+        <div class="btn-container" id="cont-manage"></div>
+      </div>
+      <div id="house-pillar-run" class="house-section">
+        <div class="house-title">Run the Business</div>
+        <div class="btn-container" id="cont-run"></div>
+      </div>
+      <div id="house-pillar-transform" class="house-section">
+        <div class="house-title">Transform the Business</div>
+        <div class="btn-container" id="cont-transform"></div>
+      </div>
+      <div id="house-foundation" class="house-section">
+        <div class="house-title">Foundations & Enablers</div>
+        <div class="btn-container" id="cont-foundation"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="error-msg">Cannot load data.json. Ensure file exists and use a local server.</div>
+
+  <div id="context-bar">
+    <div style="display:flex; align-items:center">
+      <h2 id="ctx-title">Overview</h2>
+      <span id="ctx-desc">Select a Value Stream from the Strategy House to navigate.</span>
+    </div>
+    <div id="ctx-owner"></div>
+  </div>
+
+  <div id="l1-container"></div>
+
+  <div id="workspace">
+    <div style="color:#bbb; margin:auto; font-size:18px; text-align:center; padding-top: 60px;">
+      <div style="font-size: 50px; color:#e0e0e0; margin-bottom: 20px;">⟰</div>
+      Select a Value Stream above to view the process chain.
+    </div>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <script>
+    const houseContainer = document.getElementById('strategy-house-container');
+    const miniNav = document.getElementById('mini-nav');
+    const miniNavText = document.getElementById('mini-nav-text');
+    const l1Container = document.getElementById('l1-container');
+    const workspace = document.getElementById('workspace');
+    const tooltip = document.getElementById('tooltip');
+    const searchBox = document.getElementById('process-search');
+
+    let rootData = null;
+    let currentL0 = null;
+    let currentL1 = null;
+
+    d3.json("data.json").then(function(data) {
+      if(!data || !data.children) return;
+      rootData = data;
+      renderHouse(data);
+    }).catch(err => {
+      document.getElementById('error-msg').style.display = 'block';
+      houseContainer.style.display = 'none';
+    });
+
+    function parseInfo(str) {
+      if(!str) return {id:"", name:""};
+      const parts = str.split(":");
+      return { id: parts[0].trim(), name: parts.slice(1).join(":").trim() || parts[0].trim() };
+    }
+
+    function toggleHouse(show) {
+      if(show) {
+        houseContainer.classList.remove('collapsed');
+        miniNav.style.display = 'none';
+      } else {
+        houseContainer.classList.add('collapsed');
+        setTimeout(() => { miniNav.style.display = 'flex'; }, 300);
+      }
+    }
+
+    function renderHouse(data) {
+      const containers = {
+        'manage': document.getElementById('cont-manage'),
+        'run': document.getElementById('cont-run'),
+        'transform': document.getElementById('cont-transform'),
+        'foundation': document.getElementById('cont-foundation')
+      };
+
+      data.children.sort((a,b) => a.name.localeCompare(b.name));
+      data.children.forEach(l0 => {
+        const cat = (l0.category || "").toLowerCase();
+        let target = containers['foundation'];
+        if(cat.includes('manage')) target = containers['manage'];
+        else if(cat.includes('run')) target = containers['run'];
+        else if(cat.includes('change') || cat.includes('transform')) target = containers['transform'];
+
+        const btn = document.createElement('button');
+        const info = parseInfo(l0.name);
+        btn.className = 'l0-btn';
+        btn.innerHTML = `<span class="l0-btn-id">${info.id}</span><span class="l0-btn-name">${info.name}</span>`;
+        btn.onclick = () => selectL0(l0, btn);
+        target.appendChild(btn);
+      });
+    }
+
+    function selectL0(l0Data, btn) {
+      currentL0 = l0Data;
+      currentL1 = null;
+
+      document.querySelectorAll('.l0-btn').forEach(b => b.classList.remove('active'));
+      if(btn) btn.classList.add('active');
+
+      const info = parseInfo(l0Data.name);
+      document.getElementById('ctx-title').innerText = `${info.name}`;
+      document.getElementById('ctx-desc').innerText = l0Data.description || "No description.";
+      document.getElementById('ctx-owner').innerText = (l0Data.owner || "Unassigned").toUpperCase();
+
+      miniNavText.innerHTML = `Active Stream: <strong style="color:#ffcc00">${info.name}</strong>`;
+      toggleHouse(false);
+
+      l1Container.innerHTML = '';
+      workspace.innerHTML = '<div style="color:#999; margin:auto; font-size:16px; padding-top:60px;">Select a Process Domain (L1 Chevron) to view details.</div>';
+
+      if(l0Data.children) {
+        l0Data.children.forEach((l1, idx) => {
+          const div = document.createElement('div');
+          div.className = 'l1-chevron';
+          if(idx === 0) div.classList.add('first');
+
+          const inf = parseInfo(l1.name);
+          div.dataset.search = normalizeSearch(`${inf.id} ${inf.name} ${l1.description||""}`);
+
+          div.innerHTML = `<span class="l1-id">${inf.id}</span><span class="l1-name">${inf.name}</span>`;
+          div.onclick = () => selectL1(l1, div);
+          div.onmousemove = (e) => showTooltip(e, inf.name, l1.description, `Owner: ${l1.owner}`);
+          div.onmouseleave = hideTooltip;
+
+          l1Container.appendChild(div);
+        });
+      }
+
+      applySearch();
+    }
+
+    function selectL1(l1Data, chevron) {
+      currentL1 = l1Data;
+
+      document.querySelectorAll('.l1-chevron').forEach(c => c.classList.remove('active'));
+      chevron.classList.add('active');
+      workspace.innerHTML = '';
+
+      if(l1Data.children) {
+        l1Data.children.forEach((l2, idx) => {
+          const inf = parseInfo(l2.name);
+          const card = document.createElement('div');
+          card.className = 'l2-chain-item';
+          if(idx === 0) card.classList.add('first');
+
+          const l2Search = `${inf.id} ${inf.name} ${(l2.description||"")} ${(l2.owner||"")}`;
+          card.dataset.search = normalizeSearch(l2Search);
+
+          card.innerHTML = `
+            <div class="l2-bar"></div>
+            <span class="l2-id">${inf.id}</span>
+            <span class="l2-name">${inf.name}</span>
+            <div class="l3-list" id="l3-list-${idx}"></div>
+          `;
+          workspace.appendChild(card);
+
+          const list = card.querySelector(`#l3-list-${idx}`);
+          if(l2.children && l2.children.length > 0) {
+            l2.children.forEach(l3 => {
+              const l3Inf = parseInfo(l3.name);
+              const item = document.createElement('div');
+              item.className = 'l3-item';
+
+              const l3Search = `${l3Inf.id} ${l3Inf.name} ${(l3.description||"")} ${(l3.owner||l2.owner||"")} ${(l3.trigger||"")} ${(l3.outcome||"")}`;
+              item.dataset.search = normalizeSearch(l3Search);
+
+              item.innerHTML = `
+                <div class="l3-head"><span>${l3Inf.id}</span></div>
+                <div class="l3-body">${l3Inf.name}</div>
+              `;
+
+              item.onmousemove = (e) => {
+                const meta = `<b>Owner:</b> ${l3.owner||l2.owner||"-"}<br><b>Trigger:</b> ${l3.trigger||"-"}<br><b>Outcome:</b> ${l3.outcome||"-"}`;
+                showTooltip(e, l3Inf.name, l3.description, meta);
+              };
+              item.onmouseleave = hideTooltip;
+
+              list.appendChild(item);
+            });
+          } else {
+            list.innerHTML = `<div style="padding:10px; color:#ccc; font-style:italic;">No L3 steps.</div>`;
+          }
+        });
+      }
+
+      applySearch();
+    }
+
+    function normalizeSearch(s) {
+      return (s || "")
+        .toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function applySearch() {
+      const q = normalizeSearch(searchBox.value);
+
+      const l1Chevrons = l1Container.querySelectorAll('.l1-chevron');
+      if (l1Chevrons.length) {
+        l1Chevrons.forEach(el => {
+          if (!q) { el.classList.remove('is-hidden'); return; }
+          const hay = el.dataset.search || "";
+          el.classList.toggle('is-hidden', !hay.includes(q));
+        });
+      }
+
+      const l2Cards = workspace.querySelectorAll('.l2-chain-item');
+      if (l2Cards.length) {
+        l2Cards.forEach(card => {
+          const l2Hay = card.dataset.search || "";
+          const cardMatch = !q || l2Hay.includes(q);
+
+          const l3Items = card.querySelectorAll('.l3-item');
+          let anyL3Visible = false;
+
+          l3Items.forEach(item => {
+            if (!q) {
+              item.classList.remove('is-hidden');
+              anyL3Visible = true;
+              return;
+            }
+            const hay = item.dataset.search || "";
+            const show = hay.includes(q);
+            item.classList.toggle('is-hidden', !show);
+            if (show) anyL3Visible = true;
+          });
+
+          const showCard = cardMatch || anyL3Visible || !q;
+          card.classList.toggle('is-hidden', !showCard);
+        });
+      }
+    }
+
+    searchBox.addEventListener('input', applySearch);
+
+    function showTooltip(e, title, desc, meta) {
+      tooltip.style.display = 'block';
+      tooltip.style.left = (e.clientX + 15) + 'px';
+      tooltip.style.top = (e.clientY + 15) + 'px';
+      tooltip.innerHTML = `<h4>${title}</h4><p>${desc||""}</p><div class="meta">${meta||""}</div>`;
+    }
+    function hideTooltip() { tooltip.style.display = 'none'; }
+  </script>
+</body>
+</html>
