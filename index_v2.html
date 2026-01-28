@@ -22,14 +22,14 @@
       --e3: 0 16px 40px rgba(0,0,0,.10);
 
       /* Chevron geometry */
-      --chev-h: 128px;
-      --chev-tip: 42px;
-      --chev-notch: 24px;
+      --chev-h: 132px;     /* consistent height */
+      --chev-tip: 44px;
+      --chev-notch: 26px;
       --chev-gap: 14px;
 
       /* Readability */
-      --fs-code: 14px;
-      --fs-title: 17px;
+      --fs-code: 13px;
+      --fs-title: 16px;
       --fs-desc: 13px;
       --fs-owner: 12px;
 
@@ -100,7 +100,7 @@
       background: rgba(255,255,255,.88);
       box-shadow: var(--e1);
       cursor:pointer;
-      max-width: 320px;
+      max-width: 340px;
     }
 
     /* Breadcrumb */
@@ -350,9 +350,12 @@
       position: relative;
       z-index: 5;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
       gap: var(--chev-gap);
       align-items: stretch;
+    }
+    @media (max-width: 520px){
+      .chain.chevron{ grid-template-columns: 1fr; }
     }
 
     /* Chevron card using clip-path */
@@ -365,7 +368,7 @@
 
       padding: 12px 16px 10px 16px;
       display: grid;
-      grid-template-rows: 18px 44px 1fr 30px;
+      grid-template-rows: auto auto 1fr auto; /* fixes alignment */
       gap: 6px;
       overflow: hidden;
 
@@ -411,9 +414,9 @@
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
-      max-width: 70%;
+      max-width: 72%;
     }
-    .ord{ font-weight: 1000; font-size: 12px; opacity:.90; white-space:nowrap; }
+    .ord{ font-weight: 1000; font-size: 12px; opacity:.92; white-space:nowrap; }
 
     .name{
       font-weight: 1000;
@@ -424,6 +427,7 @@
       -webkit-box-orient: vertical;
       overflow:hidden;
       margin-top: 2px;
+      min-height: 36px; /* keeps title block consistent */
     }
 
     .meta{
@@ -436,6 +440,7 @@
       -webkit-box-orient: vertical;
       overflow:hidden;
       margin-top: 2px;
+      min-height: 34px; /* keeps description aligned */
     }
 
     .foot{
@@ -443,6 +448,7 @@
       justify-content:space-between;
       align-items:center;
       gap:10px;
+      padding-top: 2px;
     }
 
     .ownerTag{
@@ -454,8 +460,8 @@
       font-weight: 1000;
       background: rgba(255,255,255,.86);
       border: 1px solid rgba(0,0,0,.14);
-      color: rgba(0,0,0,.80);
-      max-width: 72%;
+      color: rgba(0,0,0,.82);
+      max-width: 74%;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
@@ -467,6 +473,7 @@
       opacity: .95;
       text-shadow: 0 1px 0 rgba(0,0,0,.15);
       user-select:none;
+      flex: 0 0 auto;
     }
 
     .chev.darkPill .ownerTag{
@@ -485,7 +492,7 @@
       position: relative;
       z-index: 5;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
       gap: 14px;
     }
     .step{
@@ -497,7 +504,7 @@
       cursor:pointer;
       position: relative;
       overflow:hidden;
-      min-height: 118px;
+      min-height: 120px;
       transition: transform .08s ease, box-shadow .08s ease;
     }
     .step:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
@@ -614,9 +621,7 @@
     }
 
     /* Tree view */
-    .tree{
-      padding: 10px 12px 14px;
-    }
+    .tree{ padding: 10px 12px 14px; }
     .tree details{
       border: 1px solid rgba(0,0,0,.10);
       border-radius: 12px;
@@ -639,9 +644,7 @@
       border-bottom: 1px solid rgba(0,0,0,.06);
     }
     .tree summary::-webkit-details-marker{ display:none; }
-    .tree .node{
-      display:flex; align-items:center; gap:10px; min-width:0;
-    }
+    .tree .node{ display:flex; align-items:center; gap:10px; min-width:0; }
     .tag{
       padding: 4px 8px;
       border-radius: 999px;
@@ -808,7 +811,6 @@
 </header>
 
 <main>
-  <!-- IMPORTANT: This is the L0 process house you said was missing -->
   <details id="house" class="house" open>
     <summary>
       <div class="sum-left">
@@ -955,23 +957,36 @@
     if (Array.isArray(raw)) return { processes: raw };
 
     // 3) nested tree: { name, children: [...] }
+    // IMPORTANT: your JSON uses a wrapper root ("DHL eCommerce Value Chain") with children = real L0 processes.
     if (raw && raw.name && Array.isArray(raw.children)){
       const out = [];
+
+      function nodeCode(node){
+        return node.code || node.id || (node.name || "").split(":")[0]?.trim() || node.name;
+      }
+
+      const rootHasRealCode = !!(raw.code || raw.id);
+      const startNodes = rootHasRealCode ? [raw] : (raw.children || []);
+      const startLevel = 0;
+
       function walk(node, level, parentCode){
-        const code = node.code || node.id || (node.name || "").split(":")[0]?.trim() || node.name;
+        const code = nodeCode(node);
         out.push({
           level,
           code,
           name: node.title || node.display_name || node.name,
           description: node.description || node.def || "",
           owner: node.owner || "",
-          create: node.create || node.category || node.stream || "",
+          create: node.create || node.category || node.stream || node.value_stream || "",
           parent_code: parentCode || "",
           order: node.order || node.seq || node.sequence || 0
         });
         (node.children || []).forEach(ch => walk(ch, level+1, code));
       }
-      walk(raw, 0, "");
+
+      for (const n of startNodes){
+        walk(n, startLevel, "");
+      }
       return { processes: out };
     }
 
@@ -1070,16 +1085,16 @@
     });
   }
 
-  // ---------- breadcrumb ----------
+  // ---------- breadcrumb (ONLY up to selected depth) ----------
   function setBreadcrumb(){
     const row = $("crumbRow");
     row.innerHTML = "";
 
     const parts = [];
-    if (state.selected.l0) parts.push({ cls:"crumbL0", txt: `${state.selected.l0.code}: ${state.selected.l0.name}` });
-    if (state.selected.l1) parts.push({ cls:"crumbL1", txt: `${state.selected.l1.code}: ${state.selected.l1.name}` });
-    if (state.selected.l2) parts.push({ cls:"crumbL2", txt: `${state.selected.l2.code}: ${state.selected.l2.name}` });
-    if (state.selected.l3) parts.push({ cls:"crumbL3", txt: `${state.selected.l3.code}: ${state.selected.l3.name}` });
+    if (state.selected.l0) parts.push({ cls:"crumbL0", txt: `${state.selected.l0.name}` });
+    if (state.selected.l1) parts.push({ cls:"crumbL1", txt: `${state.selected.l1.name}` });
+    if (state.selected.l2) parts.push({ cls:"crumbL2", txt: `${state.selected.l2.name}` });
+    if (state.selected.l3) parts.push({ cls:"crumbL3", txt: `${state.selected.l3.name}` });
 
     parts.forEach(p => {
       const chip = document.createElement("div");
@@ -1155,59 +1170,76 @@
     closePopover();
   }, true);
 
-  // -------- continuity connectors between wrapped rows --------
-  function drawRowConnectors(containerEl, wrapEl, svgEl){
-    const items = Array.from(containerEl.querySelectorAll(".connTarget"));
-    svgEl.innerHTML = "";
-    if (items.length < 2) return;
-
-    const wrapRect = wrapEl.getBoundingClientRect();
-    svgEl.setAttribute("viewBox", `0 0 ${wrapRect.width} ${wrapRect.height}`);
-
+  // ---------- continuity connectors (visible always: adjacent + wrap) ----------
+  function ensureSvgDefs(svgEl){
+    if (svgEl.querySelector("defs")) return;
     const defs = document.createElementNS("http://www.w3.org/2000/svg","defs");
     defs.innerHTML = `
       <marker id="arrowHead" markerWidth="16" markerHeight="16" refX="12" refY="8" orient="auto">
-        <path d="M0,0 L16,8 L0,16 Z" fill="rgba(212,5,17,.85)"></path>
+        <path d="M0,0 L16,8 L0,16 Z" fill="rgba(212,5,17,.86)"></path>
       </marker>
       <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
         <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="rgba(0,0,0,.22)"/>
       </filter>
     `;
     svgEl.appendChild(defs);
+  }
 
-    const rows = [];
-    for (const el of items){
+  function drawConnectors(containerEl, wrapEl, svgEl){
+    svgEl.innerHTML = "";
+    ensureSvgDefs(svgEl);
+
+    const items = Array.from(containerEl.querySelectorAll(".connTarget"));
+    if (items.length < 2) return;
+
+    const wrapRect = wrapEl.getBoundingClientRect();
+    const w = wrapRect.width, h = wrapRect.height;
+
+    svgEl.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    svgEl.setAttribute("preserveAspectRatio", "none");
+
+    // build geometry list in DOM order (which matches flow order)
+    const rects = items.map(el => {
       const r = el.getBoundingClientRect();
-      let row = rows.find(x => Math.abs(x.top - r.top) < 10);
-      if (!row){ row = { top:r.top, els:[] }; rows.push(row); }
-      row.els.push({ el, rect:r });
-    }
-    rows.sort((a,b)=>a.top-b.top);
-    if (rows.length <= 1) return;
+      const left = r.left - wrapRect.left;
+      const right = r.right - wrapRect.left;
+      const top = r.top - wrapRect.top;
+      const midY = top + r.height/2;
+      return { el, r, left, right, top, midY, rowTop: Math.round(top/8)*8 };
+    });
 
-    for (let i=0;i<rows.length-1;i++){
-      const a = rows[i].els.sort((p,q)=>p.rect.left-q.rect.left);
-      const b = rows[i+1].els.sort((p,q)=>p.rect.left-q.rect.left);
+    // Draw arrow between each adjacent item (always visible)
+    for (let i=0;i<rects.length-1;i++){
+      const a = rects[i];
+      const b = rects[i+1];
 
-      const last = a[a.length-1].rect;
-      const first = b[0].rect;
+      const x1 = a.right - 14;
+      const y1 = a.midY;
 
-      const x1 = (last.right - wrapRect.left) - 12;
-      const y1 = (last.top - wrapRect.top) + last.height/2;
+      const x2 = b.left + 14;
+      const y2 = b.midY;
 
-      const x2 = (first.left - wrapRect.left) + 12;
-      const y2 = (first.top - wrapRect.top) + first.height/2;
+      const sameRow = Math.abs(a.top - b.top) < 10;
 
-      const bend = 30;
-      const midX = Math.max(x1, x2) + 60;
-      const pathD = `M ${x1} ${y1}
-                     C ${x1 + bend} ${y1}, ${midX} ${y1}, ${midX} ${(y1+y2)/2}
-                     C ${midX} ${y2}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+      let d;
+      if (sameRow){
+        const bend = 36;
+        d = `M ${x1} ${y1}
+             C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
+      } else {
+        // wrap: go out, down, then into next row
+        const out = 48;
+        const down = Math.max(24, Math.abs(y2 - y1)/2);
+        const mx = Math.max(x1, x2) + 60;
+        d = `M ${x1} ${y1}
+             C ${x1 + out} ${y1}, ${mx} ${y1}, ${mx} ${y1 + down}
+             C ${mx} ${y2}, ${x2 - out} ${y2}, ${x2} ${y2}`;
+      }
 
       const path = document.createElementNS("http://www.w3.org/2000/svg","path");
-      path.setAttribute("d", pathD);
-      path.setAttribute("stroke", "rgba(212,5,17,.78)");
-      path.setAttribute("stroke-width", "4");
+      path.setAttribute("d", d);
+      path.setAttribute("stroke", "rgba(212,5,17,.72)");
+      path.setAttribute("stroke-width", sameRow ? "3.5" : "4");
       path.setAttribute("fill", "none");
       path.setAttribute("marker-end","url(#arrowHead)");
       path.setAttribute("filter","url(#softShadow)");
@@ -1215,7 +1247,7 @@
     }
   }
 
-  // ---------- L0 house band mapping (robust when JSON has no 'create') ----------
+  // ---------- L0 house band mapping ----------
   function l0Band(code){
     const c = String(code||"").split("_")[0].toUpperCase();
     if (["S2E","GRC","EA_PM"].includes(c)) return "manage";
@@ -1229,6 +1261,8 @@
   // ---------- rendering: process house ----------
   function renderHouse(){
     const body = $("houseBody");
+    if (!body) return;
+
     body.innerHTML = "";
 
     const l0 = applyFilters(state.l0All);
@@ -1259,14 +1293,17 @@
           <div>${escapeHtml(title)}</div>
           <div class="count">${arr.length}</div>
         </div>
-        <div class="band-grid" id="grid_${escapeHtml(key)}"></div>
+        <div class="band-grid" id="grid_${key}"></div>
       `;
       body.appendChild(band);
-      const grid = band.querySelector(`#grid_${CSS.escape("grid_"+key)}`);
+
+      const grid = band.querySelector(`#grid_${key}`);
+      if (!grid) continue;
 
       for (const n of arr){
         const card = document.createElement("div");
         card.className = `l0card ${state.selected.l0?.code===n.code ? "active":""}`;
+
         const codePrefix = String(n.code||"").split("_")[0].toUpperCase();
         const iconSvg = ICONS[codePrefix] || ICONS["EA_PM"] || icon("cog");
 
@@ -1278,6 +1315,7 @@
             <div class="l0desc">${escapeHtml(n.desc || "")}</div>
           </div>
         `;
+
         card.onclick = (e)=>{
           e.stopPropagation();
           state.selected.l0 = n;
@@ -1288,6 +1326,7 @@
           setBreadcrumb();
           renderAll();
         };
+
         grid.appendChild(card);
       }
     }
@@ -1387,7 +1426,7 @@
       chain.appendChild(el);
     });
 
-    requestAnimationFrame(()=> drawRowConnectors(chain, wrap, svg));
+    requestAnimationFrame(()=> drawConnectors(chain, wrap, svg));
   }
 
   // ---------- render swimlane ----------
@@ -1452,7 +1491,7 @@
       chain.appendChild(step);
     });
 
-    requestAnimationFrame(()=> drawRowConnectors(chain, wrap, svg));
+    requestAnimationFrame(()=> drawConnectors(chain, wrap, svg));
   }
 
   // ---------- L3 waterfall ----------
@@ -1612,93 +1651,78 @@
     }
   }
 
-  // ---------- orchestrator ----------
- function renderHouse(){
-  const body = $("houseBody");
-  if (!body) return;
+  // ---------- renderAll ----------
+  function renderAll(){
+    const idx = state.index;
+    if (!idx) return;
 
-  body.innerHTML = "";
+    // Always render process house
+    renderHouse();
 
-  const l0 = applyFilters(state.l0All);
+    // View switching
+    const isTree = state.view === "tree";
+    $("treePanel").style.display = isTree ? "block" : "none";
+    $("l1Panel").style.display = isTree ? "none" : "block";
+    $("l2Panel").style.display = isTree ? "none" : "block";
+    $("l3Panel").style.display = isTree ? "none" : "block";
 
-  const groups = { manage: [], run: [], enabling: [], change: [], foundation: [] };
-  for (const n of l0){
-    groups[l0Band(n.code)].push(n);
-  }
+    // Breadcrumb
+    setBreadcrumb();
 
-  const order = [
-    ["manage","Manage the Business"],
-    ["run","Run the Business"],
-    ["enabling","Enabling Functions"],
-    ["change","Change the Business"],
-    ["foundation","Foundation"]
-  ];
-
-  for (const [key, title] of order){
-    const arr = groups[key];
-    if (!arr.length) continue;
-
-    arr.sort((a,b)=>a.code.localeCompare(b.code));
-
-    const band = document.createElement("div");
-    band.className = `band ${key}`;
-
-    // IMPORTANT: id is grid_${key}, e.g. grid_manage
-    band.innerHTML = `
-      <div class="band-head">
-        <div>${escapeHtml(title)}</div>
-        <div class="count">${arr.length}</div>
-      </div>
-      <div class="band-grid" id="grid_${key}"></div>
-    `;
-    body.appendChild(band);
-
-    // FIX: query the correct id
-    const grid = band.querySelector(`#grid_${key}`);
-    if (!grid) continue;
-
-    for (const n of arr){
-      const card = document.createElement("div");
-      card.className = `l0card ${state.selected.l0?.code===n.code ? "active":""}`;
-
-      const codePrefix = String(n.code||"").split("_")[0].toUpperCase();
-      const iconSvg = ICONS[codePrefix] || ICONS["EA_PM"] || icon("cog");
-
-      card.innerHTML = `
-        <div class="icon">${iconSvg}</div>
-        <div class="l0meta">
-          <div class="l0code">${escapeHtml(n.code)}</div>
-          <div class="l0name">${escapeHtml(n.name)}</div>
-          <div class="l0desc">${escapeHtml(n.desc || "")}</div>
-        </div>
-      `;
-
-      card.onclick = (e)=>{
-        e.stopPropagation();
-        state.selected.l0 = n;
-        state.selected.l1 = null;
-        state.selected.l2 = null;
-        state.selected.l3 = null;
-        closePopover();
-        setBreadcrumb();
-        renderAll();
-      };
-
-      grid.appendChild(card);
+    // If tree view: just render tree and stop
+    if (isTree){
+      renderTree();
+      return;
     }
-  }
 
-  if (!body.children.length){
-    body.innerHTML = `<div class="empty">No L0 items match the current filters.</div>`;
+    // L1 depends on selected L0
+    const l0 = state.selected.l0;
+    if (!l0){
+      $("l1").innerHTML = `<div class="empty">Select an L0 box in the process house.</div>`;
+      $("l2").innerHTML = `<div class="empty">Select an L1 item.</div>`;
+      renderL3([]);
+      $("l1Count").textContent = "0";
+      $("l2Count").textContent = "0";
+      return;
+    }
+
+    const l1s = levelChildren(idx, l0.code, 1);
+
+    $("l1Hint").textContent = `Selected L0: ${l0.name}`;
+    if (state.view === "chevron") renderChevronChain("l1","l1Wrap","l1Flow", l1s, 1);
+    else renderSwimlane("l1","l1Wrap","l1Flow", l1s, 1);
+
+    // L2 depends on selected L1
+    const l1 = state.selected.l1;
+    if (!l1){
+      $("l2").innerHTML = `<div class="empty">Select an L1 item to show L2 sub-chain.</div>`;
+      $("l2Count").textContent = "0";
+      renderL3([]);
+      return;
+    }
+
+    const l2s = levelChildren(idx, l1.code, 2);
+    $("l2Hint").textContent = `Selected L1: ${l1.name}`;
+    if (state.view === "chevron") renderChevronChain("l2","l2Wrap","l2Flow", l2s, 2);
+    else renderSwimlane("l2","l2Wrap","l2Flow", l2s, 2);
+
+    // L3 depends on selected L2
+    const l2 = state.selected.l2;
+    if (!l2){
+      renderL3([]);
+      return;
+    }
+    const l3s = levelChildren(idx, l2.code, 3);
+    $("l3Hint").textContent = `Selected L2: ${l2.name}`;
+    renderL3(l3s);
   }
-}
 
   // ---------- load ----------
   async function load(){
     try{
       setError("");
 
-      // IMPORTANT: GitHub Pages is case sensitive. Ensure file is exactly "data.json"
+      // GitHub Pages is case sensitive. Ensure file is exactly "data.json"
       const res = await fetch("./data.json", { cache:"no-store" });
       if (!res.ok) throw new Error(`Failed to fetch data.json (HTTP ${res.status}). Check path + case.`);
       const raw = await res.json();
@@ -1712,15 +1736,14 @@
 
       state.rows = rows;
       state.index = buildIndex(rows);
+
+      // With wrapper-root JSON, S2E/GRC/... are now correctly level 0
       state.l0All = rows.filter(r => r.level === 0).sort((a,b)=>a.code.localeCompare(b.code));
 
-      // populate dropdown filters
       renderFilters(rows);
 
-      // initial selection: first L0 (optional). comment out if you want blank start
-      if (state.l0All.length && !state.selected.l0){
-        state.selected.l0 = state.l0All[0];
-      }
+      // Start blank: user clicks L0 (process house is the filter)
+      state.selected = { l0:null, l1:null, l2:null, l3:null };
 
       renderAll();
     }catch(e){
@@ -1733,7 +1756,7 @@
     state.filters = { create:"", owner:"" };
     $("createFilter").value = "";
     $("ownerFilter").value = "";
-    state.selected = { l0: state.l0All[0] || null, l1:null, l2:null, l3:null };
+    state.selected = { l0:null, l1:null, l2:null, l3:null };
     closePopover();
     renderAll();
   };
@@ -1762,8 +1785,8 @@
 
   window.addEventListener("resize", ()=>{
     if (state.view !== "tree"){
-      if ($("l1").children.length) drawRowConnectors($("l1"), $("l1Wrap"), $("l1Flow"));
-      if ($("l2").children.length) drawRowConnectors($("l2"), $("l2Wrap"), $("l2Flow"));
+      if ($("l1").querySelectorAll(".connTarget").length) drawConnectors($("l1"), $("l1Wrap"), $("l1Flow"));
+      if ($("l2").querySelectorAll(".connTarget").length) drawConnectors($("l2"), $("l2Wrap"), $("l2Flow"));
     }
     positionPopover();
   });
