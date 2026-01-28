@@ -4,6 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>DHL eCommerce · Enterprise Process Architecture · Value Chain</title>
+
   <style>
     :root{
       --dhl-red:#D40511;
@@ -21,9 +22,9 @@
       --e3: 0 16px 40px rgba(0,0,0,.10);
 
       /* Chevron geometry */
-      --chev-h: 124px;       /* consistent block height */
-      --chev-tip: 40px;      /* visible arrow tip */
-      --chev-notch: 22px;    /* left notch */
+      --chev-h: 128px;
+      --chev-tip: 42px;
+      --chev-notch: 24px;
       --chev-gap: 14px;
 
       /* Readability */
@@ -99,10 +100,10 @@
       background: rgba(255,255,255,.88);
       box-shadow: var(--e1);
       cursor:pointer;
-      max-width: 280px;
+      max-width: 320px;
     }
 
-    /* Breadcrumb (per level, colored chips) */
+    /* Breadcrumb */
     .crumbbar{
       max-width: var(--maxw);
       margin: 0 auto;
@@ -225,6 +226,7 @@
     }
     .band.manage .band-head{ background: rgba(255,204,0,.55); }
     .band.run .band-head{ background: rgba(255,204,0,.35); }
+    .band.enabling .band-head{ background: rgba(255,204,0,.28); }
     .band.change .band-head{ background: rgba(212,5,17,.10); }
     .band.foundation .band-head{ background: rgba(43,47,51,.10); }
 
@@ -332,7 +334,7 @@
       max-width: 74vw;
     }
 
-    /* Chevron chain wrapper */
+    /* Shared chain wrapper */
     .chainwrap{ position: relative; padding: 12px; }
     .flowSvg{
       position:absolute;
@@ -340,12 +342,11 @@
       width: 100%;
       height: 100%;
       pointer-events:none;
-      /* put ABOVE chevrons so it is visible */
       z-index: 6;
     }
 
-    /* GRID makes chevron sizes consistent per row */
-    .chain{
+    /* Chevron grid */
+    .chain.chevron{
       position: relative;
       z-index: 5;
       display: grid;
@@ -354,7 +355,7 @@
       align-items: stretch;
     }
 
-    /* Chevron card using clip-path (consistent shape) */
+    /* Chevron card using clip-path */
     .chev{
       height: var(--chev-h);
       border-radius: 16px;
@@ -364,7 +365,7 @@
 
       padding: 12px 16px 10px 16px;
       display: grid;
-      grid-template-rows: 18px 44px 1fr 28px; /* top, title, desc, footer */
+      grid-template-rows: 18px 44px 1fr 30px;
       gap: 6px;
       overflow: hidden;
 
@@ -373,7 +374,6 @@
 
       transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
 
-      /* chevron shape */
       clip-path: polygon(
         0% 0%,
         calc(100% - var(--chev-tip)) 0%,
@@ -383,7 +383,6 @@
         var(--chev-notch) 50%
       );
     }
-    /* first in chain: no notch */
     .chev.first{
       clip-path: polygon(
         0% 0%,
@@ -393,7 +392,6 @@
         0% 100%
       );
     }
-
     .chev:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
 
     .chev.active{
@@ -482,22 +480,90 @@
       color: rgba(255,255,255,.92);
     }
 
-    /* Start / end icons in top row */
-    .edgeIcon{
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      box-shadow: var(--e1);
-      border: 1px solid rgba(0,0,0,.14);
-      background: rgba(255,255,255,.88);
-      color: rgba(0,0,0,.75);
+    /* Swimlane view */
+    .swimlane{
+      position: relative;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 14px;
+    }
+    .step{
+      background: #fff;
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 16px;
+      box-shadow: var(--e2);
+      padding: 12px 12px 10px;
+      cursor:pointer;
+      position: relative;
+      overflow:hidden;
+      min-height: 118px;
+      transition: transform .08s ease, box-shadow .08s ease;
+    }
+    .step:hover{ transform: translateY(-1px); box-shadow: var(--e3); }
+    .step::before{
+      content:"";
+      position:absolute;
+      left:0; top:0; bottom:0;
+      width: 10px;
+      background: var(--lane, var(--dhl-yellow));
+    }
+    .step.active{
+      outline: 4px solid rgba(212,5,17,.22);
+      outline-offset: 2px;
+      border-color: rgba(212,5,17,.22);
+      background: rgba(212,5,17,.05);
+    }
+    .stepHead{
+      display:flex; justify-content:space-between; gap:10px; align-items:flex-start;
+    }
+    .bubble{
+      display:inline-flex; align-items:center; justify-content:center;
+      width: 30px; height: 30px; border-radius: 999px;
+      background: rgba(0,0,0,.06);
+      border: 1px solid rgba(0,0,0,.12);
+      font-weight: 1000;
       flex: 0 0 auto;
     }
-    .edgeIcon svg{ width: 16px; height: 16px; fill: currentColor; }
-    .edgeGroup{ display:flex; gap:8px; align-items:center; }
+    .stepCode{ font-weight:1000; font-size: 12px; color: rgba(212,5,17,.90); }
+    .stepTitle{ margin-top:6px; font-weight:1000; font-size: 15px; line-height:1.15; }
+    .stepDesc{
+      margin-top: 8px;
+      font-weight: 850;
+      font-size: 12px;
+      color: rgba(0,0,0,.62);
+      line-height:1.3;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      min-height: 32px;
+    }
+    .stepFoot{
+      margin-top: 10px;
+      display:flex; justify-content:space-between; align-items:center; gap:10px;
+    }
+    .stepOwner{
+      display:inline-flex;
+      align-items:center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(0,0,0,.04);
+      font-weight: 1000;
+      font-size: 12px;
+      color: rgba(0,0,0,.70);
+      max-width: 75%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .laneArrow{
+      font-size: 18px;
+      font-weight: 1100;
+      opacity: .80;
+      user-select:none;
+    }
 
     /* L3 waterfall */
     .l3wrap{ padding: 12px; }
@@ -547,7 +613,108 @@
       background: #fff;
     }
 
-    /* Click popover (follows mouse) */
+    /* Tree view */
+    .tree{
+      padding: 10px 12px 14px;
+    }
+    .tree details{
+      border: 1px solid rgba(0,0,0,.10);
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: var(--e1);
+      margin: 10px 0;
+      overflow:hidden;
+    }
+    .tree summary{
+      list-style:none;
+      cursor:pointer;
+      padding: 10px 12px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      font-weight: 1000;
+      font-size: 12px;
+      background: linear-gradient(180deg,#fff,#fbfbfd);
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+    .tree summary::-webkit-details-marker{ display:none; }
+    .tree .node{
+      display:flex; align-items:center; gap:10px; min-width:0;
+    }
+    .tag{
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(0,0,0,.04);
+      font-weight: 1000;
+      font-size: 11px;
+      color: rgba(0,0,0,.70);
+      flex:0 0 auto;
+    }
+    .tag.l0{ background: rgba(212,5,17,.12); border-color: rgba(212,5,17,.22); color: rgba(212,5,17,.95); }
+    .tag.l1{ background: rgba(255,204,0,.22); border-color: rgba(255,204,0,.40); }
+    .tag.l2{ background: rgba(43,47,51,.10); border-color: rgba(43,47,51,.22); }
+    .tag.l3{ background: rgba(240,241,243,.95); }
+    .nodeTitle{
+      font-size: 12px; font-weight: 1000;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .tree .body{
+      padding: 10px 12px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .tree .leaf{
+      border: 1px solid rgba(0,0,0,.10);
+      border-radius: 12px;
+      padding: 10px 10px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      cursor:pointer;
+      background:#fff;
+      box-shadow: var(--e1);
+    }
+    .tree .leaf:hover{ box-shadow: var(--e2); }
+    .tree .leaf.active{
+      outline: 3px solid rgba(212,5,17,.18);
+      outline-offset: 2px;
+      border-color: rgba(212,5,17,.22);
+    }
+    .leafLeft{ min-width:0; }
+    .leafCode{ font-weight:1000; font-size:12px; color: var(--dhl-red); }
+    .leafName{
+      margin-top: 3px;
+      font-weight:1000;
+      font-size: 13px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      max-width: 72vw;
+    }
+    .leafDesc{
+      margin-top: 6px;
+      font-weight: 850;
+      font-size: 12px;
+      color: rgba(0,0,0,.62);
+      line-height:1.3;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+    .leafOwner{
+      font-weight:1000;
+      font-size: 12px;
+      color: rgba(0,0,0,.60);
+      white-space:nowrap;
+      flex:0 0 auto;
+      max-width: 40%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* Popover */
     .popover{
       position: fixed;
       z-index: 9999;
@@ -610,7 +777,13 @@
     </div>
 
     <div class="actions">
-      <select id="createFilter" class="select" title="Create (L0 category)">
+      <select id="viewStyle" class="select" title="Visual style">
+        <option value="chevron">Visual: Chevron Chains</option>
+        <option value="swimlane">Visual: Swimlane Timeline</option>
+        <option value="tree">Visual: Collapsible Tree</option>
+      </select>
+
+      <select id="createFilter" class="select" title="Create (category)">
         <option value="">Create: All</option>
       </select>
 
@@ -635,18 +808,19 @@
 </header>
 
 <main>
+  <!-- IMPORTANT: This is the L0 process house you said was missing -->
   <details id="house" class="house" open>
     <summary>
       <div class="sum-left">
         <span class="pill">L0</span>
         <span>Process House</span>
       </div>
-      <span class="hint">Click a box to select (process house acts as filter)</span>
+      <span class="hint">Click a box to select (process house acts as primary filter)</span>
     </summary>
     <div class="house-body" id="houseBody"></div>
   </details>
 
-  <section class="panel">
+  <section class="panel" id="l1Panel">
     <div class="panel-head">
       <div class="panel-title">
         <span class="badge l1">L1</span>
@@ -657,38 +831,49 @@
     </div>
     <div class="chainwrap" id="l1Wrap">
       <svg id="l1Flow" class="flowSvg"></svg>
-      <div id="l1" class="chain"></div>
+      <div id="l1" class="chain chevron"></div>
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="l2Panel">
     <div class="panel-head">
       <div class="panel-title">
         <span class="badge l2">L2</span>
         <span>L2 Sub-Chain</span>
         <span id="l2Count" class="badge l2">0</span>
       </div>
-      <div id="l2Hint" class="subhint">Select an L1 chevron.</div>
+      <div id="l2Hint" class="subhint">Select an L1 item.</div>
     </div>
     <div class="chainwrap" id="l2Wrap">
       <svg id="l2Flow" class="flowSvg"></svg>
-      <div id="l2" class="chain"></div>
+      <div id="l2" class="chain chevron"></div>
     </div>
   </section>
 
-  <section class="panel">
+  <section class="panel" id="l3Panel">
     <div class="panel-head">
       <div class="panel-title">
         <span class="badge l3">L3</span>
         <span>L3 Activities</span>
         <span id="l3Count" class="badge l3">0</span>
       </div>
-      <div id="l3Hint" class="subhint">Select an L2 chevron.</div>
+      <div id="l3Hint" class="subhint">Select an L2 item.</div>
     </div>
     <div class="l3wrap">
       <div class="waterfall" id="l3"></div>
     </div>
   </section>
+
+  <div id="treePanel" class="panel" style="display:none;">
+    <div class="panel-head">
+      <div class="panel-title">
+        <span class="badge l1">Tree</span>
+        <span>Browse processes</span>
+      </div>
+      <div class="subhint">Use the tree to navigate L0→L3. Clicking updates breadcrumb + L3 list.</div>
+    </div>
+    <div class="tree" id="tree"></div>
+  </div>
 
   <div id="err" style="display:none;" class="error"></div>
 </main>
@@ -699,18 +884,18 @@
   const $ = (id) => document.getElementById(id);
 
   const state = {
-    json: null,
+    rows: [],
+    index: null,
     l0All: [],
     selected: { l0:null, l1:null, l2:null, l3:null },
     filters: { create:"", owner:"" },
+    view: "chevron",
     popOpen: false,
     popFollowMouse: false,
     mouse: { x: 0, y: 0 }
   };
 
-  function svgPlay(){ return `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`; }
-  function svgFlag(){ return `<svg viewBox="0 0 24 24"><path d="M6 2h2v2h10l-2 4 2 4H8v10H6V2z"/></svg>`; }
-
+  // ---------- minimal icons (inline SVG) ----------
   function icon(kind){
     const paths = {
       compass:`<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm3.7 6.3-2.2 6.1-6.2 2.2 2.2-6.1 6.2-2.2Zm-6 7.4 2.9-1.1 1.1-2.9-2.9 1.1-1.1 2.9Z"/>`,
@@ -729,9 +914,8 @@
       rocket:`<path d="M12 2c3 0 6 3 6 6 0 5-6 12-6 12S6 13 6 8c0-3 3-6 6-6Zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM4 14l3-1-1 3-2 2-2-2 2-2Zm16 0-3-1 1 3 2 2 2-2-2-2Z"/>`
     };
     const p = paths[kind] || paths.cog;
-    return `<svg viewBox="0 0 24 24">${p}</svg>`;
+    return `<svg viewBox="0 0 24 24" aria-hidden="true">${p}</svg>`;
   }
-
   const ICONS = {
     S2E: icon("compass"),
     GRC: icon("shield"),
@@ -749,11 +933,29 @@
     ITF: icon("lock")
   };
 
-  // ---------- JSON parsing (supports both formats) ----------
+  function setError(msg){
+    const el = $("err");
+    if (!msg){ el.style.display="none"; el.textContent=""; return; }
+    el.style.display="block";
+    el.textContent = msg;
+  }
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
+  }
+  function uniq(arr){
+    return Array.from(new Set(arr.map(v => (v==null || String(v).trim()==="") ? "—" : String(v)))).sort((a,b)=>a.localeCompare(b));
+  }
+
+  // ---------- JSON parsing (supports multiple shapes) ----------
   function normalizeJson(raw){
-    if (!raw) return { processes: [] };
-    if (Array.isArray(raw.processes)) return raw;
-    if (raw.name && Array.isArray(raw.children)){
+    // 1) { processes: [...] }
+    if (raw && Array.isArray(raw.processes)) return raw;
+
+    // 2) [ ... ] directly
+    if (Array.isArray(raw)) return { processes: raw };
+
+    // 3) nested tree: { name, children: [...] }
+    if (raw && raw.name && Array.isArray(raw.children)){
       const out = [];
       function walk(node, level, parentCode){
         const code = node.code || node.id || (node.name || "").split(":")[0]?.trim() || node.name;
@@ -763,20 +965,23 @@
           name: node.title || node.display_name || node.name,
           description: node.description || node.def || "",
           owner: node.owner || "",
-          create: node.create || node.category || "",
-          parent_code: parentCode || ""
+          create: node.create || node.category || node.stream || "",
+          parent_code: parentCode || "",
+          order: node.order || node.seq || node.sequence || 0
         });
         (node.children || []).forEach(ch => walk(ch, level+1, code));
       }
       walk(raw, 0, "");
       return { processes: out };
     }
-    if (Array.isArray(raw)) return { processes: raw };
+
     return { processes: [] };
   }
 
   function pick(o, keys, fallback=""){
-    for (const k of keys){ if (o && o[k]!=null && String(o[k]).trim()!=="") return String(o[k]); }
+    for (const k of keys){
+      if (o && o[k]!=null && String(o[k]).trim()!=="") return String(o[k]);
+    }
     return fallback;
   }
 
@@ -815,11 +1020,11 @@
     return kids.filter(k => k.level === level);
   }
 
-  // ---------- Color ramps ----------
+  // ---------- color utils ----------
   function lerp(a,b,t){ return a + (b-a)*t; }
   function clamp01(x){ return Math.max(0, Math.min(1, x)); }
   function hexToRgb(hex){
-    const h = hex.replace("#","");
+    const h = String(hex).replace("#","");
     const n = parseInt(h.length===3 ? h.split("").map(c=>c+c).join("") : h, 16);
     return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
   }
@@ -838,24 +1043,10 @@
     return l < 0.55;
   }
 
-  // ---------- UI helpers ----------
-  function setError(msg){
-    const el = $("err");
-    if (!msg){ el.style.display="none"; el.textContent=""; return; }
-    el.style.display="block";
-    el.textContent = msg;
-  }
-
-  function uniq(arr){ return Array.from(new Set(arr.filter(Boolean))).sort((a,b)=>a.localeCompare(b)); }
-
-  function escapeHtml(s){
-    return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" }[m]));
-  }
-
+  // ---------- filters ----------
   function renderFilters(rows){
-    const createVals = uniq(rows.map(r=>r.create));
-    const ownerVals  = uniq(rows.map(r=>r.owner));
-
+    const createVals = uniq(rows.map(r => r.create));
+    const ownerVals  = uniq(rows.map(r => r.owner));
     const createSel = $("createFilter");
     const ownerSel  = $("ownerFilter");
 
@@ -869,6 +1060,17 @@
     if (curO) ownerSel.value = curO;
   }
 
+  function applyFilters(list){
+    const create = state.filters.create;
+    const owner  = state.filters.owner;
+    return list.filter(x => {
+      const c = (x.create && String(x.create).trim()!=="") ? x.create : "—";
+      const o = (x.owner  && String(x.owner).trim()!=="") ? x.owner  : "—";
+      return (!create || c === create) && (!owner || o === owner);
+    });
+  }
+
+  // ---------- breadcrumb ----------
   function setBreadcrumb(){
     const row = $("crumbRow");
     row.innerHTML = "";
@@ -890,18 +1092,7 @@
     $("crumbOwner").textContent = `Owner: ${owner || "—"}`;
   }
 
-  function applyFilters(list){
-    const { create, owner } = state.filters;
-    return list.filter(x => (!create || x.create === create) && (!owner || x.owner === owner));
-  }
-
-  function resetSelection(){
-    state.selected = { l0:null, l1:null, l2:null, l3:null };
-    setBreadcrumb();
-    renderAll();
-  }
-
-  // -------- Popover (click-to-open, follows mouse) --------
+  // -------- popover (click-to-open + follows mouse) --------
   function openPopover(item){
     const pop = $("pop");
     const owner = item.owner || "—";
@@ -927,14 +1118,12 @@
     positionPopover();
     $("popCloseBtn").onclick = closePopover;
   }
-
   function closePopover(){
     const pop = $("pop");
     pop.style.display = "none";
     state.popOpen = false;
     state.popFollowMouse = false;
   }
-
   function positionPopover(){
     if (!state.popOpen) return;
     const pop = $("pop");
@@ -953,17 +1142,12 @@
     pop.style.left = x + "px";
     pop.style.top  = y + "px";
   }
-
   document.addEventListener("mousemove", (e)=>{
     state.mouse.x = e.clientX;
     state.mouse.y = e.clientY;
     if (state.popOpen && state.popFollowMouse) positionPopover();
   });
-
-  document.addEventListener("keydown", (e)=>{
-    if (e.key === "Escape") closePopover();
-  });
-
+  document.addEventListener("keydown", (e)=>{ if (e.key === "Escape") closePopover(); });
   document.addEventListener("click", (e)=>{
     const pop = $("pop");
     if (!state.popOpen) return;
@@ -971,9 +1155,9 @@
     closePopover();
   }, true);
 
-  // -------- Continuity connectors between wrapped rows (now visible) --------
-  function drawRowConnectors(chainEl, wrapEl, svgEl){
-    const items = Array.from(chainEl.querySelectorAll(".chev"));
+  // -------- continuity connectors between wrapped rows --------
+  function drawRowConnectors(containerEl, wrapEl, svgEl){
+    const items = Array.from(containerEl.querySelectorAll(".connTarget"));
     svgEl.innerHTML = "";
     if (items.length < 2) return;
 
@@ -991,7 +1175,6 @@
     `;
     svgEl.appendChild(defs);
 
-    // group by row using top coordinate
     const rows = [];
     for (const el of items){
       const r = el.getBoundingClientRect();
@@ -1009,15 +1192,14 @@
       const last = a[a.length-1].rect;
       const first = b[0].rect;
 
-      const x1 = (last.right - wrapRect.left) - 10;
+      const x1 = (last.right - wrapRect.left) - 12;
       const y1 = (last.top - wrapRect.top) + last.height/2;
 
-      const x2 = (first.left - wrapRect.left) + 10;
+      const x2 = (first.left - wrapRect.left) + 12;
       const y2 = (first.top - wrapRect.top) + first.height/2;
 
-      // route outside the cards: go right, down, then left
-      const bend = 26;
-      const midX = Math.max(x1, x2) + 50; // push outside
+      const bend = 30;
+      const midX = Math.max(x1, x2) + 60;
       const pathD = `M ${x1} ${y1}
                      C ${x1 + bend} ${y1}, ${midX} ${y1}, ${midX} ${(y1+y2)/2}
                      C ${midX} ${y2}, ${x2 - bend} ${y2}, ${x2} ${y2}`;
@@ -1033,30 +1215,33 @@
     }
   }
 
-  // -------- Rendering --------
-  function renderHouse(idx){
+  // ---------- L0 house band mapping (robust when JSON has no 'create') ----------
+  function l0Band(code){
+    const c = String(code||"").split("_")[0].toUpperCase();
+    if (["S2E","GRC","EA_PM"].includes(c)) return "manage";
+    if (["L2C","O2D","P2R","D2O"].includes(c)) return "run";
+    if (["S2P","H2R","R2R"].includes(c)) return "enabling";
+    if (["I2P","TRF"].includes(c)) return "change";
+    if (["DA","ITF"].includes(c)) return "foundation";
+    return "run";
+  }
+
+  // ---------- rendering: process house ----------
+  function renderHouse(){
     const body = $("houseBody");
     body.innerHTML = "";
 
-    const l0 = state.l0All;
+    const l0 = applyFilters(state.l0All);
 
-    const groups = { manage: [], run: [], change: [], foundation: [] };
-    const normalizedCreate = (v)=> String(v||"").toLowerCase();
-    for (const n of applyFilters(l0)){
-      const c = normalizedCreate(n.create);
-      if (c.includes("manage")) groups.manage.push(n);
-      else if (c.includes("run")) groups.run.push(n);
-      else if (c.includes("change")) groups.change.push(n);
-      else if (c.includes("foundation")) groups.foundation.push(n);
-      else {
-        if (["da","itf"].includes((n.code||"").split("_")[0]?.toLowerCase())) groups.foundation.push(n);
-        else groups.run.push(n);
-      }
+    const groups = { manage: [], run: [], enabling: [], change: [], foundation: [] };
+    for (const n of l0){
+      groups[l0Band(n.code)].push(n);
     }
 
     const order = [
       ["manage","Manage the Business"],
       ["run","Run the Business"],
+      ["enabling","Enabling Functions"],
       ["change","Change the Business"],
       ["foundation","Foundation"]
     ];
@@ -1064,6 +1249,9 @@
     for (const [key, title] of order){
       const arr = groups[key];
       if (!arr.length) continue;
+
+      arr.sort((a,b)=>a.code.localeCompare(b.code));
+
       const band = document.createElement("div");
       band.className = `band ${key}`;
       band.innerHTML = `
@@ -1071,14 +1259,17 @@
           <div>${escapeHtml(title)}</div>
           <div class="count">${arr.length}</div>
         </div>
-        <div class="band-grid" id="grid_${key}"></div>
+        <div class="band-grid" id="grid_${escapeHtml(key)}"></div>
       `;
       body.appendChild(band);
-      const grid = band.querySelector(`#grid_${key}`);
+      const grid = band.querySelector(`#grid_${CSS.escape("grid_"+key)}`);
+
       for (const n of arr){
         const card = document.createElement("div");
         card.className = `l0card ${state.selected.l0?.code===n.code ? "active":""}`;
-        const iconSvg = ICONS[n.code] || icon("cog");
+        const codePrefix = String(n.code||"").split("_")[0].toUpperCase();
+        const iconSvg = ICONS[codePrefix] || ICONS["EA_PM"] || icon("cog");
+
         card.innerHTML = `
           <div class="icon">${iconSvg}</div>
           <div class="l0meta">
@@ -1106,6 +1297,7 @@
     }
   }
 
+  // ---------- palettes ----------
   function chevronPalette(level, idx, total){
     const t = total<=1 ? 1 : idx/(total-1);
     if (level === 1){
@@ -1123,15 +1315,22 @@
       const fg = isDark(bg) ? "#ffffff" : "#111111";
       return { bg, fg, darkPill: isDark(bg) };
     }
-    const bg = "#F0F1F3";
-    return { bg, fg:"#111", darkPill:false };
+    return { bg:"#F0F1F3", fg:"#111", darkPill:false };
+  }
+  function laneColor(level, idx, total){
+    const t = total<=1 ? 1 : idx/(total-1);
+    if (level === 1) return mixHex("#FFCC00", "#D40511", Math.min(1, t*1.2));
+    if (level === 2) return mixHex("#2B2F33", "#D40511", t);
+    return "#D40511";
   }
 
+  // ---------- render chevrons ----------
   function renderChevronChain(chainId, wrapId, svgId, items, level){
     const chain = $(chainId);
     const wrap = $(wrapId);
     const svg = $(svgId);
 
+    chain.className = "chain chevron";
     chain.innerHTML = "";
     svg.innerHTML = "";
 
@@ -1150,39 +1349,25 @@
       const el = document.createElement("div");
       const isActive = (level===1 && state.selected.l1?.code===it.code) || (level===2 && state.selected.l2?.code===it.code);
 
-      el.className = `chev ${pal.darkPill ? "darkPill":""} ${i===0 ? "first":""} ${isActive ? "active":""}`;
+      el.className = `chev connTarget ${pal.darkPill ? "darkPill":""} ${i===0 ? "first":""} ${isActive ? "active":""}`;
       el.style.setProperty("--chev-bg", pal.bg);
       el.style.setProperty("--chev-fg", pal.fg);
 
       const owner = it.owner || "—";
       const ord = it.order ? `#${it.order}` : `#${i+1}`;
 
-      const startIcon = (i===0) ? `<div class="edgeIcon" title="Start">${svgPlay()}</div>` : ``;
-      const endIcon = (i===filtered.length-1) ? `<div class="edgeIcon" title="End">${svgFlag()}</div>` : ``;
-
       el.innerHTML = `
         <div class="rowtop">
-          <div class="edgeGroup">${startIcon}</div>
+          <div class="code" title="${escapeHtml(it.code)}">${escapeHtml(it.code)}</div>
           <div class="ord">${escapeHtml(ord)}</div>
         </div>
         <div class="name">${escapeHtml(it.name)}</div>
         <div class="meta">${escapeHtml(it.desc || "")}</div>
         <div class="foot">
           <div class="ownerTag" title="${escapeHtml(owner)}">${escapeHtml(owner)}</div>
-          <div class="edgeGroup">
-            ${endIcon}
-            <div class="flowArrow" aria-hidden="true">➜</div>
-          </div>
+          <div class="flowArrow" aria-hidden="true">➜</div>
         </div>
       `;
-
-      // code shown via tooltip on hover + in popover; add subtle at top-left without breaking alignment
-      const codeEl = document.createElement("div");
-      codeEl.className = "code";
-      codeEl.textContent = it.code;
-      codeEl.title = it.code;
-      // Insert code into the top row (left) inside edgeGroup
-      el.querySelector(".edgeGroup").appendChild(codeEl);
 
       el.onclick = (e)=>{
         e.stopPropagation();
@@ -1202,11 +1387,75 @@
       chain.appendChild(el);
     });
 
-    requestAnimationFrame(()=>{
-      drawRowConnectors(chain, wrap, svg);
-    });
+    requestAnimationFrame(()=> drawRowConnectors(chain, wrap, svg));
   }
 
+  // ---------- render swimlane ----------
+  function renderSwimlane(chainId, wrapId, svgId, items, level){
+    const chain = $(chainId);
+    const wrap = $(wrapId);
+    const svg  = $(svgId);
+
+    chain.className = "swimlane";
+    chain.innerHTML = "";
+    svg.innerHTML = "";
+
+    const filtered = applyFilters(items);
+
+    if (level===1) $("l1Count").textContent = filtered.length;
+    if (level===2) $("l2Count").textContent = filtered.length;
+
+    if (!filtered.length){
+      chain.innerHTML = `<div class="empty">No processes at this level for the current selection / filters.</div>`;
+      return;
+    }
+
+    filtered.forEach((it, i) => {
+      const isActive = (level===1 && state.selected.l1?.code===it.code) || (level===2 && state.selected.l2?.code===it.code);
+      const step = document.createElement("div");
+      step.className = "step connTarget" + (isActive ? " active" : "");
+      step.style.setProperty("--lane", laneColor(level, i, filtered.length));
+
+      const ord = it.order ? it.order : (i+1);
+      const owner = it.owner || "—";
+
+      step.innerHTML = `
+        <div class="stepHead">
+          <div style="min-width:0;">
+            <div class="stepCode">${escapeHtml(it.code)}</div>
+            <div class="stepTitle">${escapeHtml(it.name)}</div>
+          </div>
+          <div class="bubble" title="Order">${escapeHtml(String(ord))}</div>
+        </div>
+        <div class="stepDesc">${escapeHtml(it.desc || "")}</div>
+        <div class="stepFoot">
+          <div class="stepOwner" title="${escapeHtml(owner)}">${escapeHtml(owner)}</div>
+          <div class="laneArrow">➜</div>
+        </div>
+      `;
+
+      step.onclick = (e)=>{
+        e.stopPropagation();
+        if (level===1){
+          state.selected.l1 = it;
+          state.selected.l2 = null;
+          state.selected.l3 = null;
+        } else if (level===2){
+          state.selected.l2 = it;
+          state.selected.l3 = null;
+        }
+        setBreadcrumb();
+        renderAll();
+        openPopover(it);
+      };
+
+      chain.appendChild(step);
+    });
+
+    requestAnimationFrame(()=> drawRowConnectors(chain, wrap, svg));
+  }
+
+  // ---------- L3 waterfall ----------
   function renderL3(list){
     const el = $("l3");
     el.innerHTML = "";
@@ -1214,7 +1463,7 @@
     $("l3Count").textContent = filtered.length;
 
     if (!filtered.length){
-      el.innerHTML = `<div class="empty">Select an L2 chevron to show L3 activities (or none match filters).</div>`;
+      el.innerHTML = `<div class="empty">Select an L2 item to show L3 activities (or none match filters).</div>`;
       return;
     }
 
@@ -1240,75 +1489,228 @@
     });
   }
 
-  function renderAll(){
-    if (!state.json) return;
+  // ---------- Tree ----------
+  function renderTree(){
+    const tree = $("tree");
+    tree.innerHTML = "";
 
     const idx = state.index;
-    renderHouse(idx);
+    const l0s = applyFilters(state.l0All);
 
+    if (!l0s.length){
+      tree.innerHTML = `<div class="empty">No processes match current filters.</div>`;
+      return;
+    }
+
+    for (const l0 of l0s){
+      const d0 = document.createElement("details");
+      d0.open = (state.selected.l0?.code === l0.code) || !state.selected.l0;
+      d0.innerHTML = `
+        <summary>
+          <div class="node">
+            <span class="tag l0">L0</span>
+            <span class="nodeTitle">${escapeHtml(l0.code)}: ${escapeHtml(l0.name)}</span>
+          </div>
+          <span class="tag">${escapeHtml((l0.owner || "—"))}</span>
+        </summary>
+        <div class="body"></div>
+      `;
+      tree.appendChild(d0);
+      const body0 = d0.querySelector(".body");
+
+      const l1s = applyFilters(levelChildren(idx, l0.code, 1));
+      if (!l1s.length){
+        body0.innerHTML = `<div class="empty">No L1 under this L0 (or filtered out).</div>`;
+      } else {
+        for (const l1 of l1s){
+          const d1 = document.createElement("details");
+          d1.open = state.selected.l1?.code === l1.code;
+          d1.innerHTML = `
+            <summary>
+              <div class="node">
+                <span class="tag l1">L1</span>
+                <span class="nodeTitle">${escapeHtml(l1.code)}: ${escapeHtml(l1.name)}</span>
+              </div>
+              <span class="tag">${escapeHtml((l1.owner || "—"))}</span>
+            </summary>
+            <div class="body"></div>
+          `;
+          body0.appendChild(d1);
+          const body1 = d1.querySelector(".body");
+
+          const l2s = applyFilters(levelChildren(idx, l1.code, 2));
+          if (!l2s.length){
+            body1.innerHTML = `<div class="empty">No L2 under this L1 (or filtered out).</div>`;
+          } else {
+            for (const l2 of l2s){
+              const d2 = document.createElement("details");
+              d2.open = state.selected.l2?.code === l2.code;
+              d2.innerHTML = `
+                <summary>
+                  <div class="node">
+                    <span class="tag l2">L2</span>
+                    <span class="nodeTitle">${escapeHtml(l2.code)}: ${escapeHtml(l2.name)}</span>
+                  </div>
+                  <span class="tag">${escapeHtml((l2.owner || "—"))}</span>
+                </summary>
+                <div class="body"></div>
+              `;
+              body1.appendChild(d2);
+
+              const body2 = d2.querySelector(".body");
+              const l3s = applyFilters(levelChildren(idx, l2.code, 3));
+
+              if (!l3s.length){
+                body2.innerHTML = `<div class="empty">No L3 under this L2 (or filtered out).</div>`;
+              } else {
+                for (const l3 of l3s){
+                  const leaf = document.createElement("div");
+                  leaf.className = "leaf" + (state.selected.l3?.code === l3.code ? " active" : "");
+                  leaf.innerHTML = `
+                    <div class="leafLeft">
+                      <div class="leafCode">${escapeHtml(l3.code)}</div>
+                      <div class="leafName">${escapeHtml(l3.name)}</div>
+                      ${l3.desc ? `<div class="leafDesc">${escapeHtml(l3.desc)}</div>` : ``}
+                    </div>
+                    <div class="leafOwner" title="${escapeHtml(l3.owner||"—")}">${escapeHtml(l3.owner||"—")}</div>
+                  `;
+                  leaf.onclick = (e)=>{
+                    e.stopPropagation();
+                    state.selected.l0 = l0;
+                    state.selected.l1 = l1;
+                    state.selected.l2 = l2;
+                    state.selected.l3 = l3;
+                    setBreadcrumb();
+                    renderAll();
+                    openPopover(l3);
+                  };
+                  body2.appendChild(leaf);
+                }
+              }
+
+              d2.querySelector("summary").onclick = (e)=>{
+                e.preventDefault();
+                state.selected.l0 = l0; state.selected.l1 = l1; state.selected.l2 = l2; state.selected.l3 = null;
+                setBreadcrumb(); renderAll(); openPopover(l2);
+              };
+            }
+          }
+
+          d1.querySelector("summary").onclick = (e)=>{
+            e.preventDefault();
+            state.selected.l0 = l0; state.selected.l1 = l1; state.selected.l2 = null; state.selected.l3 = null;
+            setBreadcrumb(); renderAll(); openPopover(l1);
+          };
+        }
+      }
+
+      d0.querySelector("summary").onclick = (e)=>{
+        e.preventDefault();
+        state.selected.l0 = l0; state.selected.l1 = null; state.selected.l2 = null; state.selected.l3 = null;
+        setBreadcrumb(); renderAll(); openPopover(l0);
+      };
+    }
+  }
+
+  // ---------- orchestrator ----------
+  function renderAll(){
+    renderHouse();
+
+    const idx = state.index;
+
+    // Toggle panels for "tree"
+    const isTree = state.view === "tree";
+    $("treePanel").style.display = isTree ? "block" : "none";
+    $("l1Panel").style.display = isTree ? "none" : "block";
+    $("l2Panel").style.display = isTree ? "none" : "block";
+
+    // L1 from L0
     let l1Items = [];
     if (state.selected.l0){
       l1Items = levelChildren(idx, state.selected.l0.code, 1);
       $("l1Hint").textContent = `Selected L0: ${state.selected.l0.code}: ${state.selected.l0.name}`;
     } else {
       $("l1Hint").textContent = "Select an L0 box in the process house.";
+      $("l1Count").textContent = "0";
     }
-    renderChevronChain("l1","l1Wrap","l1Flow", l1Items, 1);
 
+    // L2 from L1
     let l2Items = [];
     if (state.selected.l1){
       l2Items = levelChildren(idx, state.selected.l1.code, 2);
       $("l2Hint").textContent = `Selected L1: ${state.selected.l1.code}: ${state.selected.l1.name}`;
     } else {
-      $("l2Hint").textContent = "Select an L1 chevron.";
+      $("l2Hint").textContent = "Select an L1 item.";
+      $("l2Count").textContent = "0";
     }
-    renderChevronChain("l2","l2Wrap","l2Flow", l2Items, 2);
 
+    // L3 from L2
     let l3Items = [];
     if (state.selected.l2){
       l3Items = levelChildren(idx, state.selected.l2.code, 3);
       $("l3Hint").textContent = `Selected L2: ${state.selected.l2.code}: ${state.selected.l2.name}`;
     } else {
-      $("l3Hint").textContent = "Select an L2 chevron.";
+      $("l3Hint").textContent = "Select an L2 item.";
+      $("l3Count").textContent = "0";
     }
-    renderL3(l3Items);
 
+    if (isTree){
+      renderTree();
+    } else if (state.view === "chevron"){
+      renderChevronChain("l1","l1Wrap","l1Flow", l1Items, 1);
+      renderChevronChain("l2","l2Wrap","l2Flow", l2Items, 2);
+    } else if (state.view === "swimlane"){
+      renderSwimlane("l1","l1Wrap","l1Flow", l1Items, 1);
+      renderSwimlane("l2","l2Wrap","l2Flow", l2Items, 2);
+    }
+
+    renderL3(l3Items);
     setBreadcrumb();
   }
 
+  // ---------- load ----------
   async function load(){
     try{
       setError("");
+
+      // IMPORTANT: GitHub Pages is case sensitive. Ensure file is exactly "data.json"
       const res = await fetch("./data.json", { cache:"no-store" });
-      if (!res.ok) throw new Error(`Failed to fetch data.json (HTTP ${res.status})`);
+      if (!res.ok) throw new Error(`Failed to fetch data.json (HTTP ${res.status}). Check path + case.`);
       const raw = await res.json();
+
       const normalized = normalizeJson(raw);
       const rows = toProcRows(normalized.processes);
 
       if (!rows.length){
-        throw new Error("Loaded data.json but found 0 processes after parsing. Check JSON keys/format.");
+        throw new Error("Loaded data.json but parsed 0 processes. JSON keys/shape not recognized by parser.");
       }
 
-      state.json = normalized;
       state.rows = rows;
       state.index = buildIndex(rows);
+      state.l0All = rows.filter(r => r.level === 0).sort((a,b)=>a.code.localeCompare(b.code));
 
-      state.l0All = rows.filter(r => r.level===0).sort((a,b)=>a.code.localeCompare(b.code));
-
+      // populate dropdown filters
       renderFilters(rows);
+
+      // initial selection: first L0 (optional). comment out if you want blank start
+      if (state.l0All.length && !state.selected.l0){
+        state.selected.l0 = state.l0All[0];
+      }
+
       renderAll();
-      setBreadcrumb();
     }catch(e){
       setError(String(e && e.stack ? e.stack : e));
     }
   }
 
+  // ---------- events ----------
   $("reset").onclick = ()=>{
     state.filters = { create:"", owner:"" };
     $("createFilter").value = "";
     $("ownerFilter").value = "";
-    resetSelection();
+    state.selected = { l0: state.l0All[0] || null, l1:null, l2:null, l3:null };
     closePopover();
+    renderAll();
   };
 
   $("createFilter").addEventListener("change", ()=>{
@@ -1327,9 +1729,17 @@
     d.open = !d.open;
   };
 
+  $("viewStyle").addEventListener("change", ()=>{
+    state.view = $("viewStyle").value;
+    closePopover();
+    renderAll();
+  });
+
   window.addEventListener("resize", ()=>{
-    if ($("l1").children.length) drawRowConnectors($("l1"), $("l1Wrap"), $("l1Flow"));
-    if ($("l2").children.length) drawRowConnectors($("l2"), $("l2Wrap"), $("l2Flow"));
+    if (state.view !== "tree"){
+      if ($("l1").children.length) drawRowConnectors($("l1"), $("l1Wrap"), $("l1Flow"));
+      if ($("l2").children.length) drawRowConnectors($("l2"), $("l2Wrap"), $("l2Flow"));
+    }
     positionPopover();
   });
 
