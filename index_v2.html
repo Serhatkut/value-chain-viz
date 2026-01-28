@@ -1613,60 +1613,85 @@
   }
 
   // ---------- orchestrator ----------
-  function renderAll(){
-    renderHouse();
+ function renderHouse(){
+  const body = $("houseBody");
+  if (!body) return;
 
-    const idx = state.index;
+  body.innerHTML = "";
 
-    // Toggle panels for "tree"
-    const isTree = state.view === "tree";
-    $("treePanel").style.display = isTree ? "block" : "none";
-    $("l1Panel").style.display = isTree ? "none" : "block";
-    $("l2Panel").style.display = isTree ? "none" : "block";
+  const l0 = applyFilters(state.l0All);
 
-    // L1 from L0
-    let l1Items = [];
-    if (state.selected.l0){
-      l1Items = levelChildren(idx, state.selected.l0.code, 1);
-      $("l1Hint").textContent = `Selected L0: ${state.selected.l0.code}: ${state.selected.l0.name}`;
-    } else {
-      $("l1Hint").textContent = "Select an L0 box in the process house.";
-      $("l1Count").textContent = "0";
-    }
-
-    // L2 from L1
-    let l2Items = [];
-    if (state.selected.l1){
-      l2Items = levelChildren(idx, state.selected.l1.code, 2);
-      $("l2Hint").textContent = `Selected L1: ${state.selected.l1.code}: ${state.selected.l1.name}`;
-    } else {
-      $("l2Hint").textContent = "Select an L1 item.";
-      $("l2Count").textContent = "0";
-    }
-
-    // L3 from L2
-    let l3Items = [];
-    if (state.selected.l2){
-      l3Items = levelChildren(idx, state.selected.l2.code, 3);
-      $("l3Hint").textContent = `Selected L2: ${state.selected.l2.code}: ${state.selected.l2.name}`;
-    } else {
-      $("l3Hint").textContent = "Select an L2 item.";
-      $("l3Count").textContent = "0";
-    }
-
-    if (isTree){
-      renderTree();
-    } else if (state.view === "chevron"){
-      renderChevronChain("l1","l1Wrap","l1Flow", l1Items, 1);
-      renderChevronChain("l2","l2Wrap","l2Flow", l2Items, 2);
-    } else if (state.view === "swimlane"){
-      renderSwimlane("l1","l1Wrap","l1Flow", l1Items, 1);
-      renderSwimlane("l2","l2Wrap","l2Flow", l2Items, 2);
-    }
-
-    renderL3(l3Items);
-    setBreadcrumb();
+  const groups = { manage: [], run: [], enabling: [], change: [], foundation: [] };
+  for (const n of l0){
+    groups[l0Band(n.code)].push(n);
   }
+
+  const order = [
+    ["manage","Manage the Business"],
+    ["run","Run the Business"],
+    ["enabling","Enabling Functions"],
+    ["change","Change the Business"],
+    ["foundation","Foundation"]
+  ];
+
+  for (const [key, title] of order){
+    const arr = groups[key];
+    if (!arr.length) continue;
+
+    arr.sort((a,b)=>a.code.localeCompare(b.code));
+
+    const band = document.createElement("div");
+    band.className = `band ${key}`;
+
+    // IMPORTANT: id is grid_${key}, e.g. grid_manage
+    band.innerHTML = `
+      <div class="band-head">
+        <div>${escapeHtml(title)}</div>
+        <div class="count">${arr.length}</div>
+      </div>
+      <div class="band-grid" id="grid_${key}"></div>
+    `;
+    body.appendChild(band);
+
+    // FIX: query the correct id
+    const grid = band.querySelector(`#grid_${key}`);
+    if (!grid) continue;
+
+    for (const n of arr){
+      const card = document.createElement("div");
+      card.className = `l0card ${state.selected.l0?.code===n.code ? "active":""}`;
+
+      const codePrefix = String(n.code||"").split("_")[0].toUpperCase();
+      const iconSvg = ICONS[codePrefix] || ICONS["EA_PM"] || icon("cog");
+
+      card.innerHTML = `
+        <div class="icon">${iconSvg}</div>
+        <div class="l0meta">
+          <div class="l0code">${escapeHtml(n.code)}</div>
+          <div class="l0name">${escapeHtml(n.name)}</div>
+          <div class="l0desc">${escapeHtml(n.desc || "")}</div>
+        </div>
+      `;
+
+      card.onclick = (e)=>{
+        e.stopPropagation();
+        state.selected.l0 = n;
+        state.selected.l1 = null;
+        state.selected.l2 = null;
+        state.selected.l3 = null;
+        closePopover();
+        setBreadcrumb();
+        renderAll();
+      };
+
+      grid.appendChild(card);
+    }
+  }
+
+  if (!body.children.length){
+    body.innerHTML = `<div class="empty">No L0 items match the current filters.</div>`;
+  }
+}
 
   // ---------- load ----------
   async function load(){
