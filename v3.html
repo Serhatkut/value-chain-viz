@@ -171,35 +171,40 @@
             padding-bottom: 80px; 
         }
         
-        /* L2 CHAIN ITEM (Big Arrow) */
-        .l2-chain-item {
-            position: relative; 
-            background: #ffffff; 
-            width: 320px; 
-            min-width: 320px; 
-            min-height: 400px; /* Fixed height for uniformity */
-            margin-left: -35px; 
-            
-            /* SHAPE */
-            clip-path: polygon(
-                0% 0%, 
-                calc(100% - 35px) 0%, 
-                100% 50%, 
-                calc(100% - 35px) 100%, 
-                0% 100%, 
-                35px 50%
-            );
-            
-            /* FIXED: FRAME VISIBILITY */
-            /* Using drop-shadow to create a hard border around the clip-path */
-            filter: 
-                drop-shadow(0 0 1px #555)   /* The sharp 1px border */
-                drop-shadow(4px 4px 8px rgba(0,0,0,0.15)); /* The soft shadow */
-            
-            padding: 25px 40px 25px 60px; 
-            display: flex; flex-direction: column; 
-            transition: transform 0.2s, z-index 0s;
-        }
+  /* L2 CHAIN ITEM (Big Arrow) */
+.l2-chain-item {
+    position: relative; 
+    background: #ffffff; 
+    width: 320px; 
+    min-width: 320px; 
+    margin-left: -35px; 
+    
+    /* REMOVE FIXED HEIGHT so it grows with content */
+    height: auto; 
+    max-height: none; /* <--- Fixes the scrolling issue (lets card grow) */
+    
+    /* SHAPE */
+    clip-path: polygon(
+        0% 0%, 
+        calc(100% - 35px) 0%, 
+        100% 50%, 
+        calc(100% - 35px) 100%, 
+        0% 100%, 
+        35px 50%
+    );
+    
+    /* VISIBLE FRAME FIX: 4 sharp shadows + 1 soft shadow */
+    filter: 
+        drop-shadow(1px 0 0 #888)   /* Right Border */
+        drop-shadow(-1px 0 0 #888)  /* Left Border */
+        drop-shadow(0 1px 0 #888)   /* Bottom Border */
+        drop-shadow(0 -1px 0 #888)  /* Top Border */
+        drop-shadow(5px 5px 10px rgba(0,0,0,0.2)); /* 3D Depth Shadow */
+    
+    padding: 25px 40px 25px 60px; 
+    display: flex; flex-direction: column; 
+    transition: transform 0.2s, z-index 0s;
+}
 
         .l2-chain-item.first { 
             margin-left: 0; 
