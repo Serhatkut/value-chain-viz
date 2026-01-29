@@ -1214,16 +1214,18 @@
                 renderCrumbs();
                 updateFooterCounts();
               });
-
               item.onmousemove = (e) => {
+                e.stopPropagation(); // IMPORTANT: prevent L2 card tooltip overwriting L3 tooltip
                 const l3Owner = l3.owner || l2.owner || l1Data.owner || currentL0?.owner || "-";
                 const meta = `<b>Owner:</b> ${escapeHtml(l3Owner)}<br><b>Trigger:</b> ${escapeHtml(l3.trigger||"-")}<br><b>Outcome:</b> ${escapeHtml(l3.outcome||"-")}`;
                 showTooltip(e, l3Inf.name, l3.description, meta);
               };
-              item.onmouseleave = hideTooltip;
+              item.onmouseleave = (e) => {
+                e.stopPropagation();
+                hideTooltip();
+              };
 
-              list.appendChild(item);
-            });
+          
           } else {
             list.innerHTML = `<div style="padding:10px; color:#ccc; font-style:italic;">No L3 steps.</div>`;
           }
