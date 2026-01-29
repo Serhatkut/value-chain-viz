@@ -28,6 +28,10 @@
       --l2-border: rgba(212,5,17,0.18);
 
       --footer-h: 26px;
+
+      /* Process house sizing */
+      --ph-max-w: 1180px; /* fits most laptops; still responsive */
+      --ph-pad: 18px;
     }
 
     /* --- LAYOUT RESET --- */
@@ -134,7 +138,6 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .sep{ opacity: 0.35; font-weight: 900; }
 
     /* Breadcrumb text colors by level */
@@ -144,7 +147,10 @@
     .crumb.l3{ color: #9aa0a6; }
 
     /* --- SEARCH --- */
-    #search-wrap{ position: relative; flex: 0 0 auto; }
+    #search-wrap{
+      position: relative;
+      flex: 0 0 auto;
+    }
     #search-input{
       height: 34px;
       width: 320px;
@@ -185,7 +191,10 @@
       justify-content: space-between;
       align-items: center;
     }
-    .sr-list{ max-height: 320px; overflow-y: auto; }
+    .sr-list{
+      max-height: 320px;
+      overflow-y: auto;
+    }
     .sr-item{
       padding: 10px 12px;
       cursor: pointer;
@@ -209,6 +218,7 @@
     .sr-badge.l1{ color: #7a5a00; background: #fff8d6; border-color: rgba(255,204,0,0.55); }
     .sr-badge.l2{ color: #333; }
     .sr-badge.l3{ color: #777; }
+
     .sr-main{ min-width: 0; }
     .sr-title{
       font-size: 12px;
@@ -235,250 +245,251 @@
     }
     #mini-nav:hover{ background: #444; }
 
-    /* =========================================================
-       PROCESS HOUSE (REPLACES "STRATEGY HOUSE" VISUAL ONLY)
-       Keep container id for JS compatibility: #strategy-house-container
-       ========================================================= */
+    /* =========================
+       PROCESS HOUSE (REBUILT)
+       ========================= */
     #strategy-house-container{
       background: #eef1f5;
       padding: 18px 18px 22px;
       transition: all 0.5s ease-in-out;
-      max-height: 900px;
+      max-height: 1000px;
       opacity: 1;
       overflow: hidden;
       border-bottom: 1px solid #ccc;
       flex-shrink: 0;
     }
-    #strategy-house-container.collapsed{
-      max-height: 0;
-      padding: 0 18px;
-      opacity: 0;
-      border-bottom-width: 0;
-    }
+    #strategy-house-container.collapsed{ max-height: 0; padding: 0 18px; opacity: 0; border-bottom-width: 0; }
 
     .ph-wrap{
-      max-width: 1240px;
+      max-width: var(--ph-max-w);
       margin: 0 auto;
-      filter: drop-shadow(0 6px 18px rgba(0,0,0,0.10));
     }
+
     .ph-title{
       text-align: center;
-      font-size: 18px;
+      font-size: 28px;
       font-weight: 1000;
-      margin: 4px 0 14px;
-      color: #111;
       letter-spacing: 0.2px;
+      margin: 6px 0 14px;
+      color: #111;
     }
 
-    /* Top "Manage" arc */
-    .ph-manage{
+    /* Roof (trapezoid polygon, not curve) */
+    .ph-roof{
       position: relative;
-      background: linear-gradient(180deg, #ffe48a 0%, var(--dhl-yellow) 100%);
-      border-radius: 360px 360px 18px 18px;
-      padding: 18px 16px 14px;
+      background: linear-gradient(180deg, #ffe07a 0%, var(--dhl-yellow) 70%);
       border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+      clip-path: polygon(3% 18%, 97% 18%, 100% 100%, 0% 100%);
+      border-radius: 10px;
+      padding: 18px 18px 16px;
     }
-    .ph-manage .ph-hdr{
-      text-align:center;
+    .ph-roof-label{
+      text-align: center;
+      font-size: 16px;
       font-weight: 1000;
-      font-size: 14px;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: #111;
       margin-bottom: 12px;
+      color: #111;
     }
-    .ph-manage-grid{
+    .ph-roof-row{
       display: grid;
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
-      padding: 0 14px;
-    }
-    @media (max-width: 980px){
-      .ph-manage-grid{ grid-template-columns: 1fr; }
     }
 
-    /* Middle band: Change | Run | Change */
-    .ph-mid{
+    /* Middle band row (Change | Run | Change) */
+    .ph-band-row{
       display: grid;
-      grid-template-columns: 1.05fr 1.9fr 1.05fr;
-      gap: 14px;
-      margin-top: 12px;
+      grid-template-columns: 1fr 2.2fr 1fr;
+      gap: 12px;
       align-items: stretch;
+      margin: 12px 0 10px;
     }
-    @media (max-width: 1100px){
-      .ph-mid{ grid-template-columns: 1fr; }
-    }
-
-    .ph-col{
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid rgba(0,0,0,0.10);
-      background: #fff;
-    }
-    .ph-col-title{
+    .ph-band{
       background: #333;
       color: #fff;
+      border-radius: 8px;
       font-weight: 1000;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-size: 12px;
-      padding: 10px 12px;
-      text-align: center;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 10px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    .ph-band.side{
+      background: #444;
+      color: #fff;
+      justify-content: flex-start;
+      padding-left: 14px;
     }
 
-    .ph-change-body{
-      background: var(--dhl-red);
-      padding: 12px;
-      min-height: 160px;
+    /* Main body row (pillar | center | pillar) */
+    .ph-body-row{
+      display: grid;
+      grid-template-columns: 1fr 2.2fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+      margin-bottom: 12px;
     }
 
-    .ph-run-body{
-      background: #f6f7f9;
-      padding: 12px;
-      min-height: 160px;
-      border-top: 4px solid rgba(0,0,0,0.06);
-    }
-
-    .ph-run-strip{
-      margin-top: 10px;
-      background: var(--dhl-yellow);
-      color: #111;
-      font-weight: 1000;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      font-size: 12px;
-      padding: 8px 10px;
+    .ph-pillar{
+      background: linear-gradient(180deg, #c9040f 0%, var(--dhl-red) 70%);
       border-radius: 10px;
-      border: 1px solid rgba(0,0,0,0.12);
-      text-align:center;
-      display:none; /* shown only if D20 detected */
+      border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+      padding: 10px;
+      display:flex;
+      flex-direction: column;
+      min-height: 260px;
     }
 
-    /* Bottom: Essential enablers + Foundation */
-    .ph-bottom{
-      margin-top: 12px;
-      border-radius: 16px;
-      overflow: hidden;
+    .ph-center{
+      background: #e9ebef;
+      border-radius: 10px;
       border: 1px solid rgba(0,0,0,0.10);
-      background: #fff;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.10);
+      padding: 10px;
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 260px;
     }
-    .ph-bottom .ph-bottom-title{
-      background: #fff;
-      padding: 10px 12px 6px;
+
+    .ph-center-top{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .ph-strip{
+      background: linear-gradient(180deg, #ffe07a 0%, var(--dhl-yellow) 80%);
+      border: 1px solid rgba(0,0,0,0.10);
+      border-radius: 10px;
+      padding: 10px 12px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+    }
+    .ph-strip .ph-slot-card{
+      width: 100%;
+    }
+
+    .ph-subtitle{
       text-align:center;
+      font-size: 14px;
       font-weight: 1000;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #111;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      font-size: 12px;
-    }
-    .ph-enablers-row{
-      background: #f3f4f6;
-      padding: 12px;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-    }
-    .ph-foundation-row{
-      background: #f3f4f6;
-      padding: 12px;
+      margin: 2px 0 0;
     }
 
-    .ph-grid-3{
-      display: grid;
-      grid-template-columns: repeat(3, minmax(220px, 1fr));
+    .ph-enablers{
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Foundation base */
+    .ph-foundation{
+      background: linear-gradient(180deg, #b8030d 0%, var(--dhl-red) 70%);
+      color: #fff;
+      border-radius: 10px;
+      border: 1px solid rgba(0,0,0,0.10);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+      padding: 12px 12px 14px;
+    }
+    .ph-found-label{
+      text-align:center;
+      font-size: 16px;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    .ph-found-row{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    @media (max-width: 980px){
-      .ph-grid-3{ grid-template-columns: 1fr; }
-    }
 
-    .ph-grid-2{
-      display: grid;
-      grid-template-columns: repeat(2, minmax(280px, 1fr));
-      gap: 12px;
+    /* Slot cards (L0 buttons, styled like the reference boxes) */
+    .ph-slot{
+      min-height: 92px;
+      display:flex;
     }
-    @media (max-width: 980px){
-      .ph-grid-2{ grid-template-columns: 1fr; }
-    }
-
-    /* L0 card button styles inside process house */
-    .ph-btn{
+    .ph-slot-card{
+      width: 100%;
+      border-radius: 10px;
       border: none;
       cursor: pointer;
       text-align: left;
-      width: 100%;
-      border-radius: 12px;
       padding: 12px 14px;
-      transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      transition: transform 0.15s, box-shadow 0.15s, filter 0.15s;
       user-select: none;
+      display:flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
     }
-    .ph-btn:hover{
+    .ph-slot-card:hover{
       transform: translateY(-2px);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.16);
-      filter: brightness(1.01);
+      box-shadow: 0 10px 18px rgba(0,0,0,0.12);
+      filter: brightness(1.02);
     }
-    .ph-btn.active{
-      outline: 3px solid rgba(0,0,0,0.12);
-      outline-offset: 2px;
-    }
-
-    .ph-id{
+    .ph-slot-id{
       font-size: 11px;
       font-weight: 1000;
       opacity: 0.95;
-      letter-spacing: 0.3px;
     }
-    .ph-name{
-      font-size: 13px;
+    .ph-slot-name{
+      font-size: 14px;
       font-weight: 1000;
       line-height: 1.15;
     }
-    .ph-desc{
-      font-size: 11px;
+    .ph-slot-desc{
+      font-size: 11.5px;
       font-weight: 700;
-      opacity: 0.90;
+      opacity: 0.95;
       line-height: 1.25;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
 
-    /* Variants */
-    .ph-btn.manage{
-      background: rgba(255,255,255,0.60);
+    /* Color variants to match the reference */
+    .ph-card-yellow{
+      background: rgba(255,255,255,0.55);
       color: #111;
       border: 1px solid rgba(0,0,0,0.10);
     }
-    .ph-btn.run{
-      background: var(--dhl-red);
+    .ph-card-red{
+      background: rgba(0,0,0,0.06);
       color: #fff;
-      border: 1px solid rgba(0,0,0,0.10);
+      border: 1px solid rgba(0,0,0,0.18);
     }
-    .ph-btn.change{
-      background: rgba(255,255,255,0.14);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.18);
-    }
-    .ph-btn.enabler{
-      background: var(--dhl-yellow);
-      color: #111;
-      border: 1px solid rgba(0,0,0,0.12);
-    }
-    .ph-btn.foundation{
-      background: var(--dhl-red);
-      color: #fff;
-      border: 1px solid rgba(0,0,0,0.10);
-      min-height: 70px;
+    .ph-card-red:hover{ box-shadow: 0 12px 22px rgba(0,0,0,0.18); }
+    .ph-card-red .ph-slot-desc{ opacity: 0.92; }
+
+    /* Active state mirrors existing L0 active semantics */
+    .ph-slot-card.active{
+      box-shadow: 0 0 0 3px rgba(255,204,0,0.75), 0 10px 22px rgba(0,0,0,0.12);
+      transform: translateY(-1px);
     }
 
-    .ph-btn.run .ph-id, .ph-btn.foundation .ph-id{ color: rgba(255,255,255,0.92); }
-    .ph-btn.change .ph-id{ color: rgba(255,255,255,0.92); }
-    .ph-btn.enabler .ph-id{ color: rgba(0,0,0,0.70); }
-    .ph-btn.manage .ph-id{ color: rgba(0,0,0,0.70); }
+    /* Keep process house fitting nicely */
+    @media (max-width: 1080px){
+      .ph-title{ font-size: 24px; }
+      .ph-band-row, .ph-body-row{ grid-template-columns: 1fr 2fr 1fr; }
+    }
+    @media (max-width: 920px){
+      .ph-roof-row{ grid-template-columns: 1fr; }
+      .ph-band-row{ grid-template-columns: 1fr; }
+      .ph-body-row{ grid-template-columns: 1fr; }
+      .ph-band.side{ justify-content:center; padding-left: 10px; }
+      .ph-center-top, .ph-enablers{ grid-template-columns: 1fr; }
+      .ph-found-row{ grid-template-columns: 1fr; }
+      .ph-roof{ clip-path: polygon(6% 12%, 94% 12%, 100% 100%, 0% 100%); }
+    }
 
     /* --- CONTEXT BAR --- */
     #context-bar{
@@ -496,7 +507,7 @@
     }
     .l1-chevron{
       position: relative;
-      background: var(--dhl-yellow);
+      background: var(--dhl-yellow); /* DHL Yellow */
       height: 60px; width: 170px; margin-right: 6px; margin-bottom: 6px;
       display: flex; flex-direction: column; justify-content: center; padding-left: 28px; padding-right: 15px;
       cursor: pointer; transition: all 0.1s; color: #333; user-select: none;
@@ -703,47 +714,72 @@
     <div style="font-size:11px; text-transform:uppercase; letter-spacing:1px;">▼ Expand House</div>
   </div>
 
-  <!-- PROCESS HOUSE (visual updated) -->
+  <!-- PROCESS HOUSE (L0) -->
   <div id="strategy-house-container">
     <div class="ph-wrap">
       <div class="ph-title">The L0 Enterprise Process House: Value Stream Architecture</div>
 
-      <!-- MANAGE -->
-      <div class="ph-manage">
-        <div class="ph-hdr">MANAGE THE BUSINESS</div>
-        <div class="ph-manage-grid" id="cont-manage"></div>
-      </div>
-
-      <!-- CHANGE | RUN | CHANGE -->
-      <div class="ph-mid">
-        <div class="ph-col">
-          <div class="ph-col-title">CHANGE THE BUSINESS</div>
-          <div class="ph-change-body" id="cont-change-left"></div>
-        </div>
-
-        <div class="ph-col">
-          <div class="ph-col-title">RUN THE BUSINESS</div>
-          <div class="ph-run-body" id="cont-run"></div>
-          <div class="ph-run-strip" id="d20-strip">DESIGN TO OPERATE (D20)</div>
-        </div>
-
-        <div class="ph-col">
-          <div class="ph-col-title">CHANGE THE BUSINESS</div>
-          <div class="ph-change-body" id="cont-change-right"></div>
+      <!-- Roof: Manage the business -->
+      <div class="ph-roof">
+        <div class="ph-roof-label">MANAGE THE BUSINESS</div>
+        <div class="ph-roof-row">
+          <div class="ph-slot" id="ph-slot-S2E"></div>
+          <div class="ph-slot" id="ph-slot-GRC"></div>
+          <div class="ph-slot" id="ph-slot-EA_PM"></div>
         </div>
       </div>
 
-      <!-- ENABLERS + FOUNDATION -->
-      <div class="ph-bottom">
-        <div class="ph-bottom-title">ESSENTIAL ENABLERS</div>
-        <div class="ph-enablers-row">
-          <div class="ph-grid-3" id="cont-enablers"></div>
+      <!-- Bands: Change / Run / Change -->
+      <div class="ph-band-row">
+        <div class="ph-band side">CHANGE THE BUSINESS</div>
+        <div class="ph-band">RUN THE BUSINESS</div>
+        <div class="ph-band side">CHANGE THE BUSINESS</div>
+      </div>
+
+      <!-- Body: left pillar / center / right pillar -->
+      <div class="ph-body-row">
+        <div class="ph-pillar">
+          <div class="ph-slot" id="ph-slot-I2P" style="flex:1 1 auto;"></div>
         </div>
 
-        <div class="ph-bottom-title">FOUNDATION</div>
-        <div class="ph-foundation-row">
-          <div class="ph-grid-2" id="cont-foundation-bars"></div>
+        <div class="ph-center">
+          <div class="ph-center-top">
+            <div class="ph-slot" id="ph-slot-L2C"></div>
+            <div class="ph-slot" id="ph-slot-O2D"></div>
+            <div class="ph-slot" id="ph-slot-P2R"></div>
+          </div>
+
+          <div class="ph-strip">
+            <div class="ph-slot" id="ph-slot-D2O"></div>
+          </div>
+
+          <div class="ph-subtitle">ESSENTIAL ENABLERS</div>
+
+          <div class="ph-enablers">
+            <div class="ph-slot" id="ph-slot-S2P"></div>
+            <div class="ph-slot" id="ph-slot-H2R"></div>
+            <div class="ph-slot" id="ph-slot-R2R"></div>
+          </div>
         </div>
+
+        <div class="ph-pillar">
+          <div class="ph-slot" id="ph-slot-TRF" style="flex:1 1 auto;"></div>
+        </div>
+      </div>
+
+      <!-- Foundation -->
+      <div class="ph-foundation">
+        <div class="ph-found-label">FOUNDATION</div>
+        <div class="ph-found-row">
+          <div class="ph-slot" id="ph-slot-DA"></div>
+          <div class="ph-slot" id="ph-slot-ITF"></div>
+        </div>
+      </div>
+
+      <!-- Fallback bucket (if any L0 doesn't match slots) -->
+      <div style="margin-top:10px; display:none;" id="ph-fallback-wrap">
+        <div style="font-weight:1000; color:#667085; font-size:12px; margin:8px 2px;">Other value streams</div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;" id="ph-slot-OTHER"></div>
       </div>
     </div>
   </div>
@@ -849,90 +885,73 @@
       toggleHouse(isCollapsed);
     });
 
-    /* ========= HOUSE RENDER (VISUAL ONLY UPDATED) ========= */
+    /* ========= PROCESS HOUSE RENDER (SLOTS) ========= */
     function renderHouse(data) {
-      // Containers in the new Process House layout
-      const contManage = document.getElementById('cont-manage');
-      const contRun = document.getElementById('cont-run');
-      const contChangeLeft = document.getElementById('cont-change-left');
-      const contChangeRight = document.getElementById('cont-change-right');
-      const contEnablers = document.getElementById('cont-enablers');
-      const contFoundationBars = document.getElementById('cont-foundation-bars');
-      const d20Strip = document.getElementById('d20-strip');
+      // Clear all slots
+      const slotIds = ["S2E","GRC","EA_PM","I2P","TRF","L2C","O2D","P2R","D2O","S2P","H2R","R2R","DA","ITF"];
+      slotIds.forEach(k=>{
+        const el = document.getElementById(`ph-slot-${k}`);
+        if(el) el.innerHTML = "";
+      });
+      const otherWrap = document.getElementById('ph-fallback-wrap');
+      const otherSlot = document.getElementById('ph-slot-OTHER');
+      if(otherSlot) otherSlot.innerHTML = "";
+      if(otherWrap) otherWrap.style.display = "none";
 
-      // Clear
-      contManage.innerHTML = '';
-      contRun.innerHTML = '';
-      contChangeLeft.innerHTML = '';
-      contChangeRight.innerHTML = '';
-      contEnablers.innerHTML = '';
-      contFoundationBars.innerHTML = '';
-      d20Strip.style.display = 'none';
-
-      // Helper to build the button, preserving existing select flow
-      function buildL0Button(l0, variant){
+      // Map by L0 ID
+      const l0s = data.children.slice().sort((a,b) => (a.name||"").localeCompare(b.name||""));
+      l0s.forEach(l0 => {
         const info = parseInfo(l0.name);
+        const id = (info.id || "").replace(/\s+/g,"");
+
+        const slot = document.getElementById(`ph-slot-${cssId(id)}`);
+        const inKnownSlot = !!slot;
+
+        // Create card button styled by region type (yellow in roof, red in pillars/center/foundation)
         const btn = document.createElement('button');
-        btn.className = `ph-btn ${variant}`;
+        btn.className = 'ph-slot-card';
         btn.dataset.l0id = info.id;
+
+        // Determine style variant by where it lands
+        const yellowIds = new Set(["S2E","GRC","EA_PM"]);
+        const foundationIds = new Set(["DA","ITF"]);
+        const isYellow = yellowIds.has(id);
+        const isFoundation = foundationIds.has(id);
+
+        // Roof cards are yellow; everything else looks like the red reference boxes.
+        btn.classList.add(isYellow ? 'ph-card-yellow' : 'ph-card-red');
+
+        // Compose description (short, fits)
+        const desc = (l0.description || "").trim();
+        const shortDesc = desc.length > 140 ? (desc.slice(0, 137) + "…") : desc;
+
         btn.innerHTML = `
-          <div class="ph-id">${info.id}</div>
-          <div class="ph-name">${info.name}</div>
-          <div class="ph-desc">${escapeHtml(l0.description || "")}</div>
+          <div class="ph-slot-id">${escapeHtml(info.id)}</div>
+          <div class="ph-slot-name">${escapeHtml(info.name)}</div>
+          <div class="ph-slot-desc">${escapeHtml(shortDesc)}</div>
         `;
+
         btn.onclick = () => selectL0(l0, btn);
-        return btn;
-      }
 
-      // Split change cards across left/right to mimic “two pillars”
-      let changeSide = 0;
+        // Tooltip
+        btn.onmousemove = (e) => showTooltip(e, info.name, l0.description, `Owner: ${l0.owner||"-"}`);
+        btn.onmouseleave = hideTooltip;
 
-      // Render in deterministic order
-      data.children.slice().sort((a,b) => a.name.localeCompare(b.name)).forEach(l0 => {
-        const cat = (l0.category || "").toLowerCase();
-        const info = parseInfo(l0.name);
-        const idUpper = (info.id || "").toUpperCase();
-
-        // Heuristics to match your picture semantics without changing data.json:
-        const isManage = cat.includes('manage');
-        const isRun = cat.includes('run');
-        const isChange = cat.includes('change') || cat.includes('transform');
-        const isFoundation = !isManage && !isRun && !isChange;
-
-        const isD20 = idUpper.startsWith("D20") || info.name.toLowerCase().includes("design to operate");
-
-        // Foundation split (Enablers vs Foundation bars)
-        const isFoundationBar = idUpper.startsWith("DA") || idUpper.startsWith("ITF") || info.name.toLowerCase().includes("foundation");
-
-        if(isManage){
-          contManage.appendChild(buildL0Button(l0, 'manage'));
-          return;
-        }
-
-        if(isRun){
-          // If D20 exists, show the strip (visual cue like in your reference image)
-          if(isD20) d20Strip.style.display = 'block';
-
-          contRun.appendChild(buildL0Button(l0, 'run'));
-          return;
-        }
-
-        if(isChange){
-          const btn = buildL0Button(l0, 'change');
-          if(changeSide % 2 === 0) contChangeLeft.appendChild(btn);
-          else contChangeRight.appendChild(btn);
-          changeSide++;
-          return;
-        }
-
-        if(isFoundation){
-          if(isFoundationBar){
-            contFoundationBars.appendChild(buildL0Button(l0, 'foundation'));
-          }else{
-            contEnablers.appendChild(buildL0Button(l0, 'enabler'));
-          }
+        // Place into slot or fallback
+        if(inKnownSlot){
+          slot.appendChild(btn);
+        } else if(otherSlot && otherWrap) {
+          otherWrap.style.display = "block";
+          btn.classList.remove('ph-card-red','ph-card-yellow');
+          btn.classList.add('ph-card-yellow');
+          otherSlot.appendChild(btn);
         }
       });
+    }
+
+    function cssId(id){
+      // slot ids are literal like EA_PM, keep underscore. Just normalize common variant.
+      return id.replace(/^EA-PM$/,"EA_PM");
     }
 
     /* ========= BREADCRUMB ========= */
@@ -952,7 +971,7 @@
         const c = document.createElement('span');
         c.className = `crumb ${levelClass}`;
         c.title = inf.name;
-        c.innerHTML = `<span class="cid">${inf.id}</span><span class="cname">${inf.name}</span>`;
+        c.innerHTML = `<span class="cid">${escapeHtml(inf.id)}</span><span class="cname">${escapeHtml(inf.name)}</span>`;
         crumbsEl.appendChild(c);
       }
 
@@ -977,7 +996,7 @@
       currentL2 = null;
       currentL3 = null;
 
-      document.querySelectorAll('.ph-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.ph-slot-card, .l0-btn').forEach(b => b.classList.remove('active'));
       if(btn) btn.classList.add('active');
 
       const info = parseInfo(l0Data.name);
@@ -985,7 +1004,7 @@
       document.getElementById('ctx-desc').innerText = l0Data.description || "No description.";
       document.getElementById('ctx-owner').innerText = (l0Data.owner || "Unassigned").toUpperCase();
 
-      miniNavText.innerHTML = `View: <strong>Process House</strong> · Active Stream: <strong style="color:var(--dhl-yellow)">${info.name}</strong>`;
+      miniNavText.innerHTML = `View: <strong style="color:var(--dhl-yellow)">Process House</strong>`;
       toggleHouse(false);
 
       l1Container.innerHTML = '';
@@ -1000,7 +1019,7 @@
           const inf = parseInfo(l1.name);
           div.dataset.l1id = inf.id;
 
-          div.innerHTML = `<span class="l1-id">${inf.id}</span><span class="l1-name">${inf.name}</span>`;
+          div.innerHTML = `<span class="l1-id">${escapeHtml(inf.id)}</span><span class="l1-name">${escapeHtml(inf.name)}</span>`;
           div.onclick = () => selectL1(l1, div);
           div.onmousemove = (e) => showTooltip(e, inf.name, l1.description, `Owner: ${l1.owner||"-"}`);
           div.onmouseleave = hideTooltip;
@@ -1035,15 +1054,15 @@
 
           card.innerHTML = `
             <div class="l2-bar"></div>
-            <span class="l2-id">${l2Inf.id}</span>
-            <span class="l2-name">${l2Inf.name}</span>
+            <span class="l2-id">${escapeHtml(l2Inf.id)}</span>
+            <span class="l2-name">${escapeHtml(l2Inf.name)}</span>
             <div class="l3-list" id="l3-list-${idx}"></div>
           `;
 
           // L2 hover tooltip
           card.onmousemove = (e) => {
             const l2Owner = l2.owner || l1Data.owner || currentL0?.owner || "-";
-            const meta = `<b>Owner:</b> ${l2Owner}<br><b>Trigger:</b> ${l2.trigger || "-"}<br><b>Outcome:</b> ${l2.outcome || "-"}`;
+            const meta = `<b>Owner:</b> ${escapeHtml(l2Owner)}<br><b>Trigger:</b> ${escapeHtml(l2.trigger || "-")}<br><b>Outcome:</b> ${escapeHtml(l2.outcome || "-")}`;
             showTooltip(e, l2Inf.name, l2.description || "", meta);
           };
           card.onmouseleave = hideTooltip;
@@ -1066,8 +1085,8 @@
               item.dataset.l3id = l3Inf.id;
 
               item.innerHTML = `
-                <div class="l3-head"><span>${l3Inf.id}</span></div>
-                <div class="l3-body">${l3Inf.name}</div>
+                <div class="l3-head"><span>${escapeHtml(l3Inf.id)}</span></div>
+                <div class="l3-body">${escapeHtml(l3Inf.name)}</div>
               `;
 
               item.addEventListener('click', (ev) => {
@@ -1080,7 +1099,7 @@
 
               item.onmousemove = (e) => {
                 const l3Owner = l3.owner || l2.owner || l1Data.owner || currentL0?.owner || "-";
-                const meta = `<b>Owner:</b> ${l3Owner}<br><b>Trigger:</b> ${l3.trigger||"-"}<br><b>Outcome:</b> ${l3.outcome||"-"}`;
+                const meta = `<b>Owner:</b> ${escapeHtml(l3Owner)}<br><b>Trigger:</b> ${escapeHtml(l3.trigger||"-")}<br><b>Outcome:</b> ${escapeHtml(l3.outcome||"-")}`;
                 showTooltip(e, l3Inf.name, l3.description, meta);
               };
               item.onmouseleave = hideTooltip;
@@ -1288,7 +1307,7 @@
 
     function findL0Button(l0){
       const id = parseInfo(l0.name).id;
-      return document.querySelector(`.ph-btn[data-l0id="${cssEscape(id)}"]`);
+      return document.querySelector(`.ph-slot-card[data-l0id="${cssEscape(id)}"], .l0-btn[data-l0id="${cssEscape(id)}"]`);
     }
     function findL1Chevron(l1){
       const id = parseInfo(l1.name).id;
@@ -1314,6 +1333,7 @@
       return String(str).replace(/["\\]/g, '\\$&');
     }
 
+    /* Search input behavior */
     let searchDebounce = null;
 
     searchInput.addEventListener('input', () => {
