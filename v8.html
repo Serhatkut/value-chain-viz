@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>DHL eCommerce · Value Chain · Master Map</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+<style>
+:root{
+  --dhl-red:#D40511;
+  --dhl-yellow:#FFCC00;
+  --bg:#f2f4f8;
+
+  --l2-w: 192px; /* 320 * 0.6 */
+  --l2-notch: 35px;
+  --l2-overlap: -14px;
+  --l2-h: 520px;
+
+  --footer-h: 26px;
+}
+
+/* ========== BASE ========== */
+body{
+  margin:0; font-family: Segoe UI, Arial, sans-serif;
+  background: var(--bg);
+  height:100vh; display:flex; flex-direction:column; overflow:hidden;
+}
+
+/* ========== HEADER ========== */
+#app-header{
+  background:var(--dhl-red); color:#fff;
+  padding:10px 20px; font-weight:900;
+  display:flex; justify-content:space-between; align-items:center;
+}
+#version-pill{
+  font-size:12px; font-weight:900;
+  padding:4px 10px; border-radius:999px;
+  background:rgba(0,0,0,0.2);
+}
+
+/* ========== BREADCRUMB ========== */
+#breadcrumb-bar{
+  background:#fff; border-bottom:1px solid #ddd;
+  padding:8px 16px; display:flex; gap:10px; align-items:center;
+}
+.crumb-toggle{
+  cursor:pointer; padding:6px 10px; border-radius:8px;
+  border:1px solid #ccc; background:#f5f5f5; font-weight:800;
+}
+.crumbs{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.crumb{ padding:4px 8px; border-radius:999px; border:1px solid #ddd; font-size:12px; font-weight:900; }
+.crumb.l0{ color:var(--dhl-red); }
+.crumb.l1{ color:var(--dhl-yellow); background:#fffdf0; }
+.crumb.l2{ color:#333; }
+.crumb.l3{ color:#999; }
+.sep{ opacity:0.4; }
+
+/* ========== STRATEGY HOUSE ========== */
+#strategy-house-container{ background:#eef1f5; padding:25px; border-bottom:1px solid #ccc; }
+#strategy-house-container.collapsed{ max-height:0; padding:0 25px; overflow:hidden; opacity:0; border:0; }
+
+.house-grid{ display:grid; grid-template-columns:1fr 1fr; gap:15px; max-width:1100px; margin:auto; }
+.house-section{ padding:20px; }
+.house-title{ text-align:center; font-weight:900; text-transform:uppercase; font-size:13px; margin-bottom:10px; }
+.btn-container{ display:flex; gap:8px; flex-wrap:wrap; }
+
+#house-roof{ grid-column:1/3; background:var(--dhl-red); color:#fff; clip-path: polygon(50% 0%,100% 25%,100% 100%,0 100%,0 25%); }
+#house-pillar-run{ background:var(--dhl-yellow); }
+#house-pillar-transform{ background:#333; color:#fff; }
+#house-foundation{ grid-column:1/3; background:#d0d0d0; }
+
+.l0-btn{ border:0; padding:8px 10px; cursor:pointer; border-radius:4px; }
+.l0-btn.active{ box-shadow:0 0 0 2px var(--dhl-yellow); }
+
+/* ========== CONTEXT ========== */
+#context-bar{ background:#fff; padding:10px 20px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; }
+
+/* ========== L1 ========== */
+#l1-container{ padding:12px 20px; background:#fff; border-bottom:1px solid #ddd; display:flex; gap:6px; flex-wrap:wrap; }
+.l1-chevron{
+  width:170px; height:60px; background:var(--dhl-yellow);
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 50%, calc(100% - 15px) 100%, 0 100%, 15px 50%);
+  padding:10px 15px 10px 28px; cursor:pointer; font-weight:900;
+}
+.l1-chevron.active{ background:var(--dhl-red); color:#fff; }
+
+/* ========== WORKSPACE ========== */
+#workspace{
+  flex:1; padding:30px; overflow-x:auto; overflow-y:hidden;
+  display:flex; align-items:flex-start; gap:0; background:#fff;
+}
+
+/* ========== L2 CHEVRON ========== */
+.l2-chain-item{
+  width:var(--l2-w); min-width:var(--l2-w);
+  height:var(--l2-h);
+  margin-left:var(--l2-overlap);
+  background:#f0f0f0;
+  clip-path: polygon(0 0, calc(100% - var(--l2-notch)) 0, 100% 50%, calc(100% - var(--l2-notch)) 100%, 0 100%, var(--l2-notch) 50%);
+  padding:18px 16px 16px 36px;
+  display:flex; flex-direction:column;
+  position:relative;
+  filter: drop-shadow(0 0 1px #888) drop-shadow(0 8px 14px rgba(0,0,0,0.12));
+}
+.l2-chain-item.first{ margin-left:0; }
+.l2-chain-item:hover{ background:#fff4cc; }
+
+.l2-bar{ height:4px; background:var(--dhl-yellow); margin-bottom:8px; }
+.l2-id{ color:var(--dhl-red); font-size:11px; font-weight:900; }
+
+.l2-name{
+  font-size:13px; font-weight:900; line-height:1.2;
+  height: calc(1.2em * 2); overflow:hidden;
+  border-bottom:1px solid #ddd; margin-bottom:8px;
+}
+
+/* ========== L3 ========== */
+.l3-list{ flex:1; overflow-y:auto; }
+.l3-item{
+  background:#fff; margin-bottom:6px; padding:6px 8px; border-left:3px solid #ccc; font-size:12px;
+}
+.l3-item:hover{ border-left-color:var(--dhl-red); }
+
+/* ========== FOOTER ========== */
+#app-footer{
+  height:var(--footer-h);
+  font-size:10px; color:#555;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  border-top:1px solid #ddd;
+}
+
+/* ========== TOOLTIP ========== */
+#tooltip{
+  position:fixed; display:none; background:#222; color:#fff; padding:10px;
+  border-radius:4px; font-size:12px; max-width:280px;
+  border-left:4px solid var(--dhl-yellow); z-index:9999;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app-header">
+  <div>DHL eCommerce Value Chain</div>
+  <div id="version-pill">v 0.1</div>
+</div>
+
+<div id="breadcrumb-bar">
+  <div class="crumb-toggle" id="house-toggle">🏠 Collapse Strategy House</div>
+  <div class="crumbs" id="crumbs"></div>
+</div>
+
+<div id="strategy-house-container">
+  <div class="house-grid">
+    <div id="house-roof" class="house-section"><div class="house-title">Manage</div><div class="btn-container" id="cont-manage"></div></div>
+    <div id="house-pillar-run" class="house-section"><div class="house-title">Run</div><div class="btn-container" id="cont-run"></div></div>
+    <div id="house-pillar-transform" class="house-section"><div class="house-title">Transform</div><div class="btn-container" id="cont-transform"></div></div>
+    <div id="house-foundation" class="house-section"><div class="house-title">Foundation</div><div class="btn-container" id="cont-foundation"></div></div>
+  </div>
+</div>
+
+<div id="context-bar">
+  <div><b id="ctx-title">Overview</b> <span id="ctx-desc"></span></div>
+  <div id="ctx-owner"></div>
+</div>
+
+<div id="l1-container"></div>
+<div id="workspace"></div>
+
+<div id="tooltip"></div>
+
+<div id="app-footer">
+  <span>DHL Ecommerce Global IT , Head of Data Driven Governce, Serhat Kut,PHD 2026</span>
+  <span id="footer-counts"></span>
+</div>
+
+<script>
+let rootData, currentL0, currentL1, currentL2, currentL3;
+const tooltip = document.getElementById("tooltip");
+
+function parseInfo(str){
+  const p = str.split(":");
+  return {id:p[0].trim(), name:(p[1]||p[0]).trim()};
+}
+
+/* ========== FOOTER COUNTS ========== */
+function safeChildren(n){ return n && n.children ? n.children : []; }
+
+function computeTotals(){
+  let l0=0,l1=0,l2=0,l3=0;
+  l0 = safeChildren(rootData).length;
+  safeChildren(rootData).forEach(a=>{
+    l1 += safeChildren(a).length;
+    safeChildren(a).forEach(b=>{
+      l2 += safeChildren(b).length;
+      safeChildren(b).forEach(c=>{
+        l3 += safeChildren(c).length;
+      });
+    });
+  });
+  return {l0,l1,l2,l3};
+}
+
+function updateFooter(){
+  const t = computeTotals();
+  const path = [];
+  if(currentL0) path.push(parseInfo(currentL0.name).id);
+  if(currentL1) path.push(parseInfo(currentL1.name).id);
+  if(currentL2) path.push(parseInfo(currentL2.name).id);
+  if(currentL3) path.push(parseInfo(currentL3.name).id);
+  document.getElementById("footer-counts").textContent =
+    `| Totals: L0 ${t.l0} · L1 ${t.l1} · L2 ${t.l2} · L3 ${t.l3} | Current: ${path.join(" › ") || "—"}`;
+}
+
+/* ========== TOOLTIP ========== */
+function showTooltip(e,title,desc,meta){
+  tooltip.style.display="block";
+  tooltip.style.left=(e.clientX+12)+"px";
+  tooltip.style.top=(e.clientY+12)+"px";
+  tooltip.innerHTML=`<b>${title}</b><div>${desc||""}</div><div style="opacity:.7">${meta||""}</div>`;
+}
+function hideTooltip(){ tooltip.style.display="none"; }
+
+/* ========== LOAD DATA ========== */
+d3.json("data.json").then(data=>{
+  rootData = data;
+  buildHouse();
+  updateFooter();
+});
+
+/* ========== HOUSE ========== */
+function buildHouse(){
+  const maps = {
+    manage: cont_manage,
+    run: cont_run,
+    transform: cont_transform,
+    foundation: cont_foundation
+  };
+  rootData.children.forEach(l0=>{
+    const b = document.createElement("button");
+    const inf = parseInfo(l0.name);
+    b.className="l0-btn";
+    b.innerHTML=`<b>${inf.id}</b> ${inf.name}`;
+    b.onclick=()=>selectL0(l0,b);
+    (maps[(l0.category||"").toLowerCase()]||cont_foundation).appendChild(b);
+  });
+}
+
+/* ========== BREADCRUMB ========== */
+function renderCrumbs(){
+  const el = document.getElementById("crumbs");
+  el.innerHTML="";
+  function add(cls,node){
+    const inf=parseInfo(node.name);
+    const s=document.createElement("span");
+    s.className="crumb "+cls;
+    s.textContent=inf.id+" "+inf.name;
+    el.appendChild(s);
+  }
+  function sep(){
+    const s=document.createElement("span"); s.className="sep"; s.textContent="›"; el.appendChild(s);
+  }
+  if(!currentL0){ el.textContent="Select a stream (L0)"; return; }
+  add("l0",currentL0);
+  if(currentL1){ sep(); add("l1",currentL1); }
+  if(currentL2){ sep(); add("l2",currentL2); }
+  if(currentL3){ sep(); add("l3",currentL3); }
+}
+
+/* ========== SELECT ========== */
+function selectL0(l0,btn){
+  currentL0=l0; currentL1=currentL2=currentL3=null;
+  document.querySelectorAll(".l0-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  l1_container.innerHTML="";
+  workspace.innerHTML="";
+
+  l0.children.forEach(l1=>{
+    const d=document.createElement("div");
+    d.className="l1-chevron";
+    const inf=parseInfo(l1.name);
+    d.innerHTML=`<b>${inf.id}</b><div>${inf.name}</div>`;
+    d.onclick=()=>selectL1(l1,d);
+    d.onmousemove=(e)=>showTooltip(e,inf.name,l1.description,"Owner:"+l1.owner);
+    d.onmouseleave=hideTooltip;
+    l1_container.appendChild(d);
+  });
+  renderCrumbs(); updateFooter();
+}
+
+function selectL1(l1,el){
+  currentL1=l1; currentL2=currentL3=null;
+  document.querySelectorAll(".l1-chevron").forEach(c=>c.classList.remove("active"));
+  el.classList.add("active");
+  workspace.innerHTML="";
+
+  l1.children.forEach((l2,i)=>{
+    const inf=parseInfo(l2.name);
+    const c=document.createElement("div");
+    c.className="l2-chain-item"+(i==0?" first":"");
+    c.innerHTML=`<div class="l2-bar"></div><div class="l2-id">${inf.id}</div><div class="l2-name">${inf.name}</div><div class="l3-list"></div>`;
+    c.onmousemove=(e)=>showTooltip(e,inf.name,l2.description,"Owner:"+l2.owner);
+    c.onmouseleave=hideTooltip;
+    c.onclick=()=>{ currentL2=l2; currentL3=null; renderCrumbs(); updateFooter(); };
+
+    const list=c.querySelector(".l3-list");
+    l2.children.forEach(l3=>{
+      const i3=parseInfo(l3.name);
+      const it=document.createElement("div");
+      it.className="l3-item";
+      it.innerHTML=`<b>${i3.id}</b> ${i3.name}`;
+      it.onmousemove=(e)=>showTooltip(e,i3.name,l3.description,"Owner:"+l3.owner);
+      it.onmouseleave=hideTooltip;
+      it.onclick=(ev)=>{ ev.stopPropagation(); currentL2=l2; currentL3=l3; renderCrumbs(); updateFooter(); };
+      list.appendChild(it);
+    });
+    workspace.appendChild(c);
+  });
+  renderCrumbs(); updateFooter();
+}
+</script>
+</body>
+</html>
