@@ -543,7 +543,7 @@
 
   <div id="tooltip"></div>
 
-  <div id="app-footer">DHL Ecommerce Global IT , Head of Data Driven Governce, Serhat Kut,PHD 2026</div>
+  <div id="app-footer">DHL Ecommerce Global IT, Head of Data Driven Governance, Serhat Kut,2026</div>
 
   <script>
     const houseContainer = document.getElementById('strategy-house-container');
@@ -715,6 +715,17 @@
             <span class="l2-name">${l2Inf.name}</span>
             <div class="l3-list" id="l3-list-${idx}"></div>
           `;
+          // L2 hover tooltip
+          card.onmousemove = (e) => {
+            const l2Owner = l2.owner || l1Data.owner || currentL0?.owner || "-";
+            const meta = `
+              <b>Owner:</b> ${l2Owner}<br>
+              <b>Trigger:</b> ${l2.trigger || "-"}<br>
+              <b>Outcome:</b> ${l2.outcome || "-"}
+            `;
+            showTooltip(e, l2Inf.name, l2.description || "", meta);
+          };
+          card.onmouseleave = hideTooltip;
 
           // Click anywhere in L2 card to set breadcrumb L2 context
           card.addEventListener('click', (ev) => {
