@@ -32,6 +32,10 @@
       /* Process house sizing */
       --ph-max-w: 1180px; /* fits most laptops; still responsive */
       --ph-pad: 18px;
+
+      /* Auto-fit scaling */
+      --ph-scale: 1;        /* computed at runtime */
+      --ph-min-scale: 0.72; /* don’t shrink too much */
     }
 
     /* --- LAYOUT RESET --- */
@@ -246,19 +250,30 @@
     #mini-nav:hover{ background: #444; }
 
     /* =========================
-       PROCESS HOUSE (REBUILT)
+       PROCESS HOUSE (REBUILT + AUTOFIT)
        ========================= */
     #strategy-house-container{
       background: #eef1f5;
-      padding: 18px 18px 22px;
-      transition: all 0.5s ease-in-out;
-      max-height: 1000px;
+      padding: 12px 18px 14px;   /* tighter to help vertical fit */
+      transition: all 0.45s ease-in-out;
+      max-height: none;
       opacity: 1;
       overflow: hidden;
       border-bottom: 1px solid #ccc;
       flex-shrink: 0;
     }
-    #strategy-house-container.collapsed{ max-height: 0; padding: 0 18px; opacity: 0; border-bottom-width: 0; }
+    #strategy-house-container.collapsed{
+      max-height: 0;
+      padding: 0 18px;
+      opacity: 0;
+      border-bottom-width: 0;
+    }
+
+    #ph-stage{
+      transform: scale(var(--ph-scale));
+      transform-origin: top center;
+      width: 100%;
+    }
 
     .ph-wrap{
       max-width: var(--ph-max-w);
@@ -308,7 +323,7 @@
       margin: 12px 0 10px;
     }
     .ph-band{
-      background: #333;
+      background: #3f3f3f;          /* reference dark strip */
       color: #fff;
       border-radius: 8px;
       font-weight: 1000;
@@ -318,11 +333,10 @@
       align-items:center;
       justify-content:center;
       padding: 10px 10px;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
     }
     .ph-band.side{
-      background: #444;
-      color: #fff;
+      background: #3f3f3f;          /* same as reference */
       justify-content: flex-start;
       padding-left: 14px;
     }
@@ -348,7 +362,7 @@
     }
 
     .ph-center{
-      background: #e9ebef;
+      background: #dfe3ea; /* closer to reference slab */
       border-radius: 10px;
       border: 1px solid rgba(0,0,0,0.10);
       box-shadow: 0 10px 22px rgba(0,0,0,0.10);
@@ -372,9 +386,7 @@
       padding: 10px 12px;
       box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
     }
-    .ph-strip .ph-slot-card{
-      width: 100%;
-    }
+    .ph-strip .ph-slot-card{ width: 100%; }
 
     .ph-subtitle{
       text-align:center;
@@ -415,11 +427,8 @@
       gap: 12px;
     }
 
-    /* Slot cards (L0 buttons, styled like the reference boxes) */
-    .ph-slot{
-      min-height: 92px;
-      display:flex;
-    }
+    /* Slot cards (L0 buttons) */
+    .ph-slot{ min-height: 92px; display:flex; }
     .ph-slot-card{
       width: 100%;
       border-radius: 10px;
@@ -456,27 +465,50 @@
       line-height: 1.25;
     }
 
-    /* Color variants to match the reference */
+    /* Roof / yellow cards */
     .ph-card-yellow{
       background: rgba(255,255,255,0.55);
       color: #111;
       border: 1px solid rgba(0,0,0,0.10);
     }
+
+    /* Pillars (red) */
     .ph-card-red{
-      background: rgba(0,0,0,0.06);
+      background: linear-gradient(180deg, #c9040f 0%, var(--dhl-red) 70%);
       color: #fff;
-      border: 1px solid rgba(0,0,0,0.18);
+      border: 1px solid rgba(0,0,0,0.20);
     }
     .ph-card-red:hover{ box-shadow: 0 12px 22px rgba(0,0,0,0.18); }
     .ph-card-red .ph-slot-desc{ opacity: 0.92; }
 
-    /* Active state mirrors existing L0 active semantics */
+    /* RUN core processes: solid red like reference */
+    .ph-card-run{
+      background: linear-gradient(180deg, #c9040f 0%, var(--dhl-red) 72%);
+      color: #fff;
+      border: 1px solid rgba(0,0,0,0.22);
+    }
+
+    /* Essential Enablers: yellow boxes on grey slab */
+    .ph-card-enabler{
+      background: linear-gradient(180deg, #ffe07a 0%, var(--dhl-yellow) 82%);
+      color: #111;
+      border: 1px solid rgba(0,0,0,0.16);
+    }
+
+    /* Foundation inner cards (slightly darker red, readable on red base) */
+    .ph-card-foundation{
+      background: linear-gradient(180deg, #a4040c 0%, #8f040b 80%);
+      color: #fff;
+      border: 1px solid rgba(0,0,0,0.22);
+    }
+
+    /* Active state */
     .ph-slot-card.active{
       box-shadow: 0 0 0 3px rgba(255,204,0,0.75), 0 10px 22px rgba(0,0,0,0.12);
       transform: translateY(-1px);
     }
 
-    /* Keep process house fitting nicely */
+    /* Responsive */
     @media (max-width: 1080px){
       .ph-title{ font-size: 24px; }
       .ph-band-row, .ph-body-row{ grid-template-columns: 1fr 2fr 1fr; }
@@ -507,7 +539,7 @@
     }
     .l1-chevron{
       position: relative;
-      background: var(--dhl-yellow); /* DHL Yellow */
+      background: var(--dhl-yellow);
       height: 60px; width: 170px; margin-right: 6px; margin-bottom: 6px;
       display: flex; flex-direction: column; justify-content: center; padding-left: 28px; padding-right: 15px;
       cursor: pointer; transition: all 0.1s; color: #333; user-select: none;
@@ -716,70 +748,72 @@
 
   <!-- PROCESS HOUSE (L0) -->
   <div id="strategy-house-container">
-    <div class="ph-wrap">
-      <div class="ph-title">The L0 Enterprise Process House: Value Stream Architecture</div>
+    <div id="ph-stage">
+      <div class="ph-wrap">
+        <div class="ph-title">The L0 Enterprise Process House: Value Stream Architecture</div>
 
-      <!-- Roof: Manage the business -->
-      <div class="ph-roof">
-        <div class="ph-roof-label">MANAGE THE BUSINESS</div>
-        <div class="ph-roof-row">
-          <div class="ph-slot" id="ph-slot-S2E"></div>
-          <div class="ph-slot" id="ph-slot-GRC"></div>
-          <div class="ph-slot" id="ph-slot-EA_PM"></div>
-        </div>
-      </div>
-
-      <!-- Bands: Change / Run / Change -->
-      <div class="ph-band-row">
-        <div class="ph-band side">CHANGE THE BUSINESS</div>
-        <div class="ph-band">RUN THE BUSINESS</div>
-        <div class="ph-band side">CHANGE THE BUSINESS</div>
-      </div>
-
-      <!-- Body: left pillar / center / right pillar -->
-      <div class="ph-body-row">
-        <div class="ph-pillar">
-          <div class="ph-slot" id="ph-slot-I2P" style="flex:1 1 auto;"></div>
-        </div>
-
-        <div class="ph-center">
-          <div class="ph-center-top">
-            <div class="ph-slot" id="ph-slot-L2C"></div>
-            <div class="ph-slot" id="ph-slot-O2D"></div>
-            <div class="ph-slot" id="ph-slot-P2R"></div>
-          </div>
-
-          <div class="ph-strip">
-            <div class="ph-slot" id="ph-slot-D2O"></div>
-          </div>
-
-          <div class="ph-subtitle">ESSENTIAL ENABLERS</div>
-
-          <div class="ph-enablers">
-            <div class="ph-slot" id="ph-slot-S2P"></div>
-            <div class="ph-slot" id="ph-slot-H2R"></div>
-            <div class="ph-slot" id="ph-slot-R2R"></div>
+        <!-- Roof: Manage the business -->
+        <div class="ph-roof">
+          <div class="ph-roof-label">MANAGE THE BUSINESS</div>
+          <div class="ph-roof-row">
+            <div class="ph-slot" id="ph-slot-S2E"></div>
+            <div class="ph-slot" id="ph-slot-GRC"></div>
+            <div class="ph-slot" id="ph-slot-EA_PM"></div>
           </div>
         </div>
 
-        <div class="ph-pillar">
-          <div class="ph-slot" id="ph-slot-TRF" style="flex:1 1 auto;"></div>
+        <!-- Bands: Change / Run / Change -->
+        <div class="ph-band-row">
+          <div class="ph-band side">CHANGE THE BUSINESS</div>
+          <div class="ph-band">RUN THE BUSINESS</div>
+          <div class="ph-band side">CHANGE THE BUSINESS</div>
         </div>
-      </div>
 
-      <!-- Foundation -->
-      <div class="ph-foundation">
-        <div class="ph-found-label">FOUNDATION</div>
-        <div class="ph-found-row">
-          <div class="ph-slot" id="ph-slot-DA"></div>
-          <div class="ph-slot" id="ph-slot-ITF"></div>
+        <!-- Body: left pillar / center / right pillar -->
+        <div class="ph-body-row">
+          <div class="ph-pillar">
+            <div class="ph-slot" id="ph-slot-I2P" style="flex:1 1 auto;"></div>
+          </div>
+
+          <div class="ph-center">
+            <div class="ph-center-top">
+              <div class="ph-slot" id="ph-slot-L2C"></div>
+              <div class="ph-slot" id="ph-slot-O2D"></div>
+              <div class="ph-slot" id="ph-slot-P2R"></div>
+            </div>
+
+            <div class="ph-strip">
+              <div class="ph-slot" id="ph-slot-D2O"></div>
+            </div>
+
+            <div class="ph-subtitle">ESSENTIAL ENABLERS</div>
+
+            <div class="ph-enablers">
+              <div class="ph-slot" id="ph-slot-S2P"></div>
+              <div class="ph-slot" id="ph-slot-H2R"></div>
+              <div class="ph-slot" id="ph-slot-R2R"></div>
+            </div>
+          </div>
+
+          <div class="ph-pillar">
+            <div class="ph-slot" id="ph-slot-TRF" style="flex:1 1 auto;"></div>
+          </div>
         </div>
-      </div>
 
-      <!-- Fallback bucket (if any L0 doesn't match slots) -->
-      <div style="margin-top:10px; display:none;" id="ph-fallback-wrap">
-        <div style="font-weight:1000; color:#667085; font-size:12px; margin:8px 2px;">Other value streams</div>
-        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;" id="ph-slot-OTHER"></div>
+        <!-- Foundation -->
+        <div class="ph-foundation">
+          <div class="ph-found-label">FOUNDATION</div>
+          <div class="ph-found-row">
+            <div class="ph-slot" id="ph-slot-DA"></div>
+            <div class="ph-slot" id="ph-slot-ITF"></div>
+          </div>
+        </div>
+
+        <!-- Fallback bucket (if any L0 doesn't match slots) -->
+        <div style="margin-top:10px; display:none;" id="ph-fallback-wrap">
+          <div style="font-weight:1000; color:#667085; font-size:12px; margin:8px 2px;">Other value streams</div>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;" id="ph-slot-OTHER"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -851,6 +885,7 @@
       buildIndex(data);
       renderCrumbs();
       updateFooterCounts();
+      fitProcessHouse();
     }).catch(err => {
       showLoadError("Cannot load data.json. Ensure the file exists and you're using a local server (not file://).");
       console.error(err);
@@ -867,12 +902,42 @@
       return { id: parts[0].trim(), name: parts.slice(1).join(":").trim() || parts[0].trim() };
     }
 
+    /* ========= PROCESS HOUSE AUTOFIT ========= */
+    function fitProcessHouse(){
+      // If house is collapsed, don’t do anything
+      if(houseContainer.classList.contains('collapsed')) return;
+
+      const headerH = document.getElementById('app-header')?.offsetHeight || 0;
+      const crumbH  = document.getElementById('breadcrumb-bar')?.offsetHeight || 0;
+      const ctxH    = document.getElementById('context-bar')?.offsetHeight || 0;
+      const l1H     = document.getElementById('l1-container')?.offsetHeight || 0;
+      const footerH = document.getElementById('app-footer')?.offsetHeight || 0;
+
+      const safety = 18;
+      const availableForHouse = window.innerHeight - (headerH + crumbH + ctxH + l1H + footerH + safety);
+
+      const wrap  = document.querySelector('#ph-stage .ph-wrap');
+      if(!wrap) return;
+
+      // Measure natural height (temporarily set scale=1)
+      document.documentElement.style.setProperty('--ph-scale', "1");
+      const natural = wrap.getBoundingClientRect().height || 1;
+
+      const minScale = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ph-min-scale')) || 0.72;
+      const scale = Math.min(1, Math.max(minScale, availableForHouse / natural));
+
+      document.documentElement.style.setProperty('--ph-scale', scale.toFixed(3));
+    }
+
+    window.addEventListener('resize', fitProcessHouse);
+
     /* ========= PROCESS HOUSE TOGGLE ========= */
     function toggleHouse(show) {
       if(show) {
         houseContainer.classList.remove('collapsed');
         miniNav.style.display = 'none';
         houseToggleLabel.textContent = "Collapse Process House";
+        fitProcessHouse();
       } else {
         houseContainer.classList.add('collapsed');
         setTimeout(() => { miniNav.style.display = 'flex'; }, 300);
@@ -907,19 +972,31 @@
         const slot = document.getElementById(`ph-slot-${cssId(id)}`);
         const inKnownSlot = !!slot;
 
-        // Create card button styled by region type (yellow in roof, red in pillars/center/foundation)
+        // Create card button
         const btn = document.createElement('button');
         btn.className = 'ph-slot-card';
         btn.dataset.l0id = info.id;
 
-        // Determine style variant by where it lands
-        const yellowIds = new Set(["S2E","GRC","EA_PM"]);
-        const foundationIds = new Set(["DA","ITF"]);
-        const isYellow = yellowIds.has(id);
-        const isFoundation = foundationIds.has(id);
+        const roofIds       = new Set(["S2E","GRC","EA_PM"]);
+        const runCoreIds    = new Set(["L2C","O2D","P2R"]);   // red core blocks
+        const stripIds      = new Set(["D2O"]);              // yellow strip
+        const enablerIds    = new Set(["S2P","H2R","R2R"]);   // yellow enablers
+        const pillarIds     = new Set(["I2P","TRF"]);         // red pillars
+        const foundationIds = new Set(["DA","ITF"]);          // darker red on foundation base
 
-        // Roof cards are yellow; everything else looks like the red reference boxes.
-        btn.classList.add(isYellow ? 'ph-card-yellow' : 'ph-card-red');
+        if(roofIds.has(id) || stripIds.has(id)){
+          btn.classList.add('ph-card-yellow');
+        } else if(enablerIds.has(id)){
+          btn.classList.add('ph-card-enabler');
+        } else if(runCoreIds.has(id)){
+          btn.classList.add('ph-card-run');
+        } else if(foundationIds.has(id)){
+          btn.classList.add('ph-card-foundation');
+        } else if(pillarIds.has(id)){
+          btn.classList.add('ph-card-red');
+        } else {
+          btn.classList.add('ph-card-yellow');
+        }
 
         // Compose description (short, fits)
         const desc = (l0.description || "").trim();
@@ -934,7 +1011,7 @@
         btn.onclick = () => selectL0(l0, btn);
 
         // Tooltip
-        btn.onmousemove = (e) => showTooltip(e, info.name, l0.description, `Owner: ${l0.owner||"-"}`);
+        btn.onmousemove = (e) => showTooltip(e, info.name, l0.description, `Owner: ${escapeHtml(l0.owner||"-")}`);
         btn.onmouseleave = hideTooltip;
 
         // Place into slot or fallback
@@ -942,11 +1019,13 @@
           slot.appendChild(btn);
         } else if(otherSlot && otherWrap) {
           otherWrap.style.display = "block";
-          btn.classList.remove('ph-card-red','ph-card-yellow');
-          btn.classList.add('ph-card-yellow');
+          btn.className = 'ph-slot-card ph-card-yellow';
           otherSlot.appendChild(btn);
         }
       });
+
+      // Once rendered, fit (important on load)
+      fitProcessHouse();
     }
 
     function cssId(id){
@@ -1021,7 +1100,7 @@
 
           div.innerHTML = `<span class="l1-id">${escapeHtml(inf.id)}</span><span class="l1-name">${escapeHtml(inf.name)}</span>`;
           div.onclick = () => selectL1(l1, div);
-          div.onmousemove = (e) => showTooltip(e, inf.name, l1.description, `Owner: ${l1.owner||"-"}`);
+          div.onmousemove = (e) => showTooltip(e, inf.name, l1.description, `Owner: ${escapeHtml(l1.owner||"-")}`);
           div.onmouseleave = hideTooltip;
 
           l1Container.appendChild(div);
@@ -1030,6 +1109,7 @@
 
       renderCrumbs();
       updateFooterCounts();
+      fitProcessHouse(); // L1 height changes, refit
     }
 
     function selectL1(l1Data, chevronEl) {
