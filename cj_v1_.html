@@ -194,8 +194,8 @@
     .tag.yellow{border-color:rgba(255,204,0,.6); color:#8a6a00}
 
     .grid-journey{
-      display:grid;
-      grid-template-columns: 1fr 1.1fr 1fr;
+      display:flex;
+      flex-direction:column;
       gap:12px;
     }
 
@@ -204,14 +204,17 @@
       border-radius:16px;
       background:linear-gradient(180deg,#fff, #fbfbfd);
       overflow:hidden;
+      display:grid;
+      grid-template-columns: 230px 1fr;
     }
     .lane .lane-h{
-      padding:10px 12px;
-      border-bottom:1px solid var(--line);
+      padding:12px;
+      border-right:1px solid var(--line);
       display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+      flex-direction:column;
+      gap:6px;
+      justify-content:center;
+      background:linear-gradient(180deg,#fff, #f7f7fa);
     }
     .lane .lane-h b{font-size:12px}
     .lane .lane-h span{font-size:11px;color:var(--muted)}
@@ -219,7 +222,15 @@
       padding:10px 12px 12px;
       display:flex;
       flex-direction:column;
-      gap:8px;
+      gap:10px;
+    }
+
+    .lane-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      padding-bottom:4px;
     }
 
     .nested{
@@ -290,7 +301,8 @@
     @media (max-width: 1100px){
       main{grid-template-columns: 1fr; }
       .panel{position:static}
-      .grid-journey{grid-template-columns: 1fr}
+      .lane{grid-template-columns: 1fr}
+      .lane .lane-h{border-right:none; border-bottom:1px solid var(--line)}
       .node{min-width:unset}
       .brand{min-width:unset}
     }
@@ -342,7 +354,9 @@
               <b>Engage & Contract (L2C)</b>
               <span>Lead → Quote → Contract</span>
             </div>
-            <div class="lane-b" id="laneEngage"></div>
+            <div class="lane-b">
+              <div class="lane-row" id="laneEngage"></div>
+            </div>
           </div>
 
           <div class="lane">
@@ -351,14 +365,14 @@
               <span>Pickup → Network → POD</span>
             </div>
             <div class="lane-b">
-              <div class="band" id="laneFulfilTop"></div>
+              <div class="lane-row" id="laneFulfilTop"></div>
 
               <div class="nested">
                 <h4>
                   <span>The “execution core” inside L2C</span>
                   <span class="small">Shown standalone in operating model, embedded here for customer view</span>
                 </h4>
-                <div class="band" id="laneO2D"></div>
+                <div class="lane-row" id="laneO2D"></div>
               </div>
 
               <div class="nested" style="border-color: rgba(255,204,0,.7); background: rgba(255,204,0,.08);">
@@ -366,7 +380,7 @@
                   <span>Problem-to-Resolution (conditional)</span>
                   <span class="small">Only when service deviates</span>
                 </h4>
-                <div class="band" id="laneP2R"></div>
+                <div class="lane-row" id="laneP2R"></div>
               </div>
             </div>
           </div>
@@ -376,7 +390,9 @@
               <b>Bill, Collect & Close (L2C + R2R)</b>
               <span>Invoice → Cash → Reporting</span>
             </div>
-            <div class="lane-b" id="laneClose"></div>
+            <div class="lane-b">
+              <div class="lane-row" id="laneClose"></div>
+            </div>
           </div>
 
         </div>
