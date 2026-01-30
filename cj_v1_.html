@@ -109,7 +109,7 @@
       margin:0;
       padding:14px 18px 22px;
       display:grid;
-      grid-template-columns: 1fr 420px; /* give journey more width */
+      grid-template-columns: 1fr; /* single column */
       gap:14px;
       align-items:start;
     }
@@ -230,10 +230,18 @@
       background:#fff;
       position:relative;
     }
-    .step:hover{
-      transform:translateY(-1px);
-      box-shadow:var(--shadow2);
-      border-color:rgba(212,5,17,.25);
+
+    /* Lane-colored step accents (DHL-ish) */
+    .step.lane-customer{border-left:6px solid rgba(16,24,40,.22); background:linear-gradient(180deg,#fff, rgba(16,24,40,.03));}
+    .step.lane-commercial{border-left:6px solid var(--dhl-yellow); background:linear-gradient(180deg,#fff, rgba(255,204,0,.12));}
+    .step.lane-ops{border-left:6px solid var(--dhl-red); background:linear-gradient(180deg,#fff, rgba(212,5,17,.08));}
+    .step.lane-finance{border-left:6px solid rgba(79,70,229,.80); background:linear-gradient(180deg,#fff, rgba(79,70,229,.07));}
+    .step.lane-p2r{border-left:6px solid rgba(249,115,22,.90); background:linear-gradient(180deg,#fff, rgba(249,115,22,.07));}
+    .step.lane-enablers{border-left:6px solid rgba(16,24,40,.26); background:linear-gradient(180deg,#fff, rgba(16,24,40,.05));}
+
+    .step.is-selected{
+      outline:3px solid rgba(212,5,17,.18);
+      outline-offset:2px;
     }
 
     .k{
@@ -282,26 +290,26 @@
     }
     .end .step::after, .end .step::before{display:none;}
 
-    /* Right panel */
-    .panel{
-      position:sticky;
-      top:78px;
-    }
-    .detail{
-      padding:12px 14px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .kv{
-      display:grid;
-      grid-template-columns: 96px 1fr;
-      gap:8px 10px;
-      align-items:start;
+    /* Hover tooltip (replaces right detail panel) */
+    .tooltip{
+      position:fixed;
+      z-index:9999;
+      display:none;
+      max-width:420px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.98);
+      box-shadow:var(--shadow2);
+      pointer-events:none;
       font-size:12px;
+      color:var(--ink);
     }
-    .kv .k2{color:var(--muted)}
-    .kv .v2{color:var(--ink); white-space:pre-wrap}
+    .tooltip .t-id{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; color:var(--muted); font-size:11px;}
+    .tooltip .t-name{font-weight:800; margin-top:4px;}
+    .tooltip .t-owner{margin-top:4px; color:var(--muted);}
+    .tooltip .t-row{margin-top:6px; line-height:1.35;}
+    .tooltip .t-lbl{color:var(--muted); font-weight:700;}
 
     .results{
       max-height:320px;
@@ -328,7 +336,6 @@
     @media (max-width: 1150px){
       main{grid-template-columns: 1fr; }
       :root{ --stepW: 300px; }
-      .panel{position:static}
     }
   </style>
 </head>
@@ -354,7 +361,7 @@
   <section class="card">
     <h3>
       <span>Customer Journey — Horizontal Swimlanes</span>
-      <span class="meta">Click a step to view Description / Trigger / Outcome / Owner / Notes</span>
+      <span class="meta">Hover a step for details · Click to pin highlight</span>
     </h3>
 
     <div class="swimwrap">
@@ -369,38 +376,23 @@
       </div>
     </div>
 
-    <div class="hint">
-      Interpretation: **O2D is embedded inside L2C** in the customer view (fulfilment execution), but remains its own value stream in operating model.
-    </div>
-  </section>
-
-  <aside class="panel card">
-    <h3>
-      <span>Selected Step Detail</span>
-      <span class="meta" id="selId">—</span>
-    </h3>
-
-    <div class="detail">
-      <div class="kv">
-        <div class="k2">Name</div><div class="v2" id="d_name">Select a step</div>
-        <div class="k2">Owner</div><div class="v2" id="d_owner">—</div>
-        <div class="k2">Description</div><div class="v2" id="d_desc">—</div>
-        <div class="k2">Trigger</div><div class="v2" id="d_trigger">—</div>
-        <div class="k2">Outcome</div><div class="v2" id="d_outcome">—</div>
-        <div class="k2">Notes</div><div class="v2" id="d_notes">—</div>
-      </div>
-    </div>
-
     <h3 style="border-top:1px solid var(--line)">
       <span>Search Results</span>
       <span class="meta" id="resCount">0</span>
     </h3>
     <div class="results" id="results"></div>
-  </aside>
+
+    <div class="hint">
+      Interpretation: O2D is embedded inside L2C in the customer view (fulfilment execution), but remains its own value stream in the operating model.
+    </div>
+  </section>
+
 </main>
 
 <script>
   const $ = (id)=>document.getElementById(id);
+  const tooltip = ()=>$("tooltip");
+  let PINNED_ID = null;
 
   function esc(s){
     return (s ?? "").toString()
@@ -548,23 +540,26 @@
     {key:"enablers", name:"Enablers", desc:"D2O / DA / ITF / S2P / H2R / TRF / I2P", type:"proc", tag:""}
   ];
 
-  function nodeCardForProcess(id, tagCls){
+  function nodeCardForProcess(id, laneKey, tagCls){
     const node = INDEX.get(id);
     if(!node){
       // show placeholder if the id isn't present in JSON (still useful for narrative completeness)
       const div = document.createElement("div");
-      div.className = "step";
+      div.className = `step lane-${laneKey}`;
       div.dataset.id = id;
       div.innerHTML = `
         <div class="k"><span class="mono">${esc(id)}</span><span class="tag ${tagCls||""}">Not in JSON</span></div>
         <div class="n">${esc(id)}</div>
         <div class="d">This process id is referenced in the journey view but not found in data.json.</div>`;
-      div.addEventListener("click", ()=>selectNode(id));
+      div.addEventListener("click", ()=>setSelected(id));
+      div.addEventListener("mouseenter", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
+      div.addEventListener("mousemove", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
+      div.addEventListener("mouseleave", ()=>{ if(!PINNED_ID) hideTooltip(); });
       return div;
     }
 
     const div = document.createElement("div");
-    div.className = "step";
+    div.className = `step lane-${laneKey}`;
     div.dataset.id = id;
 
     const nameShort = (node.name || "").replace(/^([A-Z0-9_]+:\s*)/,"").trim();
@@ -578,29 +573,25 @@
       <div class="n">${esc(nameShort || node.name || id)}</div>
       <div class="d">${esc((node.description || "").slice(0,95))}${(node.description||"").length>95 ? "…" : ""}</div>
     `;
-    div.addEventListener("click", ()=>selectNode(id));
+    div.addEventListener("click", ()=>setSelected(id));
+    div.addEventListener("mouseenter", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
+    div.addEventListener("mousemove", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
+    div.addEventListener("mouseleave", ()=>{ if(!PINNED_ID) hideTooltip(); });
     return div;
   }
 
   function textCard(text){
     const div = document.createElement("div");
-    div.className = "step";
+    div.className = "step lane-customer";
     div.innerHTML = `
       <div class="k"><span class="mono">Customer step</span><span class="tag gray">Touchpoint</span></div>
       <div class="n">${esc(text)}</div>
       <div class="d">Customer-visible action in the journey.</div>
     `;
-    div.addEventListener("click", ()=>{
-      $("selId").textContent = "Customer";
-      $("d_name").textContent = text;
-      $("d_owner").textContent = "Customer";
-      $("d_desc").textContent = "Customer-visible step / touchpoint.";
-      $("d_trigger").textContent = "Phase progression";
-      $("d_outcome").textContent = "Next journey step";
-      $("d_notes").textContent = "This is a narrative lane, not a process object.";
-      document.querySelectorAll(".step").forEach(el=>el.style.outline="none");
-      div.style.outline = "3px solid rgba(212,5,17,.18)";
-    });
+    div.addEventListener("click", ()=>setSelected("Customer"));
+    div.addEventListener("mouseenter", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForCustomer(text), ev.clientX, ev.clientY); });
+    div.addEventListener("mousemove", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForCustomer(text), ev.clientX, ev.clientY); });
+    div.addEventListener("mouseleave", ()=>{ if(!PINNED_ID) hideTooltip(); });
     return div;
   }
 
@@ -673,7 +664,7 @@
                 lane.tag === "red" ? "red" :
                 lane.tag === "yellow" ? "yellow" :
                 (lane.tag === "gray" ? "gray" : "");
-              stack.appendChild(nodeCardForProcess(id, tagCls));
+            stack.appendChild(nodeCardForProcess(id, lane.key, tagCls));
             }
             if(items.length > max){
               const more = document.createElement("div");
@@ -693,30 +684,84 @@
     }
   }
 
-  function selectNode(id){
-    const node = INDEX.get(id);
-    $("selId").textContent = id;
-
-    if(!node){
-      $("d_name").textContent = id;
-      $("d_owner").textContent = "—";
-      $("d_desc").textContent = "This process id is referenced in the journey view but not found in data.json.";
-      $("d_trigger").textContent = "—";
-      $("d_outcome").textContent = "—";
-      $("d_notes").textContent = "—";
-      return;
-    }
-
-    $("d_name").textContent = node.name || "—";
-    $("d_owner").textContent = textOrDash(node.owner);
-    $("d_desc").textContent = textOrDash(node.description);
-    $("d_trigger").textContent = textOrDash(node.trigger);
-    $("d_outcome").textContent = textOrDash(node.outcome);
-    $("d_notes").textContent = textOrDash(node.notes);
-
+  function setSelected(id){
+    PINNED_ID = id;
     document.querySelectorAll(".step").forEach(el=>{
-      el.style.outline = (el.dataset.id === id) ? "3px solid rgba(212,5,17,.18)" : "none";
+      el.classList.toggle("is-selected", el.dataset.id === id);
     });
+    hideTooltip();
+  }
+
+  function tooltipHTMLForNode(id){
+    const node = INDEX.get(id);
+    if(!node){
+      return `
+        <div class="t-id">${esc(id)}</div>
+        <div class="t-name">${esc(id)}</div>
+        <div class="t-owner">Owner: —</div>
+        <div class="t-row"><span class="t-lbl">Description:</span> Referenced in journey but not found in data.json.</div>
+      `;
+    }
+    const owner = textOrDash(node.owner);
+    const desc = textOrDash(node.description);
+    const trig = textOrDash(node.trigger);
+    const outc = textOrDash(node.outcome);
+    const notes = textOrDash(node.notes);
+    return `
+      <div class="t-id">${esc(node.id)}</div>
+      <div class="t-name">${esc(node.name || node.id)}</div>
+      <div class="t-owner">Owner: ${esc(owner)}</div>
+      <div class="t-row"><span class="t-lbl">Description:</span> ${esc(desc)}</div>
+      <div class="t-row"><span class="t-lbl">Trigger:</span> ${esc(trig)}</div>
+      <div class="t-row"><span class="t-lbl">Outcome:</span> ${esc(outc)}</div>
+      <div class="t-row"><span class="t-lbl">Notes:</span> ${esc(notes)}</div>
+    `;
+  }
+
+  function tooltipHTMLForCustomer(text){
+    return `
+      <div class="t-id">Customer step</div>
+      <div class="t-name">${esc(text)}</div>
+      <div class="t-owner">Owner: Customer</div>
+      <div class="t-row"><span class="t-lbl">Description:</span> Customer-visible action / touchpoint in the journey.</div>
+      <div class="t-row"><span class="t-lbl">Trigger:</span> Phase progression</div>
+      <div class="t-row"><span class="t-lbl">Outcome:</span> Next journey step</div>
+    `;
+  }
+
+  function showTooltip(html, x, y){
+    const t = tooltip();
+    if(!t) return;
+    t.innerHTML = html;
+    t.style.display = "block";
+
+    const pad = 14;
+    const offsetX = 14;
+    const offsetY = 14;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Set initial position
+    t.style.left = (x + offsetX) + "px";
+    t.style.top = (y + offsetY) + "px";
+
+    // Clamp to viewport after render
+    const rect = t.getBoundingClientRect();
+    let left = x + offsetX;
+    let top = y + offsetY;
+    if(left + rect.width + pad > vw) left = vw - rect.width - pad;
+    if(top + rect.height + pad > vh) top = vh - rect.height - pad;
+    if(left < pad) left = pad;
+    if(top < pad) top = pad;
+
+    t.style.left = left + "px";
+    t.style.top = top + "px";
+  }
+
+  function hideTooltip(){
+    const t = tooltip();
+    if(!t) return;
+    t.style.display = "none";
   }
 
   // search across all nodes
@@ -753,7 +798,11 @@
         div.className = "result";
         div.innerHTML = `<b class="mono">${esc(n.id)}</b> — ${esc((n.name||"").replace(/^([A-Z0-9_]+:\s*)/,""))}
           <div>${esc((n.owner||"").trim() ? ("Owner: "+n.owner+" · ") : "")}${esc((n.description||"").slice(0,120))}${(n.description||"").length>120?"…":""}</div>`;
-        div.addEventListener("click", ()=>selectNode(n.id));
+        div.addEventListener("click", ()=>{
+          setSelected(n.id);
+          const target = document.querySelector(`.step[data-id="${CSS.escape(n.id)}"]`);
+          if(target) target.scrollIntoView({behavior:"smooth", block:"center", inline:"center"});
+        });
         results.appendChild(div);
       });
     }
@@ -763,5 +812,7 @@
 
   load();
 </script>
+</script>
+<div id="tooltip" class="tooltip" aria-hidden="true"></div>
 </body>
 </html>
