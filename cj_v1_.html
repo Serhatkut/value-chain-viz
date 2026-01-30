@@ -20,9 +20,14 @@
       --shadow: 0 10px 26px rgba(0,0,0,.08);
       --shadow2: 0 16px 40px rgba(0,0,0,.10);
 
-      --laneH: 112px;
-      --stepW: 260px;
+      --laneH: 118px;
+      --stepW: 320px;         /* more breathing room per column */
       --gap: 14px;
+
+      /* DHL-tint backgrounds */
+      --tint-yellow: rgba(255,204,0,.14);
+      --tint-red: rgba(212,5,17,.10);
+      --tint-gray: rgba(16,24,40,.05);
     }
 
     *{box-sizing:border-box}
@@ -43,8 +48,9 @@
     }
 
     .topbar{
-      max-width:1600px;
-      margin:0 auto;
+      width:100%;
+      max-width:none;
+      margin:0;
       padding:14px 18px;
       display:flex;
       align-items:center;
@@ -98,11 +104,12 @@
     }
 
     main{
-      max-width:1600px;
-      margin:0 auto;
+      width:100%;
+      max-width:none;        /* full width */
+      margin:0;
       padding:14px 18px 22px;
       display:grid;
-      grid-template-columns: 1.45fr .55fr;
+      grid-template-columns: 1fr 420px; /* give journey more width */
       gap:14px;
       align-items:start;
     }
@@ -151,23 +158,26 @@
       background:#fff;
       white-space:nowrap;
     }
-    .tag.red{border-color:rgba(212,5,17,.25); color:var(--dhl-red)}
-    .tag.yellow{border-color:rgba(255,204,0,.7); color:#8a6a00}
-    .tag.gray{background:#f6f7fb}
+    .tag.red{border-color:rgba(212,5,17,.28); color:var(--dhl-red); background:rgba(212,5,17,.07)}
+    .tag.yellow{border-color:rgba(255,204,0,.75); color:#6b5200; background:rgba(255,204,0,.16)}
+    .tag.gray{background:rgba(16,24,40,.06)}
 
     .hscroll{
       overflow:auto;
       border:1px solid var(--line);
       border-radius:16px;
       background:#fff;
+      width:100%;
+      max-width:none;
     }
 
     /* Grid: first column is lane label, rest is steps */
     .grid{
       display:grid;
-      grid-template-columns: 210px repeat(var(--cols), var(--stepW));
+      grid-template-columns: 240px repeat(var(--cols), var(--stepW));
       gap:0;
-      min-width: calc(210px + (var(--cols) * var(--stepW)));
+      min-width: max-content; /* prevents squeezing */
+      width:max-content;
     }
 
     .laneLabel{
@@ -186,6 +196,13 @@
     .laneLabel b{font-size:12px}
     .laneLabel span{font-size:11px; color:var(--muted); line-height:1.2}
 
+    /* Per-lane tint (set via data-lane on lane label) */
+    .laneLabel[data-lane="commercial"]{ background:linear-gradient(180deg,#fff,var(--tint-yellow)); }
+    .laneLabel[data-lane="ops"]{ background:linear-gradient(180deg,#fff,var(--tint-red)); }
+    .laneLabel[data-lane="finance"]{ background:linear-gradient(180deg,#fff, rgba(79,70,229,.08)); }
+    .laneLabel[data-lane="p2r"]{ background:linear-gradient(180deg,#fff, rgba(249,115,22,.08)); }
+    .laneLabel[data-lane="enablers"]{ background:linear-gradient(180deg,#fff,var(--tint-gray)); }
+
     .cell{
       border-right:1px solid var(--line);
       border-bottom:1px solid var(--line);
@@ -197,6 +214,11 @@
       gap:10px;
       background:#fff;
     }
+    .cell[data-lane="commercial"]{ background:linear-gradient(180deg,#fff, rgba(255,204,0,.06)); }
+    .cell[data-lane="ops"]{ background:linear-gradient(180deg,#fff, rgba(212,5,17,.045)); }
+    .cell[data-lane="finance"]{ background:linear-gradient(180deg,#fff, rgba(79,70,229,.04)); }
+    .cell[data-lane="p2r"]{ background:linear-gradient(180deg,#fff, rgba(249,115,22,.04)); }
+    .cell[data-lane="enablers"]{ background:linear-gradient(180deg,#fff, rgba(16,24,40,.03)); }
 
     .step{
       width:100%;
@@ -305,6 +327,7 @@
 
     @media (max-width: 1150px){
       main{grid-template-columns: 1fr; }
+      :root{ --stepW: 300px; }
       .panel{position:static}
     }
   </style>
@@ -594,6 +617,7 @@
     const headerLabel = document.createElement("div");
     headerLabel.className = "laneLabel";
     headerLabel.style.height = "74px";
+    headerLabel.style.width = "240px";
     headerLabel.innerHTML = `<b>Journey Phases</b><span>Left → Right</span>`;
     headerLabel.style.borderBottom = "1px solid var(--line)";
     grid.appendChild(headerLabel);
@@ -616,6 +640,7 @@
     for(const lane of Lanes){
       const lab = document.createElement("div");
       lab.className = "laneLabel";
+      lab.dataset.lane = lane.key;
       lab.innerHTML = `<b>${esc(lane.name)}</b><span>${esc(lane.desc)}</span>`;
       grid.appendChild(lab);
 
@@ -623,6 +648,7 @@
         const ph = Phases[i];
         const cell = document.createElement("div");
         cell.className = "cell" + (i===Phases.length-1 ? " end" : "");
+        cell.dataset.lane = lane.key;
 
         const items = ph[lane.key] || [];
 
