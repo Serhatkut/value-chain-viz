@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>DHL eCommerce · Customer Journey View (L2C with embedded O2D)</title>
+  <title>DHL eCommerce · Customer Journey Swimlanes (Horizontal)</title>
 
   <style>
     :root{
@@ -20,7 +20,9 @@
       --shadow: 0 10px 26px rgba(0,0,0,.08);
       --shadow2: 0 16px 40px rgba(0,0,0,.10);
 
-      --chip:#f1f3f7;
+      --laneH: 112px;
+      --stepW: 260px;
+      --gap: 14px;
     }
 
     *{box-sizing:border-box}
@@ -34,36 +36,34 @@
     header{
       position:sticky;
       top:0;
-      z-index:20;
+      z-index:30;
       background:rgba(255,255,255,.92);
       backdrop-filter:saturate(140%) blur(8px);
       border-bottom:1px solid var(--line);
     }
 
     .topbar{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      padding:14px 18px;
-      max-width:1500px;
+      max-width:1600px;
       margin:0 auto;
+      padding:14px 18px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      justify-content:space-between;
     }
 
     .brand{
       display:flex;
       gap:12px;
       align-items:center;
-      min-width:280px;
+      min-width:300px;
     }
     .logo{
       width:34px;height:34px;border-radius:10px;
       background:linear-gradient(135deg, var(--dhl-red), #ff3b30);
       box-shadow:0 8px 18px rgba(212,5,17,.25);
     }
-    .title{
-      line-height:1.1;
-    }
+    .title{line-height:1.1}
     .title b{display:block;font-size:14px}
     .title span{display:block;font-size:12px;color:var(--muted)}
 
@@ -72,7 +72,7 @@
       display:flex;
       gap:10px;
       align-items:center;
-      max-width:720px;
+      max-width:820px;
     }
     .search input{
       width:100%;
@@ -91,26 +91,20 @@
       font-size:12px;
       padding:8px 10px;
       border-radius:999px;
-      background:var(--chip);
+      background:#f1f3f7;
       border:1px solid var(--line);
       color:var(--muted);
       white-space:nowrap;
     }
 
     main{
-      max-width:1500px;
+      max-width:1600px;
       margin:0 auto;
-      padding:16px 18px 26px;
+      padding:14px 18px 22px;
       display:grid;
-      grid-template-columns: 1.35fr .65fr;
+      grid-template-columns: 1.45fr .55fr;
       gap:14px;
       align-items:start;
-    }
-
-    .canvas{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
     }
 
     .card{
@@ -120,6 +114,7 @@
       box-shadow:var(--shadow);
       overflow:hidden;
     }
+
     .card h3{
       margin:0;
       padding:12px 14px;
@@ -130,129 +125,140 @@
       justify-content:space-between;
       gap:10px;
     }
-    .card h3 .meta{color:var(--muted); font-weight:500; font-size:12px}
+    .meta{color:var(--muted); font-weight:500; font-size:12px}
 
-    .section{
-      padding:12px 14px 14px;
+    /* Swimlane container */
+    .swimwrap{
+      padding:12px 12px 14px;
+      background:linear-gradient(180deg,#fff,#fbfbfd);
     }
 
-    .band{
+    .legend{
       display:flex;
-      gap:10px;
       flex-wrap:wrap;
-      padding:10px 14px 14px;
-    }
-
-    .node{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 10px;
-      background:#fff;
-      cursor:pointer;
-      transition:transform .08s ease, box-shadow .08s ease, border-color .08s ease;
-      min-width:210px;
-    }
-    .node:hover{
-      transform:translateY(-1px);
-      box-shadow:var(--shadow2);
-      border-color:rgba(212,5,17,.25);
-    }
-    .node .k{
-      font-size:11px;
-      color:var(--muted);
-      display:flex;
       gap:8px;
-      align-items:center;
-      justify-content:space-between;
+      padding:0 2px 10px;
     }
-    .node .n{
-      font-size:13px;
-      font-weight:700;
-      margin-top:4px;
-      line-height:1.25;
-    }
-    .node .d{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:6px;
-      line-height:1.35;
-    }
-
     .tag{
       display:inline-flex;
       align-items:center;
       gap:6px;
       border-radius:999px;
-      padding:4px 8px;
-      font-size:11px;
+      padding:6px 10px;
+      font-size:12px;
       border:1px solid var(--line);
       color:var(--muted);
       background:#fff;
       white-space:nowrap;
     }
     .tag.red{border-color:rgba(212,5,17,.25); color:var(--dhl-red)}
-    .tag.yellow{border-color:rgba(255,204,0,.6); color:#8a6a00}
+    .tag.yellow{border-color:rgba(255,204,0,.7); color:#8a6a00}
+    .tag.gray{background:#f6f7fb}
 
-    .grid-journey{
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .lane{
+    .hscroll{
+      overflow:auto;
       border:1px solid var(--line);
       border-radius:16px;
-      background:linear-gradient(180deg,#fff, #fbfbfd);
-      overflow:hidden;
+      background:#fff;
+    }
+
+    /* Grid: first column is lane label, rest is steps */
+    .grid{
       display:grid;
-      grid-template-columns: 230px 1fr;
+      grid-template-columns: 210px repeat(var(--cols), var(--stepW));
+      gap:0;
+      min-width: calc(210px + (var(--cols) * var(--stepW)));
     }
-    .lane .lane-h{
-      padding:12px;
+
+    .laneLabel{
+      position:sticky;
+      left:0;
+      z-index:10;
+      background:linear-gradient(180deg,#fff,#fbfbfd);
       border-right:1px solid var(--line);
+      padding:12px 12px;
+      height:var(--laneH);
       display:flex;
       flex-direction:column;
-      gap:6px;
       justify-content:center;
-      background:linear-gradient(180deg,#fff, #f7f7fa);
+      gap:6px;
     }
-    .lane .lane-h b{font-size:12px}
-    .lane .lane-h span{font-size:11px;color:var(--muted)}
-    .lane .lane-b{
-      padding:10px 12px 12px;
+    .laneLabel b{font-size:12px}
+    .laneLabel span{font-size:11px; color:var(--muted); line-height:1.2}
+
+    .cell{
+      border-right:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      height:var(--laneH);
+      padding:10px 10px;
       display:flex;
-      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
       gap:10px;
+      background:#fff;
     }
 
-    .lane-row{
-      display:flex;
-      gap:10px;
-      flex-wrap:nowrap;
-      overflow-x:auto;
-      padding-bottom:4px;
-    }
-
-    .nested{
-      border:1px dashed rgba(212,5,17,.25);
+    .step{
+      width:100%;
+      border:1px solid var(--line);
       border-radius:14px;
-      padding:10px;
-      background:rgba(212,5,17,.03);
-      margin-top:6px;
+      padding:10px 10px;
+      cursor:pointer;
+      transition:transform .08s ease, box-shadow .08s ease, border-color .08s ease;
+      background:#fff;
+      position:relative;
     }
-    .nested h4{
-      margin:0 0 8px 0;
-      font-size:12px;
-      color:var(--dhl-red);
+    .step:hover{
+      transform:translateY(-1px);
+      box-shadow:var(--shadow2);
+      border-color:rgba(212,5,17,.25);
+    }
+
+    .k{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:10px;
-    }
-    .nested .small{
+      gap:8px;
       font-size:11px;
       color:var(--muted);
     }
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+    .n{
+      margin-top:4px;
+      font-size:13px;
+      font-weight:800;
+      line-height:1.25;
+    }
+    .d{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    /* arrows between steps (pure CSS) */
+    .step::after{
+      content:"";
+      position:absolute;
+      top:50%;
+      right:-12px;
+      width:12px;
+      height:2px;
+      background:rgba(16,24,40,.18);
+      transform:translateY(-50%);
+    }
+    .step::before{
+      content:"";
+      position:absolute;
+      top:50%;
+      right:-14px;
+      width:0;height:0;
+      border-left:6px solid rgba(16,24,40,.25);
+      border-top:4px solid transparent;
+      border-bottom:4px solid transparent;
+      transform:translateY(-50%);
+    }
+    .end .step::after, .end .step::before{display:none;}
 
     /* Right panel */
     .panel{
@@ -267,14 +273,13 @@
     }
     .kv{
       display:grid;
-      grid-template-columns: 100px 1fr;
+      grid-template-columns: 96px 1fr;
       gap:8px 10px;
       align-items:start;
       font-size:12px;
     }
-    .kv .k{color:var(--muted)}
-    .kv .v{color:var(--ink)}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+    .kv .k2{color:var(--muted)}
+    .kv .v2{color:var(--ink); white-space:pre-wrap}
 
     .results{
       max-height:320px;
@@ -298,134 +303,68 @@
       background:#fcfcfe;
     }
 
-    @media (max-width: 1100px){
+    @media (max-width: 1150px){
       main{grid-template-columns: 1fr; }
       .panel{position:static}
-      .lane{grid-template-columns: 1fr}
-      .lane .lane-h{border-right:none; border-bottom:1px solid var(--line)}
-      .node{min-width:unset}
-      .brand{min-width:unset}
     }
   </style>
 </head>
-<body>
 
+<body>
 <header>
   <div class="topbar">
     <div class="brand">
       <div class="logo" aria-hidden="true"></div>
       <div class="title">
-        <b>DHL eCommerce · Customer Journey View</b>
-        <span>L2C lifecycle with embedded O2D execution (powered by data.json)</span>
+        <b>DHL eCommerce · Customer Journey Swimlanes</b>
+        <span>Horizontal customer steps with L2C + embedded O2D + payment + ticket + refund</span>
       </div>
     </div>
-
     <div class="search">
-      <input id="q" placeholder="Search any process (ID, name, owner, trigger, outcome)… e.g., O2D_07_01 or credit check" />
+      <input id="q" placeholder="Search any process (ID, name, owner, trigger, outcome)… e.g., credit check, invoice, tracking" />
       <span class="pill" id="stats">Loading…</span>
     </div>
   </div>
 </header>
 
 <main>
-  <div class="canvas">
+  <section class="card">
+    <h3>
+      <span>Customer Journey — Horizontal Swimlanes</span>
+      <span class="meta">Click a step to view Description / Trigger / Outcome / Owner / Notes</span>
+    </h3>
 
-    <!-- Steering -->
-    <section class="card" id="steering">
-      <h3>
-        <span>Steering & Governance (directs the journey)</span>
-        <span class="meta">S2E · GRC · EA_PM</span>
-      </h3>
-      <div class="band" id="steeringNodes"></div>
-    </section>
-
-    <!-- Journey -->
-    <section class="card">
-      <h3>
-        <span>Customer Journey (enterprise lifecycle view)</span>
-        <span class="meta">L2C owns the promise-to-cash lifecycle</span>
-      </h3>
-
-      <div class="section">
-        <div class="grid-journey">
-
-          <div class="lane">
-            <div class="lane-h">
-              <b>Engage & Contract (L2C)</b>
-              <span>Lead → Quote → Contract</span>
-            </div>
-            <div class="lane-b">
-              <div class="lane-row" id="laneEngage"></div>
-            </div>
-          </div>
-
-          <div class="lane">
-            <div class="lane-h">
-              <b>Fulfil & Deliver (O2D embedded)</b>
-              <span>Pickup → Network → POD</span>
-            </div>
-            <div class="lane-b">
-              <div class="lane-row" id="laneFulfilTop"></div>
-
-              <div class="nested">
-                <h4>
-                  <span>The “execution core” inside L2C</span>
-                  <span class="small">Shown standalone in operating model, embedded here for customer view</span>
-                </h4>
-                <div class="lane-row" id="laneO2D"></div>
-              </div>
-
-              <div class="nested" style="border-color: rgba(255,204,0,.7); background: rgba(255,204,0,.08);">
-                <h4 style="color:#8a6a00">
-                  <span>Problem-to-Resolution (conditional)</span>
-                  <span class="small">Only when service deviates</span>
-                </h4>
-                <div class="lane-row" id="laneP2R"></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="lane">
-            <div class="lane-h">
-              <b>Bill, Collect & Close (L2C + R2R)</b>
-              <span>Invoice → Cash → Reporting</span>
-            </div>
-            <div class="lane-b">
-              <div class="lane-row" id="laneClose"></div>
-            </div>
-          </div>
-
-        </div>
+    <div class="swimwrap">
+      <div class="legend">
+        <span class="tag yellow">Customer-visible journey</span>
+        <span class="tag red">O2D execution</span>
+        <span class="tag gray">Optional (only when needed)</span>
       </div>
-    </section>
 
-    <!-- Enablers -->
-    <section class="card">
-      <h3>
-        <span>Enablers (shared capabilities & foundations)</span>
-        <span class="meta">D2O · DA · ITF · S2P · H2R · TRF · I2P</span>
-      </h3>
-      <div class="band" id="enablers"></div>
-      <div class="hint">
-        Note: Shared capabilities (e.g., address validation / geocoding / label generation) will be mapped later as a separate capability layer across these streams.
+      <div class="hscroll">
+        <div class="grid" id="grid" style="--cols: 10;"></div>
       </div>
-    </section>
-  </div>
+    </div>
 
-  <!-- Right panel -->
+    <div class="hint">
+      Interpretation: **O2D is embedded inside L2C** in the customer view (fulfilment execution), but remains its own value stream in operating model.
+    </div>
+  </section>
+
   <aside class="panel card">
     <h3>
-      <span>Selected Process Detail</span>
+      <span>Selected Step Detail</span>
       <span class="meta" id="selId">—</span>
     </h3>
-    <div class="detail" id="detail">
+
+    <div class="detail">
       <div class="kv">
-        <div class="k">Name</div><div class="v" id="d_name">Select a node</div>
-        <div class="k">Owner</div><div class="v" id="d_owner">—</div>
-        <div class="k">Description</div><div class="v" id="d_desc">—</div>
-        <div class="k">Trigger</div><div class="v" id="d_trigger">—</div>
-        <div class="k">Outcome</div><div class="v" id="d_outcome">—</div>
-        <div class="k">Notes</div><div class="v" id="d_notes">—</div>
+        <div class="k2">Name</div><div class="v2" id="d_name">Select a step</div>
+        <div class="k2">Owner</div><div class="v2" id="d_owner">—</div>
+        <div class="k2">Description</div><div class="v2" id="d_desc">—</div>
+        <div class="k2">Trigger</div><div class="v2" id="d_trigger">—</div>
+        <div class="k2">Outcome</div><div class="v2" id="d_outcome">—</div>
+        <div class="k2">Notes</div><div class="v2" id="d_notes">—</div>
       </div>
     </div>
 
@@ -438,7 +377,6 @@
 </main>
 
 <script>
-  // ---------- helpers ----------
   const $ = (id)=>document.getElementById(id);
 
   function esc(s){
@@ -447,32 +385,10 @@
       .replaceAll("<","&lt;")
       .replaceAll(">","&gt;");
   }
-
   function textOrDash(v){ return (v && String(v).trim().length) ? v : "—"; }
 
-  function makeNodeCard(node, extraTag){
-    const div = document.createElement("div");
-    div.className = "node";
-    div.dataset.id = node.id;
-
-    const idOnly = (node.id || "").trim();
-    const nameShort = (node.name || "").replace(/^([A-Z0-9_]+:\s*)/,"").trim();
-
-    div.innerHTML = `
-      <div class="k">
-        <span class="mono">${esc(idOnly)}</span>
-        ${extraTag ? `<span class="tag ${extraTag.cls}">${esc(extraTag.txt)}</span>` : ``}
-      </div>
-      <div class="n">${esc(nameShort || node.name || idOnly)}</div>
-      <div class="d">${esc((node.description || "").slice(0,120))}${(node.description||"").length>120 ? "…" : ""}</div>
-    `;
-    div.addEventListener("click", ()=>selectNode(node.id));
-    return div;
-  }
-
-  // ---------- data loading ----------
-  let INDEX = new Map();     // id -> node
-  let ALL = [];             // all nodes flat
+  let INDEX = new Map();
+  let ALL = [];
 
   function walk(node){
     if(!node) return;
@@ -491,57 +407,280 @@
       (root.children || []).forEach(walk);
 
       $("stats").textContent = `${ALL.length} processes loaded`;
-      renderJourney();
+      renderSwimlanes();
       bindSearch();
-      // default selection: L2C or O2D if exists
-      selectNode(INDEX.has("L2C") ? "L2C" : (ALL[0]?.id || ""));
+
+      // pick a sensible default
+      selectNode(INDEX.has("L2C_02") ? "L2C_02" : (ALL[0]?.id || ""));
     }catch(e){
       $("stats").textContent = "data.json not loaded";
-      $("results").innerHTML = `<div class="hint"><b>Missing data.json</b><br/>Place <span class="mono">customer_journey.html</span> in the same folder as <span class="mono">data.json</span>.</div>`;
+      $("results").innerHTML = `<div class="hint"><b>Missing data.json</b><br/>Place <span class="mono">customer_journey_swimlanes.html</span> in the same folder as <span class="mono">data.json</span>.</div>`;
       console.error(e);
     }
   }
 
-  // ---------- journey configuration ----------
-  const Journey = {
-    steering: ["S2E","GRC","EA_PM"],
-    engage:   ["L2C_01","L2C_02","L2C_03","L2C_04"],
-    fulfilTop:["L2C_05"], // order mgmt & SLA promise as entry into execution
-    o2d:      ["O2D_01","O2D_02","O2D_03","O2D_04","O2D_05","O2D_06","O2D_07","O2D_08","O2D_09","O2D_10","O2D_11","O2D_12"],
-    p2r:      ["P2R_01","P2R_02","P2R_03","P2R_04","P2R_05","P2R_06","P2R_07","P2R_08"],
-    close:    ["L2C_06","L2C_07","L2C_08","R2R"],
+  // ------------------------------------------------------------
+  // HORIZONTAL CUSTOMER JOURNEY PHASES (you can tweak this later)
+  // Each column is a "customer step" and each lane shows mapped processes.
+  // ------------------------------------------------------------
+  const Phases = [
+    {
+      id:"PH_01", title:"Decide & Onboard",
+      customer:["Choose service / create account"],
+      commercial:["L2C_01","L2C_02","L2C_03","L2C_04"],
+      ops:[],
+      finance:[],
+      p2r:[],
+      enablers:["S2E","GRC","EA_PM","DA","ITF"]
+    },
+    {
+      id:"PH_02", title:"Create Shipment",
+      customer:["Book shipment / create label"],
+      commercial:["L2C_05"],
+      ops:["O2D_01"],
+      finance:[],
+      p2r:[],
+      enablers:["DA","ITF","D2O"]
+    },
+    {
+      id:"PH_03", title:"Pickup",
+      customer:["Handover parcel"],
+      commercial:[],
+      ops:["O2D_02"],
+      finance:[],
+      p2r:[],
+      enablers:["D2O","ITF"]
+    },
+    {
+      id:"PH_04", title:"Network Processing",
+      customer:["In transit (network)"],
+      commercial:[],
+      ops:["O2D_03","O2D_04","O2D_05","O2D_06","O2D_07","O2D_08","O2D_09"],
+      finance:[],
+      p2r:[],
+      enablers:["D2O","DA","ITF","S2P","H2R"]
+    },
+    {
+      id:"PH_05", title:"Delivery & POD",
+      customer:["Receive / pickup OOH"],
+      commercial:[],
+      ops:["O2D_10"],
+      finance:[],
+      p2r:[],
+      enablers:["D2O","DA","ITF"]
+    },
+    {
+      id:"PH_06", title:"Track & Proactive Comms",
+      customer:["Track shipment / notifications"],
+      commercial:["L2C_08"],
+      ops:["O2D_10","O2D_11"],
+      finance:[],
+      p2r:["P2R_01","P2R_02"],
+      enablers:["DA","ITF"]
+    },
+    {
+      id:"PH_07", title:"Invoice & Pay",
+      customer:["Invoice received / payment"],
+      commercial:["L2C_06","L2C_07"],
+      ops:[],
+      finance:["R2R_01","R2R_02","R2R_03"],
+      p2r:[],
+      enablers:["DA","ITF","GRC"]
+    },
+    {
+      id:"PH_08", title:"Ticket Resolution",
+      customer:["Open ticket / case updates"],
+      commercial:["L2C_08"],
+      ops:["O2D_11"],
+      finance:[],
+      p2r:["P2R_03","P2R_04"],
+      enablers:["DA","ITF","EA_PM"]
+    },
+    {
+      id:"PH_09", title:"Credit Back / Compensation",
+      customer:["Refund / compensation outcome"],
+      commercial:["L2C_08"],
+      ops:["O2D_11","O2D_12"],
+      finance:["R2R_04","R2R_06","R2R_07"],
+      p2r:["P2R_05","P2R_06","P2R_07"],
+      enablers:["GRC","DA","ITF"]
+    },
+    {
+      id:"PH_10", title:"Close & Learn",
+      customer:["Case closed / feedback"],
+      commercial:["L2C_08"],
+      ops:["O2D_12"],
+      finance:["R2R_05","R2R_07"],
+      p2r:["P2R_08"],
+      enablers:["EA_PM","DA","TRF","I2P"]
+    }
+  ];
 
-    enablers: ["D2O","DA","ITF","S2P","H2R","TRF","I2P"]
-  };
+  const Lanes = [
+    {key:"customer", name:"Customer", desc:"Customer decisions, actions, touchpoints", type:"text", tag:""},
+    {key:"commercial", name:"Commercial (L2C)", desc:"Lead → Quote → Contract → Order promise", type:"proc", tag:"yellow"},
+    {key:"ops", name:"Operations (O2D)", desc:"Pickup → hubs/gateways → delivery/POD", type:"proc", tag:"red"},
+    {key:"finance", name:"Finance (Billing/AR + R2R)", desc:"Invoice → cash → accounting/reporting", type:"proc", tag:""},
+    {key:"p2r", name:"Service Recovery (P2R)", desc:"Only when issues/claims arise", type:"proc", tag:"gray"},
+    {key:"enablers", name:"Enablers", desc:"D2O / DA / ITF / S2P / H2R / TRF / I2P", type:"proc", tag:""}
+  ];
 
-  function pickNodes(ids){
-    return ids.map(id=>INDEX.get(id)).filter(Boolean);
+  function nodeCardForProcess(id, tagCls){
+    const node = INDEX.get(id);
+    if(!node){
+      // show placeholder if the id isn't present in JSON (still useful for narrative completeness)
+      const div = document.createElement("div");
+      div.className = "step";
+      div.dataset.id = id;
+      div.innerHTML = `
+        <div class="k"><span class="mono">${esc(id)}</span><span class="tag ${tagCls||""}">Not in JSON</span></div>
+        <div class="n">${esc(id)}</div>
+        <div class="d">This process id is referenced in the journey view but not found in data.json.</div>`;
+      div.addEventListener("click", ()=>selectNode(id));
+      return div;
+    }
+
+    const div = document.createElement("div");
+    div.className = "step";
+    div.dataset.id = id;
+
+    const nameShort = (node.name || "").replace(/^([A-Z0-9_]+:\s*)/,"").trim();
+    const owner = (node.owner || "").trim();
+
+    div.innerHTML = `
+      <div class="k">
+        <span class="mono">${esc(id)}</span>
+        <span class="tag ${tagCls||""}">${esc(owner ? owner : "Owner TBD")}</span>
+      </div>
+      <div class="n">${esc(nameShort || node.name || id)}</div>
+      <div class="d">${esc((node.description || "").slice(0,95))}${(node.description||"").length>95 ? "…" : ""}</div>
+    `;
+    div.addEventListener("click", ()=>selectNode(id));
+    return div;
   }
 
-  function renderBand(containerId, ids, tag){
-    const wrap = $(containerId);
-    wrap.innerHTML = "";
-    pickNodes(ids).forEach(n=>{
-      wrap.appendChild(makeNodeCard(n, tag));
+  function textCard(text){
+    const div = document.createElement("div");
+    div.className = "step";
+    div.innerHTML = `
+      <div class="k"><span class="mono">Customer step</span><span class="tag gray">Touchpoint</span></div>
+      <div class="n">${esc(text)}</div>
+      <div class="d">Customer-visible action in the journey.</div>
+    `;
+    div.addEventListener("click", ()=>{
+      $("selId").textContent = "Customer";
+      $("d_name").textContent = text;
+      $("d_owner").textContent = "Customer";
+      $("d_desc").textContent = "Customer-visible step / touchpoint.";
+      $("d_trigger").textContent = "Phase progression";
+      $("d_outcome").textContent = "Next journey step";
+      $("d_notes").textContent = "This is a narrative lane, not a process object.";
+      document.querySelectorAll(".step").forEach(el=>el.style.outline="none");
+      div.style.outline = "3px solid rgba(212,5,17,.18)";
     });
+    return div;
   }
 
-  function renderJourney(){
-    renderBand("steeringNodes", Journey.steering, {txt:"Steering", cls:"yellow"});
-    renderBand("laneEngage", Journey.engage, {txt:"L2C", cls:"yellow"});
-    renderBand("laneFulfilTop", Journey.fulfilTop, {txt:"Promise", cls:"yellow"});
-    renderBand("laneO2D", Journey.o2d, {txt:"O2D", cls:"red"});
-    renderBand("laneP2R", Journey.p2r, {txt:"P2R", cls:""});
-    renderBand("laneClose", Journey.close, {txt:"Close", cls:""});
-    renderBand("enablers", Journey.enablers, {txt:"Enabler", cls:""});
+  function renderSwimlanes(){
+    const cols = Phases.length;
+    const grid = $("grid");
+    grid.style.setProperty("--cols", cols);
+    grid.innerHTML = "";
+
+    // Header row (sticky lane label column + phase titles across)
+    // We'll implement the header as a "lane label" cell + phase cells
+    // using the same grid by inserting first a header lane label and then header cells.
+    // (We simulate header by reusing laneLabel styling with different content.)
+    const headerLabel = document.createElement("div");
+    headerLabel.className = "laneLabel";
+    headerLabel.style.height = "74px";
+    headerLabel.innerHTML = `<b>Journey Phases</b><span>Left → Right</span>`;
+    headerLabel.style.borderBottom = "1px solid var(--line)";
+    grid.appendChild(headerLabel);
+
+    for(const ph of Phases){
+      const h = document.createElement("div");
+      h.className = "cell";
+      h.style.height = "74px";
+      h.style.alignItems = "flex-start";
+      h.style.background = "linear-gradient(180deg,#fff,#fbfbfd)";
+      h.innerHTML = `
+        <div style="width:100%">
+          <div class="k"><span class="mono">${esc(ph.id)}</span><span class="tag yellow">${esc(ph.title)}</span></div>
+          <div class="d" style="margin-top:6px">Customer storyline step</div>
+        </div>`;
+      grid.appendChild(h);
+    }
+
+    // Lane rows
+    for(const lane of Lanes){
+      const lab = document.createElement("div");
+      lab.className = "laneLabel";
+      lab.innerHTML = `<b>${esc(lane.name)}</b><span>${esc(lane.desc)}</span>`;
+      grid.appendChild(lab);
+
+      for(let i=0;i<Phases.length;i++){
+        const ph = Phases[i];
+        const cell = document.createElement("div");
+        cell.className = "cell" + (i===Phases.length-1 ? " end" : "");
+
+        const items = ph[lane.key] || [];
+
+        // If multiple items, show first as card and a small "stack" via multiple cards (vertical inside cell).
+        const stack = document.createElement("div");
+        stack.style.width = "100%";
+        stack.style.display = "flex";
+        stack.style.flexDirection = "column";
+        stack.style.gap = "8px";
+
+        if(lane.type === "text"){
+          if(items.length){
+            stack.appendChild(textCard(items[0]));
+          }else{
+            stack.innerHTML = `<div style="font-size:12px;color:var(--muted)">—</div>`;
+          }
+        }else{
+          if(items.length){
+            const max = 2; // keep cell tidy; can be increased
+            for(const id of items.slice(0,max)){
+              const tagCls =
+                lane.tag === "red" ? "red" :
+                lane.tag === "yellow" ? "yellow" :
+                (lane.tag === "gray" ? "gray" : "");
+              stack.appendChild(nodeCardForProcess(id, tagCls));
+            }
+            if(items.length > max){
+              const more = document.createElement("div");
+              more.style.fontSize = "11px";
+              more.style.color = "var(--muted)";
+              more.textContent = `+${items.length-max} more… (use search to jump)`;
+              stack.appendChild(more);
+            }
+          }else{
+            stack.innerHTML = `<div style="font-size:12px;color:var(--muted)">—</div>`;
+          }
+        }
+
+        cell.appendChild(stack);
+        grid.appendChild(cell);
+      }
+    }
   }
 
-  // ---------- selection ----------
   function selectNode(id){
     const node = INDEX.get(id);
-    if(!node) return;
-
     $("selId").textContent = id;
+
+    if(!node){
+      $("d_name").textContent = id;
+      $("d_owner").textContent = "—";
+      $("d_desc").textContent = "This process id is referenced in the journey view but not found in data.json.";
+      $("d_trigger").textContent = "—";
+      $("d_outcome").textContent = "—";
+      $("d_notes").textContent = "—";
+      return;
+    }
+
     $("d_name").textContent = node.name || "—";
     $("d_owner").textContent = textOrDash(node.owner);
     $("d_desc").textContent = textOrDash(node.description);
@@ -549,13 +688,12 @@
     $("d_outcome").textContent = textOrDash(node.outcome);
     $("d_notes").textContent = textOrDash(node.notes);
 
-    // soft highlight: scroll into view if visible
-    document.querySelectorAll(".node").forEach(el=>{
+    document.querySelectorAll(".step").forEach(el=>{
       el.style.outline = (el.dataset.id === id) ? "3px solid rgba(212,5,17,.18)" : "none";
     });
   }
 
-  // ---------- search ----------
+  // search across all nodes
   function searchableText(n){
     return [
       n.id, n.name, n.description, n.owner, n.trigger, n.outcome, n.notes, n.category
@@ -580,7 +718,7 @@
       for(const n of ALL){
         const t = cache.get(n.id) || "";
         if(t.includes(q)) hits.push(n);
-        if(hits.length >= 80) break; // cap for UX
+        if(hits.length >= 80) break;
       }
       $("resCount").textContent = String(hits.length);
 
