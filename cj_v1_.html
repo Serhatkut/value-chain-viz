@@ -3,816 +3,479 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>DHL eCommerce · Customer Journey Swimlanes (Horizontal)</title>
+  <title>DHL eCommerce · Customer Journey Blueprint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Delivery:wght@400;700;900&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --dhl-red:#D40511;
-      --dhl-yellow:#FFCC00;
-
-      --bg:#f6f6f7;
-      --card:#ffffff;
-      --ink:#101828;
-      --muted:#667085;
-      --line:#e6e8ee;
-
-      --radius:16px;
-      --shadow: 0 10px 26px rgba(0,0,0,.08);
-      --shadow2: 0 16px 40px rgba(0,0,0,.10);
-
-      --laneH: 118px;
-      --stepW: 320px;         /* more breathing room per column */
-      --gap: 14px;
-
-      /* DHL-tint backgrounds */
-      --tint-yellow: rgba(255,204,0,.14);
-      --tint-red: rgba(212,5,17,.10);
-      --tint-gray: rgba(16,24,40,.05);
+    /* =========================
+       DHL BRAND TOKENS
+       ========================= */
+    :root {
+      --dhl-red: #D40511;
+      --dhl-red-dark: #b0040e;
+      --dhl-yellow: #FFCC00;
+      --dhl-black: #101828;
+      
+      --bg: #F9FAFC;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      
+      --col-w: 220px; 
+      --lane-head-w: 240px;
     }
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color:var(--ink);
-      background:linear-gradient(180deg, #fff 0%, var(--bg) 60%);
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--dhl-black);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    header{
-      position:sticky;
-      top:0;
-      z-index:30;
-      background:rgba(255,255,255,.92);
-      backdrop-filter:saturate(140%) blur(8px);
-      border-bottom:1px solid var(--line);
+    /* =========================
+       HEADER
+       ========================= */
+    header {
+      height: 64px;
+      background: var(--dhl-red);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 100;
+    }
+    .brand { font-family: 'Delivery', sans-serif; font-weight: 900; font-size: 22px; display: flex; align-items: center; gap: 12px; }
+    .brand span { background: var(--dhl-yellow); color: var(--dhl-red); padding: 2px 8px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    
+    .status-bar { font-size: 12px; font-weight: 600; opacity: 0.9; display: flex; gap: 16px; }
+    .status-item { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: white; }
+
+    /* =========================
+       GRID LAYOUT
+       ========================= */
+    .blueprint-grid {
+      flex: 1;
+      overflow: auto;
+      display: grid;
+      /* Lane Header + 6 Journey Steps */
+      grid-template-columns: var(--lane-head-w) repeat(6, var(--col-w)); 
+      background: var(--bg);
     }
 
-    .topbar{
-      width:100%;
-      max-width:none;
-      margin:0;
-      padding:14px 18px;
-      display:flex;
-      align-items:center;
-      gap:12px;
-      justify-content:space-between;
+    /* Sticky Headers */
+    .corner-plate {
+      position: sticky; top: 0; left: 0; z-index: 50;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
+      border-bottom: 4px solid var(--dhl-red);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 14px; color: var(--dhl-red);
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
 
-    .brand{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      min-width:300px;
+    .stage-head {
+      position: sticky; top: 0; z-index: 40;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
+      border-bottom: 4px solid var(--dhl-red);
+      padding: 16px;
+      display: flex; flex-direction: column; gap: 4px;
     }
-    .logo{
-      width:34px;height:34px;border-radius:10px;
-      background:linear-gradient(135deg, var(--dhl-red), #ff3b30);
-      box-shadow:0 8px 18px rgba(212,5,17,.25);
-    }
-    .title{line-height:1.1}
-    .title b{display:block;font-size:14px}
-    .title span{display:block;font-size:12px;color:var(--muted)}
+    .stage-num { font-size: 10px; font-weight: 800; color: #94A3B8; text-transform: uppercase; }
+    .stage-name { font-size: 14px; font-weight: 800; color: var(--dhl-black); text-transform: uppercase; }
 
-    .search{
-      flex:1;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      max-width:820px;
+    /* Swimlanes */
+    .lane-label {
+      position: sticky; left: 0; z-index: 30;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 24px; display: flex; flex-direction: column; justify-content: center;
     }
-    .search input{
-      width:100%;
-      padding:10px 12px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      outline:none;
-      background:#fff;
-      font-size:13px;
-    }
-    .search input:focus{
-      border-color:rgba(212,5,17,.35);
-      box-shadow:0 0 0 4px rgba(212,5,17,.10);
-    }
-    .pill{
-      font-size:12px;
-      padding:8px 10px;
-      border-radius:999px;
-      background:#f1f3f7;
-      border:1px solid var(--line);
-      color:var(--muted);
-      white-space:nowrap;
+    .lane-label strong { font-size: 15px; color: var(--dhl-black); display: block; margin-bottom: 4px; }
+    .lane-label span { font-size: 11px; color: #64748B; line-height: 1.4; }
+
+    /* Visual Hierarchy for Lanes */
+    .lane-hero .lane-label { border-left: 5px solid var(--dhl-red); background: #FFF; }
+    .lane-hero .cell { background: #FFF; }
+    
+    .lane-support .lane-label { border-left: 5px solid #94A3B8; background: #F8FAFC; }
+    .lane-support .cell { background: #F8FAFC; }
+
+    .cell {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 12px;
+      display: flex; flex-direction: column; gap: 10px;
+      min-height: 160px;
     }
 
-    main{
-      width:100%;
-      max-width:none;        /* full width */
-      margin:0;
-      padding:14px 18px 22px;
-      display:grid;
-      grid-template-columns: 1fr; /* single column */
-      gap:14px;
-      align-items:start;
+    /* =========================
+       ACTIVITY BLOCKS (The "Single Screen" Elements)
+       ========================= */
+    .block {
+      background: white;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 12px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      border-left: 4px solid #CBD5E1;
+    }
+    .block:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border-color: var(--dhl-red);
+    }
+    
+    .block-title { font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .block-sub { font-size: 10px; color: #64748B; line-height: 1.3; }
+    
+    /* Specific Block Styles */
+    .block.type-commercial { border-left-color: var(--dhl-yellow); }
+    .block.type-ops { border-left-color: var(--dhl-red); }
+    .block.type-foundation { border-left-color: #475569; background: #F1F5F9; }
+    
+    /* Strategic Highlights (OOH) */
+    .block.strategic {
+      background: #FEF2F2; /* Light red tint */
+      border: 1px solid #FECACA;
+      border-left: 4px solid var(--dhl-red);
+    }
+    .badge {
+      font-size: 9px; background: var(--dhl-red); color: white; 
+      padding: 1px 4px; border-radius: 3px; font-weight: 700;
     }
 
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
+    /* =========================
+       CHEVRON POPUP (Progressive Disclosure)
+       ========================= */
+    .modal-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      z-index: 200; display: none; align-items: center; justify-content: center;
     }
+    .modal {
+      background: white; width: 900px; max-width: 95%; max-height: 80vh;
+      border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      animation: modalSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalSlide { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
 
-    .card h3{
-      margin:0;
-      padding:12px 14px;
-      font-size:13px;
-      border-bottom:1px solid var(--line);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
+    .modal-header {
+      background: var(--dhl-red); color: white; padding: 20px 30px;
+      display: flex; justify-content: space-between; align-items: center;
     }
-    .meta{color:var(--muted); font-weight:500; font-size:12px}
+    
+    .modal-content { padding: 30px; overflow-y: auto; background: #F8FAFC; }
 
-    /* Swimlane container */
-    .swimwrap{
-      padding:12px 12px 14px;
-      background:linear-gradient(180deg,#fff,#fbfbfd);
+    /* CHEVRON FLOW */
+    .flow-container { display: flex; flex-direction: column; gap: 30px; }
+    
+    .process-row { display: flex; flex-direction: column; gap: 10px; }
+    .process-title { font-size: 14px; font-weight: 800; color: #334155; display: flex; align-items: center; gap: 8px; }
+    
+    .chevron-track { 
+      display: flex; gap: 4px; overflow-x: auto; padding-bottom: 10px; 
+      scrollbar-width: thin;
     }
+    
+    .chevron {
+      background: white; border: 1px solid #CBD5E1;
+      padding: 10px 16px; min-width: 140px;
+      position: relative;
+      font-size: 11px; font-weight: 600; color: #475569;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%);
+      margin-left: -10px; /* Overlap */
+      transition: all 0.2s;
+    }
+    .chevron:first-child { margin-left: 0; clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%); }
+    .chevron:hover { background: var(--dhl-yellow); color: var(--dhl-red); border-color: var(--dhl-yellow); z-index: 2; transform: scale(1.05); }
 
-    .legend{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      padding:0 2px 10px;
-    }
-    .tag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:12px;
-      border:1px solid var(--line);
-      color:var(--muted);
-      background:#fff;
-      white-space:nowrap;
-    }
-    .tag.red{border-color:rgba(212,5,17,.28); color:var(--dhl-red); background:rgba(212,5,17,.07)}
-    .tag.yellow{border-color:rgba(255,204,0,.75); color:#6b5200; background:rgba(255,204,0,.16)}
-    .tag.gray{background:rgba(16,24,40,.06)}
-
-    .hscroll{
-      overflow:auto;
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:#fff;
-      width:100%;
-      max-width:none;
-    }
-
-    /* Grid: first column is lane label, rest is steps */
-    .grid{
-      display:grid;
-      grid-template-columns: 240px repeat(var(--cols), var(--stepW));
-      gap:0;
-      min-width: max-content; /* prevents squeezing */
-      width:max-content;
-    }
-
-    .laneLabel{
-      position:sticky;
-      left:0;
-      z-index:10;
-      background:linear-gradient(180deg,#fff,#fbfbfd);
-      border-right:1px solid var(--line);
-      padding:12px 12px;
-      height:var(--laneH);
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      gap:6px;
-    }
-    .laneLabel b{font-size:12px}
-    .laneLabel span{font-size:11px; color:var(--muted); line-height:1.2}
-
-    /* Per-lane tint (set via data-lane on lane label) */
-    .laneLabel[data-lane="commercial"]{ background:linear-gradient(180deg,#fff,var(--tint-yellow)); }
-    .laneLabel[data-lane="ops"]{ background:linear-gradient(180deg,#fff,var(--tint-red)); }
-    .laneLabel[data-lane="finance"]{ background:linear-gradient(180deg,#fff, rgba(79,70,229,.08)); }
-    .laneLabel[data-lane="p2r"]{ background:linear-gradient(180deg,#fff, rgba(249,115,22,.08)); }
-    .laneLabel[data-lane="enablers"]{ background:linear-gradient(180deg,#fff,var(--tint-gray)); }
-
-    .cell{
-      border-right:1px solid var(--line);
-      border-bottom:1px solid var(--line);
-      height:var(--laneH);
-      padding:10px 10px;
-      display:flex;
-      align-items:center;
-      justify-content:flex-start;
-      gap:10px;
-      background:#fff;
-    }
-    .cell[data-lane="commercial"]{ background:linear-gradient(180deg,#fff, rgba(255,204,0,.06)); }
-    .cell[data-lane="ops"]{ background:linear-gradient(180deg,#fff, rgba(212,5,17,.045)); }
-    .cell[data-lane="finance"]{ background:linear-gradient(180deg,#fff, rgba(79,70,229,.04)); }
-    .cell[data-lane="p2r"]{ background:linear-gradient(180deg,#fff, rgba(249,115,22,.04)); }
-    .cell[data-lane="enablers"]{ background:linear-gradient(180deg,#fff, rgba(16,24,40,.03)); }
-
-    .step{
-      width:100%;
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 10px;
-      cursor:pointer;
-      transition:transform .08s ease, box-shadow .08s ease, border-color .08s ease;
-      background:#fff;
-      position:relative;
-    }
-
-    /* Lane-colored step accents (DHL-ish) */
-    .step.lane-customer{border-left:6px solid rgba(16,24,40,.22); background:linear-gradient(180deg,#fff, rgba(16,24,40,.03));}
-    .step.lane-commercial{border-left:6px solid var(--dhl-yellow); background:linear-gradient(180deg,#fff, rgba(255,204,0,.12));}
-    .step.lane-ops{border-left:6px solid var(--dhl-red); background:linear-gradient(180deg,#fff, rgba(212,5,17,.08));}
-    .step.lane-finance{border-left:6px solid rgba(79,70,229,.80); background:linear-gradient(180deg,#fff, rgba(79,70,229,.07));}
-    .step.lane-p2r{border-left:6px solid rgba(249,115,22,.90); background:linear-gradient(180deg,#fff, rgba(249,115,22,.07));}
-    .step.lane-enablers{border-left:6px solid rgba(16,24,40,.26); background:linear-gradient(180deg,#fff, rgba(16,24,40,.05));}
-
-    .step.is-selected{
-      outline:3px solid rgba(212,5,17,.18);
-      outline-offset:2px;
-    }
-
-    .k{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      font-size:11px;
-      color:var(--muted);
-    }
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
-    .n{
-      margin-top:4px;
-      font-size:13px;
-      font-weight:800;
-      line-height:1.25;
-    }
-    .d{
-      margin-top:6px;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.35;
-    }
-
-    /* arrows between steps (pure CSS) */
-    .step::after{
-      content:"";
-      position:absolute;
-      top:50%;
-      right:-12px;
-      width:12px;
-      height:2px;
-      background:rgba(16,24,40,.18);
-      transform:translateY(-50%);
-    }
-    .step::before{
-      content:"";
-      position:absolute;
-      top:50%;
-      right:-14px;
-      width:0;height:0;
-      border-left:6px solid rgba(16,24,40,.25);
-      border-top:4px solid transparent;
-      border-bottom:4px solid transparent;
-      transform:translateY(-50%);
-    }
-    .end .step::after, .end .step::before{display:none;}
-
-    /* Hover tooltip (replaces right detail panel) */
-    .tooltip{
-      position:fixed;
-      z-index:9999;
-      display:none;
-      max-width:420px;
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.98);
-      box-shadow:var(--shadow2);
-      pointer-events:none;
-      font-size:12px;
-      color:var(--ink);
-    }
-    .tooltip .t-id{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; color:var(--muted); font-size:11px;}
-    .tooltip .t-name{font-weight:800; margin-top:4px;}
-    .tooltip .t-owner{margin-top:4px; color:var(--muted);}
-    .tooltip .t-row{margin-top:6px; line-height:1.35;}
-    .tooltip .t-lbl{color:var(--muted); font-weight:700;}
-
-    .results{
-      max-height:320px;
-      overflow:auto;
-      border-top:1px solid var(--line);
-    }
-    .result{
-      padding:10px 14px;
-      border-bottom:1px solid var(--line);
-      cursor:pointer;
-    }
-    .result:hover{background:#fafbff}
-    .result b{font-size:12px}
-    .result div{font-size:11px;color:var(--muted); margin-top:4px; line-height:1.25}
-
-    .hint{
-      padding:10px 14px;
-      font-size:12px;
-      color:var(--muted);
-      border-top:1px solid var(--line);
-      background:#fcfcfe;
-    }
-
-    @media (max-width: 1150px){
-      main{grid-template-columns: 1fr; }
-      :root{ --stepW: 300px; }
-    }
   </style>
 </head>
-
 <body>
+
 <header>
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo" aria-hidden="true"></div>
-      <div class="title">
-        <b>DHL eCommerce · Customer Journey Swimlanes</b>
-        <span>Horizontal customer steps with L2C + embedded O2D + payment + ticket + refund</span>
-      </div>
-    </div>
-    <div class="search">
-      <input id="q" placeholder="Search any process (ID, name, owner, trigger, outcome)… e.g., credit check, invoice, tracking" />
-      <span class="pill" id="stats">Loading…</span>
-    </div>
+  <div class="brand"><span>DHL</span> eCommerce Journey</div>
+  <div class="status-bar">
+    <div class="status-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Commercial</div>
+    <div class="status-item"><div class="dot" style="background:var(--dhl-red)"></div> Operations</div>
+    <div class="status-item"><div class="dot" style="background:#475569"></div> Foundation</div>
   </div>
 </header>
 
-<main>
-  <section class="card">
-    <h3>
-      <span>Customer Journey — Horizontal Swimlanes</span>
-      <span class="meta">Hover a step for details · Click to pin highlight</span>
-    </h3>
+<div class="blueprint-grid" id="grid">
+  </div>
 
-    <div class="swimwrap">
-      <div class="legend">
-        <span class="tag yellow">Customer-visible journey</span>
-        <span class="tag red">O2D execution</span>
-        <span class="tag gray">Optional (only when needed)</span>
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div style="font-size:11px; font-weight:700; opacity:0.8; text-transform:uppercase">Process Deep Dive</div>
+        <div style="font-size:20px; font-weight:800" id="m_title">Block Title</div>
       </div>
-
-      <div class="hscroll">
-        <div class="grid" id="grid" style="--cols: 10;"></div>
-      </div>
+      <button style="background:none; border:none; color:white; font-size:28px; cursor:pointer" onclick="closeModal()">&times;</button>
     </div>
-
-    <h3 style="border-top:1px solid var(--line)">
-      <span>Search Results</span>
-      <span class="meta" id="resCount">0</span>
-    </h3>
-    <div class="results" id="results"></div>
-
-    <div class="hint">
-      Interpretation: O2D is embedded inside L2C in the customer view (fulfilment execution), but remains its own value stream in the operating model.
+    <div class="modal-content">
+      <div id="m_flow" class="flow-container">
+        </div>
     </div>
-  </section>
-
-</main>
+  </div>
+</div>
 
 <script>
-  const $ = (id)=>document.getElementById(id);
-  const tooltip = ()=>$("tooltip");
-  let PINNED_ID = null;
+  // 1. DATA MODEL: The Grid Configuration
+  const STAGES = [
+    { id: "S1", name: "Setup & Book" },
+    { id: "S2", name: "First Mile" },
+    { id: "S3", name: "In Transit (Org)" },
+    { id: "S4", name: "In Transit (Dest)" },
+    { id: "S5", name: "Last Mile" },
+    { id: "S6", name: "Post Delivery" }
+  ];
 
-  function esc(s){
-    return (s ?? "").toString()
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;");
-  }
-  function textOrDash(v){ return (v && String(v).trim().length) ? v : "—"; }
+  const LANES = [
+    { id: "COMM", name: "Commercial", desc: "Sales, Ordering, Billing", class: "lane-hero" },
+    { id: "OPS", name: "Operations", desc: "Physical Logistics Flow", class: "lane-hero" },
+    { id: "FOUND", name: "Foundation", desc: "Strategy, Design, IT, GRC", class: "lane-support" }
+  ];
 
-  let INDEX = new Map();
-  let ALL = [];
+  // 2. MAPPING: Defining the "Blocks"
+  // Each block maps to specific L1 processes from your JSON.
+  // We use this to group multiple L1s into one clean visual block.
+  const BLOCKS = [
+    // --- STAGE 1: SETUP & BOOK ---
+    { 
+      title: "Strategy & Design", lane: "FOUND", stage: "S1", type: "foundation",
+      desc: "D2O Product & Network Design, S2E Strategy",
+      ids: ["D2O_01", "D2O_02", "S2E_01"] 
+    },
+    { 
+      title: "Sales & Contract", lane: "COMM", stage: "S1", type: "commercial",
+      desc: "Quote, Onboarding, Pricing",
+      ids: ["L2C_01", "L2C_02", "L2C_03"] 
+    },
+    { 
+      title: "Order Booking", lane: "COMM", stage: "S1", type: "commercial",
+      desc: "Order Capture, Validation",
+      ids: ["L2C_05"] 
+    },
 
-  function walk(node){
-    if(!node) return;
-    if(node.id){
-      INDEX.set(node.id, node);
-      ALL.push(node);
+    // --- STAGE 2: FIRST MILE ---
+    { 
+      title: "Data Intake", lane: "OPS", stage: "S2", type: "ops",
+      desc: "Manifest, Label Check",
+      ids: ["O2D_01"] 
+    },
+    { 
+      title: "Pickup & Inject", lane: "OPS", stage: "S2", type: "ops",
+      desc: "Driver Pickup, Hub Induction",
+      ids: ["O2D_02", "O2D_03"] 
+    },
+
+    // --- STAGE 3: TRANSIT (ORIGIN) ---
+    { 
+      title: "Linehaul Ops", lane: "OPS", stage: "S3", type: "ops",
+      desc: "Road/Air Linehaul",
+      ids: ["O2D_04"] 
+    },
+    { 
+      title: "Export Customs", lane: "OPS", stage: "S3", type: "ops",
+      desc: "Clearance & Compliance",
+      ids: ["O2D_07"] 
+    },
+
+    // --- STAGE 4: TRANSIT (DEST) ---
+    { 
+      title: "Gateway Import", lane: "OPS", stage: "S4", type: "ops",
+      desc: "Arrival, Deconsolidation",
+      ids: ["O2D_08", "O2D_09"] 
+    },
+    { 
+      title: "Issue Management", lane: "OPS", stage: "S4", type: "ops",
+      desc: "Delays, Exceptions (P2R)",
+      ids: ["P2R_01", "P2R_02"] 
+    },
+
+    // --- STAGE 5: LAST MILE ---
+    { 
+      title: "Final Delivery", lane: "OPS", stage: "S5", type: "ops",
+      desc: "Courier Delivery, POD",
+      ids: ["O2D_10", "O2D_11"] 
+    },
+    { 
+      title: "OOH & Lockers", lane: "OPS", stage: "S5", type: "ops",
+      desc: "Strategic Network Execution",
+      ids: ["O2D_10"], // Using O2D_10 but visualized as specific block
+      strategic: true 
+    },
+    { 
+      title: "Driver Tech", lane: "FOUND", stage: "S5", type: "foundation",
+      desc: "Scanner & App Infrastructure",
+      ids: ["ITF_02"] 
+    },
+
+    // --- STAGE 6: POST DELIVERY ---
+    { 
+      title: "Invoice & Pay", lane: "COMM", stage: "S6", type: "commercial",
+      desc: "Billing, Reconciliation",
+      ids: ["L2C_06", "R2R_01"] 
+    },
+    { 
+      title: "Claims & Care", lane: "COMM", stage: "S6", type: "commercial",
+      desc: "Disputes, Compensation",
+      ids: ["P2R_03", "P2R_05", "L2C_08"] 
     }
-    (node.children || []).forEach(walk);
-  }
+  ];
 
-  async function load(){
-    try{
-      const res = await fetch("data.json", {cache:"no-store"});
-      if(!res.ok) throw new Error("Cannot load data.json");
+  // 3. RENDER ENGINE
+  const grid = document.getElementById('grid');
+  let FULL_DATA = new Map(); // Store full JSON data for Modal lookups
+
+  async function init() {
+    // A. Render Grid Skeleton
+    renderSkeleton();
+
+    // B. Fetch Data & Hydrate
+    try {
+      const res = await fetch("data.json");
       const root = await res.json();
-      (root.children || []).forEach(walk);
-
-      $("stats").textContent = `${ALL.length} processes loaded`;
-      renderSwimlanes();
-      bindSearch();
-
-      // pick a sensible default
-      selectNode(INDEX.has("L2C_02") ? "L2C_02" : (ALL[0]?.id || ""));
-    }catch(e){
-      $("stats").textContent = "data.json not loaded";
-      $("results").innerHTML = `<div class="hint"><b>Missing data.json</b><br/>Place <span class="mono">customer_journey_swimlanes.html</span> in the same folder as <span class="mono">data.json</span>.</div>`;
-      console.error(e);
+      indexData(root);
+      renderBlocks();
+    } catch (e) {
+      console.error("Data load failed", e);
+      // Fallback: Render blocks anyway (they will just lack deep chevron data)
+      renderBlocks(); 
     }
   }
 
-  // ------------------------------------------------------------
-  // HORIZONTAL CUSTOMER JOURNEY PHASES (you can tweak this later)
-  // Each column is a "customer step" and each lane shows mapped processes.
-  // ------------------------------------------------------------
-  const Phases = [
-    {
-      id:"PH_01", title:"Decide & Onboard",
-      customer:["Choose service / create account"],
-      commercial:["L2C_01","L2C_02","L2C_03","L2C_04"],
-      ops:[],
-      finance:[],
-      p2r:[],
-      enablers:["S2E","GRC","EA_PM","DA","ITF"]
-    },
-    {
-      id:"PH_02", title:"Create Shipment",
-      customer:["Book shipment / create label"],
-      commercial:["L2C_05"],
-      ops:["O2D_01"],
-      finance:[],
-      p2r:[],
-      enablers:["DA","ITF","D2O"]
-    },
-    {
-      id:"PH_03", title:"Pickup",
-      customer:["Handover parcel"],
-      commercial:[],
-      ops:["O2D_02"],
-      finance:[],
-      p2r:[],
-      enablers:["D2O","ITF"]
-    },
-    {
-      id:"PH_04", title:"Network Processing",
-      customer:["In transit (network)"],
-      commercial:[],
-      ops:["O2D_03","O2D_04","O2D_05","O2D_06","O2D_07","O2D_08","O2D_09"],
-      finance:[],
-      p2r:[],
-      enablers:["D2O","DA","ITF","S2P","H2R"]
-    },
-    {
-      id:"PH_05", title:"Delivery & POD",
-      customer:["Receive / pickup OOH"],
-      commercial:[],
-      ops:["O2D_10"],
-      finance:[],
-      p2r:[],
-      enablers:["D2O","DA","ITF"]
-    },
-    {
-      id:"PH_06", title:"Track & Proactive Comms",
-      customer:["Track shipment / notifications"],
-      commercial:["L2C_08"],
-      ops:["O2D_10","O2D_11"],
-      finance:[],
-      p2r:["P2R_01","P2R_02"],
-      enablers:["DA","ITF"]
-    },
-    {
-      id:"PH_07", title:"Invoice & Pay",
-      customer:["Invoice received / payment"],
-      commercial:["L2C_06","L2C_07"],
-      ops:[],
-      finance:["R2R_01","R2R_02","R2R_03"],
-      p2r:[],
-      enablers:["DA","ITF","GRC"]
-    },
-    {
-      id:"PH_08", title:"Ticket Resolution",
-      customer:["Open ticket / case updates"],
-      commercial:["L2C_08"],
-      ops:["O2D_11"],
-      finance:[],
-      p2r:["P2R_03","P2R_04"],
-      enablers:["DA","ITF","EA_PM"]
-    },
-    {
-      id:"PH_09", title:"Credit Back / Compensation",
-      customer:["Refund / compensation outcome"],
-      commercial:["L2C_08"],
-      ops:["O2D_11","O2D_12"],
-      finance:["R2R_04","R2R_06","R2R_07"],
-      p2r:["P2R_05","P2R_06","P2R_07"],
-      enablers:["GRC","DA","ITF"]
-    },
-    {
-      id:"PH_10", title:"Close & Learn",
-      customer:["Case closed / feedback"],
-      commercial:["L2C_08"],
-      ops:["O2D_12"],
-      finance:["R2R_05","R2R_07"],
-      p2r:["P2R_08"],
-      enablers:["EA_PM","DA","TRF","I2P"]
-    }
-  ];
-
-  const Lanes = [
-    {key:"customer", name:"Customer", desc:"Customer decisions, actions, touchpoints", type:"text", tag:""},
-    {key:"commercial", name:"Commercial (L2C)", desc:"Lead → Quote → Contract → Order promise", type:"proc", tag:"yellow"},
-    {key:"ops", name:"Operations (O2D)", desc:"Pickup → hubs/gateways → delivery/POD", type:"proc", tag:"red"},
-    {key:"finance", name:"Finance (Billing/AR + R2R)", desc:"Invoice → cash → accounting/reporting", type:"proc", tag:""},
-    {key:"p2r", name:"Service Recovery (P2R)", desc:"Only when issues/claims arise", type:"proc", tag:"gray"},
-    {key:"enablers", name:"Enablers", desc:"D2O / DA / ITF / S2P / H2R / TRF / I2P", type:"proc", tag:""}
-  ];
-
-  function nodeCardForProcess(id, laneKey, tagCls){
-    const node = INDEX.get(id);
-    if(!node){
-      // show placeholder if the id isn't present in JSON (still useful for narrative completeness)
-      const div = document.createElement("div");
-      div.className = `step lane-${laneKey}`;
-      div.dataset.id = id;
-      div.innerHTML = `
-        <div class="k"><span class="mono">${esc(id)}</span><span class="tag ${tagCls||""}">Not in JSON</span></div>
-        <div class="n">${esc(id)}</div>
-        <div class="d">This process id is referenced in the journey view but not found in data.json.</div>`;
-      div.addEventListener("click", ()=>setSelected(id));
-      div.addEventListener("mouseenter", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
-      div.addEventListener("mousemove", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
-      div.addEventListener("mouseleave", ()=>{ if(!PINNED_ID) hideTooltip(); });
-      return div;
-    }
-
-    const div = document.createElement("div");
-    div.className = `step lane-${laneKey}`;
-    div.dataset.id = id;
-
-    const nameShort = (node.name || "").replace(/^([A-Z0-9_]+:\s*)/,"").trim();
-    const owner = (node.owner || "").trim();
-
-    div.innerHTML = `
-      <div class="k">
-        <span class="mono">${esc(id)}</span>
-        <span class="tag ${tagCls||""}">${esc(owner ? owner : "Owner TBD")}</span>
-      </div>
-      <div class="n">${esc(nameShort || node.name || id)}</div>
-      <div class="d">${esc((node.description || "").slice(0,95))}${(node.description||"").length>95 ? "…" : ""}</div>
-    `;
-    div.addEventListener("click", ()=>setSelected(id));
-    div.addEventListener("mouseenter", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
-    div.addEventListener("mousemove", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForNode(id), ev.clientX, ev.clientY); });
-    div.addEventListener("mouseleave", ()=>{ if(!PINNED_ID) hideTooltip(); });
-    return div;
+  function indexData(node) {
+    if(node.id) FULL_DATA.set(node.id, node);
+    if(node.children) node.children.forEach(indexData);
   }
 
-  function textCard(text){
-    const div = document.createElement("div");
-    div.className = "step lane-customer";
-    div.innerHTML = `
-      <div class="k"><span class="mono">Customer step</span><span class="tag gray">Touchpoint</span></div>
-      <div class="n">${esc(text)}</div>
-      <div class="d">Customer-visible action in the journey.</div>
-    `;
-    div.addEventListener("click", ()=>setSelected("Customer"));
-    div.addEventListener("mouseenter", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForCustomer(text), ev.clientX, ev.clientY); });
-    div.addEventListener("mousemove", (ev)=>{ if(!PINNED_ID) showTooltip(tooltipHTMLForCustomer(text), ev.clientX, ev.clientY); });
-    div.addEventListener("mouseleave", ()=>{ if(!PINNED_ID) hideTooltip(); });
-    return div;
-  }
+  function renderSkeleton() {
+    // Corner
+    const corner = document.createElement("div");
+    corner.className = "corner-plate";
+    corner.textContent = "PROCESS AREA";
+    grid.appendChild(corner);
 
-  function renderSwimlanes(){
-    const cols = Phases.length;
-    const grid = $("grid");
-    grid.style.setProperty("--cols", cols);
-    grid.innerHTML = "";
-
-    // Header row (sticky lane label column + phase titles across)
-    // We'll implement the header as a "lane label" cell + phase cells
-    // using the same grid by inserting first a header lane label and then header cells.
-    // (We simulate header by reusing laneLabel styling with different content.)
-    const headerLabel = document.createElement("div");
-    headerLabel.className = "laneLabel";
-    headerLabel.style.height = "74px";
-    headerLabel.style.width = "240px";
-    headerLabel.innerHTML = `<b>Journey Phases</b><span>Left → Right</span>`;
-    headerLabel.style.borderBottom = "1px solid var(--line)";
-    grid.appendChild(headerLabel);
-
-    for(const ph of Phases){
+    // Headers
+    STAGES.forEach(s => {
       const h = document.createElement("div");
-      h.className = "cell";
-      h.style.height = "74px";
-      h.style.alignItems = "flex-start";
-      h.style.background = "linear-gradient(180deg,#fff,#fbfbfd)";
-      h.innerHTML = `
-        <div style="width:100%">
-          <div class="k"><span class="mono">${esc(ph.id)}</span><span class="tag yellow">${esc(ph.title)}</span></div>
-          <div class="d" style="margin-top:6px">Customer storyline step</div>
-        </div>`;
+      h.className = "stage-head";
+      h.innerHTML = `<span class="stage-num">${s.id}</span><span class="stage-name">${s.name}</span>`;
       grid.appendChild(h);
-    }
+    });
 
-    // Lane rows
-    for(const lane of Lanes){
+    // Swimlanes
+    LANES.forEach(l => {
+      // Label
       const lab = document.createElement("div");
-      lab.className = "laneLabel";
-      lab.dataset.lane = lane.key;
-      lab.innerHTML = `<b>${esc(lane.name)}</b><span>${esc(lane.desc)}</span>`;
+      lab.className = `lane-label ${l.class}`;
+      lab.innerHTML = `<strong>${l.name}</strong><span>${l.desc}</span>`;
       grid.appendChild(lab);
 
-      for(let i=0;i<Phases.length;i++){
-        const ph = Phases[i];
+      // Cells
+      STAGES.forEach(s => {
         const cell = document.createElement("div");
-        cell.className = "cell" + (i===Phases.length-1 ? " end" : "");
-        cell.dataset.lane = lane.key;
-
-        const items = ph[lane.key] || [];
-
-        // If multiple items, show first as card and a small "stack" via multiple cards (vertical inside cell).
-        const stack = document.createElement("div");
-        stack.style.width = "100%";
-        stack.style.display = "flex";
-        stack.style.flexDirection = "column";
-        stack.style.gap = "8px";
-
-        if(lane.type === "text"){
-          if(items.length){
-            stack.appendChild(textCard(items[0]));
-          }else{
-            stack.innerHTML = `<div style="font-size:12px;color:var(--muted)">—</div>`;
-          }
-        }else{
-          if(items.length){
-            const max = 2; // keep cell tidy; can be increased
-            for(const id of items.slice(0,max)){
-              const tagCls =
-                lane.tag === "red" ? "red" :
-                lane.tag === "yellow" ? "yellow" :
-                (lane.tag === "gray" ? "gray" : "");
-            stack.appendChild(nodeCardForProcess(id, lane.key, tagCls));
-            }
-            if(items.length > max){
-              const more = document.createElement("div");
-              more.style.fontSize = "11px";
-              more.style.color = "var(--muted)";
-              more.textContent = `+${items.length-max} more… (use search to jump)`;
-              stack.appendChild(more);
-            }
-          }else{
-            stack.innerHTML = `<div style="font-size:12px;color:var(--muted)">—</div>`;
-          }
-        }
-
-        cell.appendChild(stack);
+        cell.className = "cell";
+        cell.dataset.lane = l.id;
+        cell.dataset.stage = s.id;
+        cell.id = `cell_${l.id}_${s.id}`;
         grid.appendChild(cell);
-      }
-    }
-  }
-
-  function setSelected(id){
-    PINNED_ID = id;
-    document.querySelectorAll(".step").forEach(el=>{
-      el.classList.toggle("is-selected", el.dataset.id === id);
-    });
-    hideTooltip();
-  }
-
-  function tooltipHTMLForNode(id){
-    const node = INDEX.get(id);
-    if(!node){
-      return `
-        <div class="t-id">${esc(id)}</div>
-        <div class="t-name">${esc(id)}</div>
-        <div class="t-owner">Owner: —</div>
-        <div class="t-row"><span class="t-lbl">Description:</span> Referenced in journey but not found in data.json.</div>
-      `;
-    }
-    const owner = textOrDash(node.owner);
-    const desc = textOrDash(node.description);
-    const trig = textOrDash(node.trigger);
-    const outc = textOrDash(node.outcome);
-    const notes = textOrDash(node.notes);
-    return `
-      <div class="t-id">${esc(node.id)}</div>
-      <div class="t-name">${esc(node.name || node.id)}</div>
-      <div class="t-owner">Owner: ${esc(owner)}</div>
-      <div class="t-row"><span class="t-lbl">Description:</span> ${esc(desc)}</div>
-      <div class="t-row"><span class="t-lbl">Trigger:</span> ${esc(trig)}</div>
-      <div class="t-row"><span class="t-lbl">Outcome:</span> ${esc(outc)}</div>
-      <div class="t-row"><span class="t-lbl">Notes:</span> ${esc(notes)}</div>
-    `;
-  }
-
-  function tooltipHTMLForCustomer(text){
-    return `
-      <div class="t-id">Customer step</div>
-      <div class="t-name">${esc(text)}</div>
-      <div class="t-owner">Owner: Customer</div>
-      <div class="t-row"><span class="t-lbl">Description:</span> Customer-visible action / touchpoint in the journey.</div>
-      <div class="t-row"><span class="t-lbl">Trigger:</span> Phase progression</div>
-      <div class="t-row"><span class="t-lbl">Outcome:</span> Next journey step</div>
-    `;
-  }
-
-  function showTooltip(html, x, y){
-    const t = tooltip();
-    if(!t) return;
-    t.innerHTML = html;
-    t.style.display = "block";
-
-    const pad = 14;
-    const offsetX = 14;
-    const offsetY = 14;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    // Set initial position
-    t.style.left = (x + offsetX) + "px";
-    t.style.top = (y + offsetY) + "px";
-
-    // Clamp to viewport after render
-    const rect = t.getBoundingClientRect();
-    let left = x + offsetX;
-    let top = y + offsetY;
-    if(left + rect.width + pad > vw) left = vw - rect.width - pad;
-    if(top + rect.height + pad > vh) top = vh - rect.height - pad;
-    if(left < pad) left = pad;
-    if(top < pad) top = pad;
-
-    t.style.left = left + "px";
-    t.style.top = top + "px";
-  }
-
-  function hideTooltip(){
-    const t = tooltip();
-    if(!t) return;
-    t.style.display = "none";
-  }
-
-  // search across all nodes
-  function searchableText(n){
-    return [
-      n.id, n.name, n.description, n.owner, n.trigger, n.outcome, n.notes, n.category
-    ].filter(Boolean).join(" ").toLowerCase();
-  }
-
-  function bindSearch(){
-    const input = $("q");
-    const results = $("results");
-
-    const cache = new Map();
-    ALL.forEach(n=>cache.set(n.id, searchableText(n)));
-
-    function run(){
-      const q = input.value.trim().toLowerCase();
-      results.innerHTML = "";
-      if(!q){
-        $("resCount").textContent = "0";
-        return;
-      }
-      const hits = [];
-      for(const n of ALL){
-        const t = cache.get(n.id) || "";
-        if(t.includes(q)) hits.push(n);
-        if(hits.length >= 80) break;
-      }
-      $("resCount").textContent = String(hits.length);
-
-      hits.forEach(n=>{
-        const div = document.createElement("div");
-        div.className = "result";
-        div.innerHTML = `<b class="mono">${esc(n.id)}</b> — ${esc((n.name||"").replace(/^([A-Z0-9_]+:\s*)/,""))}
-          <div>${esc((n.owner||"").trim() ? ("Owner: "+n.owner+" · ") : "")}${esc((n.description||"").slice(0,120))}${(n.description||"").length>120?"…":""}</div>`;
-        div.addEventListener("click", ()=>{
-          setSelected(n.id);
-          const target = document.querySelector(`.step[data-id="${CSS.escape(n.id)}"]`);
-          if(target) target.scrollIntoView({behavior:"smooth", block:"center", inline:"center"});
-        });
-        results.appendChild(div);
       });
-    }
-
-    input.addEventListener("input", run);
+    });
   }
 
-  load();
+  function renderBlocks() {
+    BLOCKS.forEach(b => {
+      const cell = document.getElementById(`cell_${b.lane}_${b.stage}`);
+      if(!cell) return;
+
+      const div = document.createElement("div");
+      div.className = `block type-${b.type} ${b.strategic ? 'strategic' : ''}`;
+      
+      let badgeHtml = b.strategic ? `<span class="badge">STRATEGIC</span>` : '';
+      
+      div.innerHTML = `
+        <div class="block-title">
+          ${b.title} ${badgeHtml}
+        </div>
+        <div class="block-sub">${b.desc}</div>
+      `;
+      
+      div.onclick = () => openModal(b);
+      cell.appendChild(div);
+    });
+  }
+
+  // 4. INTERACTION: The Chevron Modal
+  function openModal(block) {
+    document.getElementById('m_title').textContent = block.title;
+    const container = document.getElementById('m_flow');
+    container.innerHTML = "";
+
+    // Iterate over mapped IDs for this block
+    block.ids.forEach(procId => {
+      const node = FULL_DATA.get(procId);
+      if(!node) return;
+
+      const row = document.createElement("div");
+      row.className = "process-row";
+      
+      // L1 Title
+      const cleanName = node.name.includes(':') ? node.name.split(':')[1].trim() : node.name;
+      row.innerHTML = `
+        <div class="process-title">
+          <span style="color:var(--dhl-red)">➤</span> ${cleanName} <span style="font-size:10px;color:#999;font-weight:400">(${node.id})</span>
+        </div>
+      `;
+
+      // Chevron Track (L2/L3 Children)
+      const track = document.createElement("div");
+      track.className = "chevron-track";
+
+      if(node.children && node.children.length > 0) {
+        node.children.forEach(child => {
+           const chev = document.createElement("div");
+           chev.className = "chevron";
+           const childName = child.name.includes(':') ? child.name.split(':')[1].trim() : child.name;
+           chev.textContent = childName;
+           chev.title = child.description || "";
+           track.appendChild(chev);
+        });
+      } else {
+        track.innerHTML = `<div style="font-size:11px; color:#999; padding:10px; font-style:italic">No sub-processes defined in data model.</div>`;
+      }
+
+      row.appendChild(track);
+      container.appendChild(row);
+    });
+
+    document.getElementById('modal').style.display = "flex";
+  }
+
+  function closeModal() {
+    document.getElementById('modal').style.display = "none";
+  }
+
+  init();
 </script>
-</script>
-<div id="tooltip" class="tooltip" aria-hidden="true"></div>
 </body>
 </html>
