@@ -3,353 +3,415 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>DHL eCommerce · Enhanced Customer Journey</title>
+  <title>DHL eCommerce · Service Blueprint Journey</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --dhl-red:#D40511;
-      --dhl-yellow:#FFCC00;
-      --bg:#f6f6f7;
-      --card:#ffffff;
-      --ink:#101828;
-      --muted:#667085;
-      --line:#e6e8ee;
-      --radius:16px;
-      --shadow: 0 10px 26px rgba(0,0,0,.08);
-      --laneH: 140px;
-      --stepW: 340px;
-      --gap: 14px;
+    /* =========================
+       DHL BRAND & THEME
+       ========================= */
+    :root {
+      --dhl-red: #D40511;
+      --dhl-yellow: #FFCC00;
+      --dhl-black: #101828;
+      --bg: #F4F5F7;
+      --card-bg: #FFFFFF;
+      --border: #E5E7EB;
+      
+      --col-w: 240px; 
+      --lane-head-w: 220px;
     }
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      color:var(--ink);
-      background:var(--bg);
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--dhl-black);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    header{
-      position:sticky;
-      top:0;
-      z-index:100;
-      background:rgba(255,255,255,.95);
-      backdrop-filter:blur(8px);
-      border-bottom:1px solid var(--line);
+    /* =========================
+       HEADER
+       ========================= */
+    header {
+      height: 64px;
+      background: var(--dhl-red);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
     }
-
-    .topbar{
-      padding:14px 20px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:20px;
-    }
-
-    .brand{ display:flex; gap:12px; align-items:center; }
-    .logo{ width:32px; height:32px; background:var(--dhl-red); border-radius:8px; box-shadow:0 4px 10px rgba(212,5,17,0.3); }
+    .brand { font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 12px; }
+    .brand span { background: white; color: var(--dhl-red); padding: 2px 8px; border-radius: 4px; }
     
-    .search-box{
-      flex:1;
-      max-width:600px;
-      position:relative;
-    }
-    .search-box input{
-      width:100%;
-      padding:10px 16px;
-      border-radius:12px;
-      border:1px solid var(--line);
-      outline:none;
+    .controls { display: flex; gap: 12px; }
+    .toggle-btn {
+      background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+      color: white; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+      font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px;
       transition: all 0.2s;
     }
-    .search-box input:focus{ border-color:var(--dhl-red); box-shadow:0 0 0 4px rgba(212,5,17,0.1); }
+    .toggle-btn:hover { background: rgba(255,255,255,0.3); }
+    .toggle-btn.active { background: var(--dhl-yellow); color: var(--dhl-black); border-color: var(--dhl-yellow); }
 
-    /* Navigation Mini-Map */
-    .mini-map {
-      display: flex;
-      background: #fff;
-      padding: 10px 20px;
-      border-bottom: 1px solid var(--line);
-      gap: 8px;
-      overflow-x: auto;
-    }
-    .mini-map-btn {
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 600;
-      border-radius: 20px;
-      background: var(--bg);
-      border: 1px solid var(--line);
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .mini-map-btn:hover { background: var(--dhl-yellow); }
-
-    main{
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 20px;
-      padding: 20px;
-    }
-
-    .hscroll {
-      background: white;
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
+    /* =========================
+       JOURNEY GRID
+       ========================= */
+    .blueprint-container {
+      flex: 1;
       overflow: auto;
-      box-shadow: var(--shadow);
-    }
-
-    .grid {
       display: grid;
-      grid-template-columns: 200px repeat(var(--cols), var(--stepW));
-      width: max-content;
-    }
-
-    .lane-label {
-      position: sticky;
-      left: 0;
-      z-index: 10;
-      background: #fdfdfd;
-      padding: 20px;
-      border-right: 2px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    .cell {
-      padding: 15px;
-      border-right: 1px solid var(--line);
-      border-bottom: 1px solid var(--line);
-      min-height: var(--laneH);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .step-card {
-      background: white;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px;
-      cursor: pointer;
-      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Lane Header + 6 Journey Steps */
+      grid-template-columns: var(--lane-head-w) repeat(6, var(--col-w)); 
       position: relative;
     }
-    .step-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      border-color: var(--dhl-red);
-    }
-    .step-card.active { border: 2px solid var(--dhl-red); background: #fffdf5; }
 
-    .step-id { font-size: 10px; font-family: monospace; color: var(--muted); }
-    .step-name { font-weight: 700; font-size: 13px; margin: 4px 0; }
+    /* --- TOP STAGES (Sticky) --- */
+    .corner-plate {
+      position: sticky; top: 0; left: 0; z-index: 50;
+      background: #fff; border-bottom: 4px solid var(--dhl-red);
+      border-right: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 14px; color: var(--dhl-red);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .stage-head {
+      position: sticky; top: 0; z-index: 40;
+      background: #fff; border-bottom: 4px solid var(--dhl-red);
+      border-right: 1px solid var(--border);
+      padding: 16px;
+    }
+    .stage-step { font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; margin-bottom: 4px; }
+    .stage-name { font-size: 16px; font-weight: 800; color: var(--dhl-black); }
+    .stage-icon { font-size: 20px; margin-bottom: 4px; display: block; }
+
+    /* --- SWIMLANES --- */
+    .lane-head {
+      position: sticky; left: 0; z-index: 30;
+      background: #fff; border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 20px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .lane-title { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+    .lane-desc { font-size: 11px; color: #6B7280; line-height: 1.4; }
+
+    .cell {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 12px; display: flex; flex-direction: column; gap: 8px;
+      transition: background 0.2s;
+    }
+    .cell:hover { background: #F9FAFB; }
+
+    /* --- VISUAL HIERARCHY --- */
+    /* Frontstage (Hero) */
+    .frontstage .lane-head { border-left: 5px solid var(--dhl-red); background: #FFF; }
+    .frontstage .cell { background: #FFF; min-height: 160px; }
+    .frontstage .lane-title { color: var(--dhl-red); font-size: 16px; }
+
+    /* Backstage (Foundation) */
+    .backstage { display: contents; } /* Allows children to sit in grid */
+    .backstage.hidden .lane-head, .backstage.hidden .cell { display: none; }
     
-    .meta-badges { display: flex; gap: 4px; margin-top: 8px; }
-    .badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: var(--bg); text-transform: uppercase; }
-
-    .flash { animation: flash-highlight 1.5s ease-out; }
-    @keyframes flash-highlight {
-      0% { background-color: var(--dhl-yellow); }
-      100% { background-color: transparent; }
+    .backstage .lane-head { border-left: 5px solid #9CA3AF; background: #F3F4F6; }
+    .backstage .cell { background: #F3F4F6; min-height: 120px; }
+    .backstage .lane-title { color: #4B5563; }
+    
+    /* The Stack Container */
+    .stack-group {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .stack-label {
+      font-size: 10px; font-weight: 700; color: #6B7280; text-transform: uppercase;
+      margin-top: 4px; margin-bottom: 2px;
     }
 
-    aside .card {
-      position: sticky;
-      top: 140px;
+    /* --- CARDS --- */
+    .card {
       background: white;
-      border-radius: var(--radius);
-      border: 1px solid var(--line);
-      padding: 20px;
-      box-shadow: var(--shadow);
+      border: 1px solid #E5E7EB;
+      border-left: 4px solid #ccc;
+      border-radius: 8px;
+      padding: 10px 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.1); border-color: var(--dhl-red); }
 
-    .detail-row { margin-bottom: 15px; }
-    .detail-label { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
-    .detail-value { font-size: 14px; line-height: 1.5; }
+    .card-id { font-size: 9px; font-weight: 700; color: #9CA3AF; margin-bottom: 4px; }
+    .card-name { font-size: 12px; font-weight: 700; line-height: 1.3; color: #111827; }
+
+    /* Card Colors */
+    .l0-L2C { border-left-color: var(--dhl-yellow); }
+    .l0-O2D { border-left-color: var(--dhl-red); }
+    .l0-P2R { border-left-color: #F97316; }
+    .l0-D2O, .l0-S2E { border-left-color: #4B5563; } /* Grey for Strategy */
+    .l0-ITF, .l0-DA { border-left-color: #8B5CF6; }   /* Purple for Tech */
+    
+    /* --- POPUP --- */
+    .modal-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
+      z-index: 200; display: none; align-items: center; justify-content: center;
+    }
+    .modal {
+      background: white; width: 440px; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2); animation: pop 0.2s ease-out;
+    }
+    @keyframes pop { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
+    
+    .modal-head { background: var(--dhl-red); padding: 20px; color: white; }
+    .modal-body { padding: 24px; }
 
   </style>
 </head>
 <body>
 
 <header>
-  <div class="topbar">
-    <div class="brand">
-      <div class="logo"></div>
-      <div>
-        <div style="font-weight: 800; font-size: 16px;">DHL eCommerce</div>
-        <div style="font-size: 12px; color: var(--muted);">Customer Journey Ecosystem</div>
-      </div>
-    </div>
-    <div class="search-box">
-      <input type="text" id="searchInput" placeholder="Search processes, triggers, or owners...">
-    </div>
-    <div id="data-status" class="badge">Connecting...</div>
+  <div class="brand"><span>DHL</span> Customer Journey</div>
+  <div class="controls">
+    <button class="toggle-btn active" id="btnFound" onclick="toggleFoundation()">
+      Foundation Layer: <span id="foundState">ON</span>
+    </button>
   </div>
-  <div class="mini-map" id="miniMap"></div>
 </header>
 
-<main>
-  <section class="hscroll">
-    <div class="grid" id="journeyGrid"></div>
-  </section>
+<div class="blueprint-container" id="grid">
+  </div>
 
-  <aside>
-    <div class="card">
-      <div id="detailView">
-        <h2 id="selName" style="margin-top:0">Select a Step</h2>
-        <div class="detail-row">
-          <div class="detail-label">Process ID</div>
-          <div class="detail-value" id="selId">—</div>
-        </div>
-        <div class="detail-row">
-          <div class="detail-label">Owner</div>
-          <div class="detail-value" id="selOwner">—</div>
-        </div>
-        <div class="detail-row">
-          <div class="detail-label">Description</div>
-          <div class="detail-value" id="selDesc">Click any process card in the journey to see details.</div>
-        </div>
-        <div class="detail-row">
-          <div class="detail-label">Trigger → Outcome</div>
-          <div class="detail-value"><i id="selTrigger">—</i> <br> ➔ <b id="selOutcome">—</b></div>
-        </div>
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div style="font-size:11px; opacity:0.8; font-weight:700" id="m_id">ID</div>
+      <div style="font-size:18px; font-weight:800; margin-top:4px" id="m_name">Title</div>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:16px">
+        <div style="font-size:10px; font-weight:700; color:#888; text-transform:uppercase">Owner</div>
+        <div style="font-size:14px" id="m_owner">-</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-size:10px; font-weight:700; color:#888; text-transform:uppercase">Description</div>
+        <div style="font-size:14px; line-height:1.5" id="m_desc">-</div>
+      </div>
+      <div style="background:#F9FAFB; padding:12px; border-radius:8px; border:1px solid #E5E7EB">
+        <div style="font-size:10px; font-weight:700; color:#888; text-transform:uppercase">Outcome</div>
+        <div style="font-size:13px; font-weight:700; color:var(--dhl-red)" id="m_out">-</div>
       </div>
     </div>
-  </aside>
-</main>
+  </div>
+</div>
 
 <script>
-  let rawData = null;
-  const index = new Map();
-
-  const PHASES = [
-    { id: "P1", name: "Decide & Onboard", ids: ["L2C_01", "L2C_02"] },
-    { id: "P2", name: "Shipment Prep", ids: ["L2C_05", "O2D_01"] },
-    { id: "P3", name: "In Transit", ids: ["O2D_03", "O2D_04", "O2D_07"] },
-    { id: "P4", name: "Delivery", ids: ["O2D_10"] },
-    { id: "P5", name: "Billing", ids: ["L2C_06", "R2R_01"] },
-    { id: "P6", name: "Support", ids: ["P2R_01", "P2R_03"] }
+  // 1. CONFIGURATION: Journey Steps (The "Picture")
+  const STAGES = [
+    { id: "S1", name: "Discover", icon: "🔍", desc: "Strategy & Plan" },
+    { id: "S2", name: "Join",     icon: "📝", desc: "Contract & Onboard" },
+    { id: "S3", name: "Ship",     icon: "📦", desc: "Booking & Induction" },
+    { id: "S4", name: "Track",    icon: "🌐", desc: "Network & Transit" },
+    { id: "S5", name: "Receive",  icon: "🏡", desc: "Last Mile & POD" },
+    { id: "S6", name: "Support",  icon: "💬", desc: "Claims & Loyalty" }
   ];
 
+  // 2. CONFIGURATION: Swimlanes
   const LANES = [
-    { key: "commercial", label: "Commercial", color: "#FFF4CC" },
-    { key: "ops", label: "Operations", color: "#FFE5E5" },
-    { key: "finance", label: "Finance", color: "#E5F0FF" }
+    // FRONTSTAGE (Hero)
+    { id: "L2C", name: "Commercial", desc: "Sales, Pricing, & Care", type: "front" },
+    { id: "O2D", name: "Operations", desc: "Physical Logistics", type: "front" },
+    // BACKSTAGE (Enablers Stacked)
+    { id: "FOUNDATION", name: "Strategic Foundation", desc: "Strategy, Design, IT, GRC", type: "back" }
   ];
 
-  async function init() {
-    try {
-      // FIX: Changed from data_all.json to data.json
-      const response = await fetch('data.json');
-      rawData = await response.json();
-      buildIndex(rawData);
-      document.getElementById('data-status').textContent = "Connected";
-      renderJourney();
-      renderMiniMap();
-    } catch (e) {
-      document.getElementById('data-status').textContent = "Connection Error";
-      console.error(e);
+  let ALL_L1 = [];
+
+  // 3. MAPPING LOGIC
+  function getStage(p) {
+    const id = p.id;
+    const n = (p.name||"").toLowerCase();
+
+    // D2O/Strategy -> Discover (S1)
+    if(id.startsWith("D2O") || id.startsWith("S2E") || id.startsWith("I2P")) return "S1";
+    
+    // Commercial (L2C)
+    if(id.startsWith("L2C")) {
+      if(id.includes("01") || id.includes("02")) return "S1"; // Discover
+      if(id.includes("03") || id.includes("04")) return "S2"; // Join
+      if(id.includes("05")) return "S3"; // Ship
+      if(id.includes("Billing") || id.includes("06")) return "S6"; // Support
+      return "S1";
     }
+
+    // Operations (O2D)
+    if(id.startsWith("O2D")) {
+      if(id.includes("01")) return "S3"; // Ship (Data Entry)
+      if(id.includes("02") || id.includes("03")) return "S3"; // Processing
+      if(id.includes("10") || id.includes("11")) return "S5"; // Receive
+      if(id.includes("04") || id.includes("07")) return "S4"; // Track/Transit
+      return "S4";
+    }
+
+    // P2R (Issues)
+    if(id.startsWith("P2R")) {
+      if(n.includes("claim") || n.includes("comp")) return "S6";
+      return "S4"; // In-transit issue
+    }
+
+    // Enablers
+    if(id.startsWith("ITF") || id.startsWith("DA")) {
+        if(n.includes("driver")) return "S5"; // Driver App
+        if(n.includes("sort")) return "S3"; // Sort logic
+        return "S2"; // General Platform
+    }
+    
+    if(id.startsWith("GRC") || id.startsWith("R2R")) return "S6"; // Audit/Finance
+
+    return "S1";
   }
 
-  function buildIndex(node) {
-    if (node.id) index.set(node.id, node);
-    if (node.children) node.children.forEach(buildIndex);
+  // 4. RENDERING
+  const grid = document.getElementById('grid');
+
+  async function load(){
+    try {
+      const res = await fetch('data.json');
+      const root = await res.json();
+      extractL1(root);
+      render();
+    } catch(e) { console.error(e); }
   }
 
-  function renderMiniMap() {
-    const container = document.getElementById('miniMap');
-    PHASES.forEach(ph => {
-      const btn = document.createElement('button');
-      btn.className = 'mini-map-btn';
-      btn.textContent = ph.name;
-      btn.onclick = () => {
-        const target = document.getElementById(`phase-${ph.id}`);
-        target.scrollIntoView({ behavior: 'smooth', inline: 'start' });
-        target.classList.add('flash');
-        setTimeout(() => target.classList.remove('flash'), 1500);
-      };
-      container.appendChild(btn);
-    });
+  // Get only L1 (e.g. L2C_01)
+  function extractL1(node){
+    if(node.id && node.id.split('_').length === 2) ALL_L1.push(node);
+    if(node.children) node.children.forEach(extractL1);
   }
 
-  function renderJourney() {
-    const grid = document.getElementById('journeyGrid');
-    grid.style.setProperty('--cols', PHASES.length);
+  function render(){
+    grid.innerHTML = "";
 
-    // Render Headers
-    grid.innerHTML = '<div class="lane-label" style="height:60px"><b>Stream / Phase</b></div>';
-    PHASES.forEach(ph => {
-      const h = document.createElement('div');
-      h.className = 'cell';
-      h.id = `phase-${ph.id}`;
-      h.style.background = '#f8f9fa';
-      h.innerHTML = `<div style="font-weight:800; font-size:14px">${ph.name}</div>`;
+    // A. Corner
+    const corner = document.createElement("div");
+    corner.className = "corner-plate";
+    corner.textContent = "PROCESS AREA";
+    grid.appendChild(corner);
+
+    // B. Headers
+    STAGES.forEach(s => {
+      const h = document.createElement("div");
+      h.className = "stage-head";
+      h.innerHTML = `<div class="stage-step">Step ${s.id.replace('S','')}</div>
+                     <span class="stage-icon">${s.icon}</span>
+                     <div class="stage-name">${s.name}</div>`;
       grid.appendChild(h);
     });
 
-    // Render Lanes
+    // C. Swimlanes
     LANES.forEach(lane => {
-      const label = document.createElement('div');
-      label.className = 'lane-label';
-      label.innerHTML = `<b>${lane.label}</b>`;
-      grid.appendChild(label);
+      // Wrapper for Backstage toggling
+      const rowGroup = document.createElement("div");
+      rowGroup.className = lane.type === 'front' ? 'frontstage' : 'backstage';
+      rowGroup.id = `row-${lane.id}`;
+      
+      // Label
+      const label = document.createElement("div");
+      label.className = "lane-head";
+      label.innerHTML = `<div class="lane-title">${lane.name}</div>
+                         <div class="lane-desc">${lane.desc}</div>`;
+      rowGroup.appendChild(label);
+      grid.appendChild(label); // Append label directly to grid, but keep class ref
 
-      PHASES.forEach(ph => {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.style.backgroundColor = lane.color + '20'; // 20% opacity
+      // Cells
+      STAGES.forEach(st => {
+        const cell = document.createElement("div");
+        cell.className = "cell";
 
-        // Filter processes for this lane and phase (simplified logic)
-        const relevantIds = ph.ids.filter(id => {
-            if(lane.key === 'commercial') return id.startsWith('L2C');
-            if(lane.key === 'ops') return id.startsWith('O2D');
-            if(lane.key === 'finance') return id.startsWith('R2R');
+        // Filter processes for this Cell
+        let hits = [];
+        if(lane.id === "FOUNDATION") {
+          // Catch-all for Strategy, GRC, IT, D2O
+          hits = ALL_L1.filter(p => {
+             const pre = p.id.split('_')[0];
+             return ["S2E","D2O","GRC","ITF","DA","I2P","R2R","S2P","H2R"].includes(pre) && getStage(p) === st.id;
+          });
+        } else {
+          // Specific Frontstage lanes
+          hits = ALL_L1.filter(p => {
+            const pre = p.id.split('_')[0];
+            // Map L2C -> Commercial, O2D -> Ops.  P2R -> Ops? No, let's put P2R in Ops for simplicity or create P2R lane.
+            // For this design, let's put P2R in Operations for "Issue Mgmt".
+            if(lane.id === "O2D" && (pre === "O2D" || pre === "P2R")) return getStage(p) === st.id;
+            if(lane.id === "L2C" && pre === "L2C") return getStage(p) === st.id;
             return false;
-        });
+          });
+        }
 
-        relevantIds.forEach(id => {
-          const data = index.get(id);
-          if (data) cell.appendChild(createCard(data));
-        });
+        // Render Stacked
+        if(hits.length > 0){
+          hits.sort((a,b)=>a.id.localeCompare(b.id));
+          hits.forEach(p => {
+            const c = document.createElement("div");
+            c.className = `card l0-${p.id.split('_')[0]}`;
+            c.innerHTML = `<div class="card-id">${p.id}</div>
+                           <div class="card-name">${p.name.split(':').pop()}</div>`;
+            c.onclick = ()=>showModal(p);
+            cell.appendChild(c);
+          });
+        }
         
+        rowGroup.appendChild(cell);
         grid.appendChild(cell);
       });
+
+      // We don't append rowGroup to grid because Grid Layout needs direct children.
+      // We use the class on the children to manage visibility.
+      // Add class to the specific DOM elements we just added.
+      const children = Array.from(grid.children).slice(-7); // Last 7 (Label + 6 Cells)
+      children.forEach(el => el.classList.add(lane.type === 'front' ? 'frontstage' : 'backstage'));
     });
   }
 
-  function createCard(data) {
-    const card = document.createElement('div');
-    card.className = 'step-card';
-    card.innerHTML = `
-      <div class="step-id">${data.id}</div>
-      <div class="step-name">${data.name.split(':').pop()}</div>
-      <div class="meta-badges">
-        <span class="badge" title="Owner">${data.owner || 'TBD'}</span>
-        ${data.trigger ? '<span class="badge" style="background:#e8f5e9">Trigger</span>' : ''}
-      </div>
-    `;
-    card.onclick = () => showDetail(data, card);
-    return card;
-  }
-
-  function showDetail(data, el) {
-    document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
+  // 5. TOGGLE LOGIC
+  function toggleFoundation(){
+    const els = document.querySelectorAll('.backstage');
+    const btn = document.getElementById('btnFound');
+    const state = document.getElementById('foundState');
     
-    document.getElementById('selName').textContent = data.name.split(':').pop();
-    document.getElementById('selId').textContent = data.id;
-    document.getElementById('selOwner').textContent = data.owner || 'Not Assigned';
-    document.getElementById('selDesc').textContent = data.description || 'No description available.';
-    document.getElementById('selTrigger').textContent = data.trigger || 'Manual';
-    document.getElementById('selOutcome').textContent = data.outcome || 'Process Completion';
+    els.forEach(el => el.classList.toggle('hidden'));
+    
+    if(btn.classList.contains('active')){
+      btn.classList.remove('active');
+      state.textContent = "OFF";
+    } else {
+      btn.classList.add('active');
+      state.textContent = "ON";
+    }
   }
 
-  init();
+  function showModal(p){
+    document.getElementById('m_id').textContent = p.id;
+    document.getElementById('m_name').textContent = p.name.split(':').pop();
+    document.getElementById('m_owner').textContent = p.owner || "Unassigned";
+    document.getElementById('m_desc').textContent = p.description;
+    document.getElementById('m_out').textContent = p.outcome || "End";
+    document.getElementById('modal').style.display = "flex";
+  }
+
+  function closeModal(){
+    document.getElementById('modal').style.display = "none";
+  }
+
+  load();
 </script>
 </body>
 </html>
