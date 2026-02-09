@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>DHL eCommerce · Value Chain Matrix</title>
+
+  <style>
+    /* =========================
+       DHL BRAND & UI VARS
+       ========================= */
+    :root {
+      --dhl-red: #D40511;
+      --dhl-red-dark: #b0040e;
+      --dhl-yellow: #FFCC00;
+      --dhl-black: #101828;
+      
+      --bg-app: #f2f4f8;
+      --bg-panel: #ffffff;
+      --border: #e6e8ee;
+      
+      --col-w: 260px; 
+      --lane-label-w: 240px;
+      
+      /* Visual Hierarchy Heights */
+      --h-hero: 180px;   /* Dominant rows */
+      --h-norm: 130px;   /* Support rows */
+      --h-muted: 90px;   /* Background rows */
+    }
+
+    body {
+      margin: 0;
+      font-family: "Delivery", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background: var(--bg-app);
+      color: var(--dhl-black);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* =========================
+       HEADER
+       ========================= */
+    header {
+      height: 64px;
+      background: var(--dhl-red);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      justify-content: space-between;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 60;
+    }
+    .brand { font-weight: 900; font-size: 20px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 14px; }
+    .brand-logo { 
+      background: white; color: var(--dhl-red); 
+      height: 28px; padding: 0 10px; border-radius: 4px; 
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 900;
+    }
+    
+    .controls { display: flex; gap: 12px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; opacity: 0.9; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    /* =========================
+       MAIN MATRIX GRID
+       ========================= */
+    #matrix-container {
+      flex: 1;
+      overflow: auto;
+      display: grid;
+      grid-template-columns: var(--lane-label-w) repeat(6, var(--col-w)); 
+      background: var(--bg-app);
+      position: relative;
+    }
+
+    /* =========================
+       TIMELINE HEADERS (Sticky Top)
+       ========================= */
+    .corner-block {
+      position: sticky; top: 0; left: 0; z-index: 50;
+      background: var(--dhl-red);
+      border-right: 1px solid #b0040e;
+      border-bottom: 4px solid var(--dhl-yellow);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 12px; color: white;
+      text-transform: uppercase; letter-spacing: 1px;
+      text-align: center; line-height: 1.4;
+    }
+
+    .stage-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: #fff;
+      border-bottom: 4px solid var(--dhl-yellow);
+      border-right: 1px solid var(--border);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .stage-num { font-size: 10px; color: #999; font-weight: 700; text-transform: uppercase; }
+    .stage-title { font-weight: 800; font-size: 14px; color: var(--dhl-red); text-transform: uppercase; }
+    .stage-desc { font-weight: 400; font-size: 11px; color: #666; margin-top: 2px; }
+
+    /* =========================
+       SWIMLANES (ROWS)
+       ========================= */
+    
+    /* 1. Group Headers (Manage/Run/Change) */
+    .group-header {
+      grid-column: 1 / -1;
+      padding: 8px 20px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      cursor: pointer;
+      position: sticky; left: 0; z-index: 30;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+      transition: background 0.2s;
+    }
+    
+    /* Group Styling Contexts */
+    .gh-manage { background: #e0e0e0; color: #444; border-top: 1px solid #ccc; }
+    .gh-run { background: var(--dhl-black); color: var(--dhl-yellow); border-top: 4px solid var(--dhl-yellow); }
+    .gh-change { background: #e0e0e0; color: #444; border-top: 1px solid #ccc; }
+
+    /* 2. Lane Labels (Left Sticky) */
+    .l0-label {
+      position: sticky; left: 0; z-index: 20;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 16px; display: flex; flex-direction: column; justify-content: center;
+      transition: all 0.2s;
+    }
+    .l0-label b { font-size: 13px; margin-bottom: 4px; display: block; }
+    .l0-label span { font-size: 10px; line-height: 1.3; display: block; }
+
+    /* 3. The Cells */
+    .cell {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 10px;
+      display: flex; flex-direction: column; gap: 8px;
+      align-content: flex-start;
+      transition: background 0.2s;
+    }
+    .cell:hover { background: rgba(0,0,0,0.015); }
+
+    /* =========================
+       HIERARCHY STYLES (The "Spotlight")
+       ========================= */
+    
+    /* HERO LANES (L2C, O2D, P2R) */
+    .lane-hero .l0-label { background: #fff; border-right: 3px solid var(--dhl-red); }
+    .lane-hero .l0-label b { color: var(--dhl-red); font-size: 16px; }
+    .lane-hero .cell { background: #fff; min-height: var(--h-hero); }
+    .lane-hero .cell:hover { background: #fffdf5; }
+    
+    /* SUPPORT LANES (R2R, S2P, D2O) */
+    .lane-support .l0-label { background: #fdfdfd; border-right: 3px solid #ccc; }
+    .lane-support .l0-label b { color: #333; }
+    .lane-support .cell { background: #fdfdfd; min-height: var(--h-norm); }
+
+    /* BACKGROUND LANES (Manage, Change) */
+    .lane-muted .l0-label { background: #f4f4f4; border-right: 1px solid #ddd; }
+    .lane-muted .l0-label b { color: #666; font-size: 12px; }
+    .lane-muted .l0-label span { color: #999; }
+    .lane-muted .cell { background: #f4f4f4; min-height: var(--h-muted); }
+    .lane-muted .card { transform: scale(0.95); opacity: 0.9; }
+
+    /* =========================
+       CARDS
+       ========================= */
+    .card {
+      background: white;
+      border: 1px solid #dcdcdc;
+      border-left-width: 4px;
+      border-radius: 4px;
+      padding: 8px 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      cursor: pointer;
+      position: relative;
+      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    
+    /* Hero cards get a bit more pop */
+    .lane-hero .card { box-shadow: 0 3px 8px rgba(0,0,0,0.08); padding: 12px; }
+    .lane-hero .card-name { font-size: 12px; }
+    
+    /* Hover Effects */
+    .card:hover { 
+      transform: translateY(-3px) scale(1.02); 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
+      border-color: var(--dhl-red);
+      z-index: 5;
+    }
+
+    /* Card Text */
+    .card-id { font-size: 9px; font-weight: 700; color: #999; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .card-name { font-size: 11px; font-weight: 700; line-height: 1.35; color: var(--dhl-black); }
+    
+    /* Card Border Colors by L0 */
+    .card.l0-L2C { border-left-color: var(--dhl-yellow); }
+    .card.l0-O2D { border-left-color: var(--dhl-red); }
+    .card.l0-P2R { border-left-color: #d35400; } /* Burnt Orange */
+    .card.l0-R2R { border-left-color: #2980b9; } /* Blue */
+    .card.l0-S2E { border-left-color: #7f8c8d; } /* Gray */
+    .card.l0-ITF { border-left-color: #8e44ad; } /* Purple */
+
+    /* =========================
+       POPUP
+       ========================= */
+    .popup-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(16,24,40,0.4); z-index: 1000;
+      display: none; align-items: center; justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    .popup {
+      background: white; width: 480px; max-width: 90%;
+      border-radius: 12px; padding: 0;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.3);
+      animation: popIn 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+    @keyframes popIn { from {transform: scale(0.9); opacity:0} to {transform: scale(1); opacity:1} }
+    
+    .popup-header {
+      background: var(--dhl-red); color: white;
+      padding: 20px 24px; display: flex; justify-content: space-between; align-items: flex-start;
+      border-radius: 12px 12px 0 0;
+    }
+    .popup-body { padding: 24px; }
+    .pop-row { margin-bottom: 16px; }
+    .pop-lbl { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+    .pop-val { font-size: 14px; line-height: 1.5; color: #111; }
+
+    /* Collapsed Utility */
+    .collapsed { display: none !important; }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">DHL</div>
+    Value Chain Matrix
+  </div>
+  <div class="controls">
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Ops</div>
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Sales</div>
+    <div class="legend-item"><div class="dot" style="background:#999"></div> Enablers</div>
+  </div>
+</header>
+
+<div id="matrix-container">
+  </div>
+
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
+  <div class="popup" onclick="event.stopPropagation()">
+    <div class="popup-header">
+      <div>
+        <div style="font-size:11px; opacity:0.8; font-weight:700" id="d_id">ID</div>
+        <div style="font-size:18px; font-weight:800; margin-top:4px" id="d_name">Process Name</div>
+      </div>
+      <button style="background:none; border:none; color:white; font-size:24px; cursor:pointer;" onclick="closePopup()">&times;</button>
+    </div>
+    <div class="popup-body">
+      <div style="display:flex; gap:30px; margin-bottom:20px;">
+        <div><div class="pop-lbl">Owner</div><div class="pop-val" id="d_owner">—</div></div>
+        <div><div class="pop-lbl">Category</div><div class="pop-val" id="d_cat">—</div></div>
+      </div>
+      
+      <div class="pop-row">
+        <div class="pop-lbl">Description</div>
+        <div class="pop-val" id="d_desc">—</div>
+      </div>
+
+      <div style="background:#f9f9f9; border:1px solid #eee; padding:16px; border-radius:8px;">
+        <div style="margin-bottom:12px;">
+          <div class="pop-lbl">Trigger</div>
+          <div class="pop-val" id="d_trigger" style="font-style:italic">—</div>
+        </div>
+        <div>
+          <div class="pop-lbl">Outcome</div>
+          <div class="pop-val" id="d_outcome" style="font-weight:700; color:var(--dhl-red)">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // -----------------------------------------------------------
+  // 1. DATA CONFIGURATION
+  // -----------------------------------------------------------
+  
+  // The Columns (Customer Timeline)
+  const STAGES = [
+    { id: "S1", num: "01", title: "Decide & Shop", desc: "Strategy, Design, Browsing" },
+    { id: "S2", num: "02", title: "Book & Pay",    desc: "Order Entry, Risk, Contracts" },
+    { id: "S3", num: "03", title: "Processing",    desc: "Pickup, Sort, Customs" },
+    { id: "S4", num: "04", title: "Transit",       desc: "Linehaul, Network Flow" },
+    { id: "S5", num: "05", title: "Last Mile",     desc: "Final Delivery & Handover" },
+    { id: "S6", num: "06", title: "Support",       desc: "Claims, Returns, Audit" }
+  ];
+
+  // The Rows (L0 Process Areas) with Visual Hierarchy settings
+  const GROUPS = {
+    manage: {
+      id: "manage", label: "Manage the Business", styleClass: "gh-manage",
+      rows: [
+        { id: "S2E", name: "Strategy (S2E)", desc: "Strategy to Execute", type: "muted" },
+        { id: "GRC", name: "Governance (GRC)", desc: "Risk & Compliance", type: "muted" },
+        { id: "EA_PM", name: "Architecture (EA)", desc: "Ent. Arch & KPIs", type: "muted" }
+      ]
+    },
+    run: {
+      id: "run", label: "Run the Business (Core)", styleClass: "gh-run",
+      rows: [
+        { id: "D2O", name: "Design (D2O)", desc: "Network & Product", type: "support" },
+        { id: "L2C", name: "Commercial (L2C)", desc: "Lead to Cash", type: "hero" },
+        { id: "O2D", name: "Operations (O2D)", desc: "Order to Delivery", type: "hero" },
+        { id: "P2R", name: "Resolution (P2R)", desc: "Issue to Resolution", type: "hero" },
+        { id: "R2R", name: "Finance (R2R)", desc: "Record to Report", type: "support" },
+        { id: "S2P", name: "Sourcing (S2P)", desc: "Source to Pay", type: "support" },
+        { id: "H2R", name: "HR (H2R)", desc: "Hire to Retire", type: "support" }
+      ]
+    },
+    change: {
+      id: "change", label: "Change the Business", styleClass: "gh-change",
+      rows: [
+        { id: "I2P", name: "Innovation (I2P)", desc: "Idea to Product", type: "muted" },
+        { id: "TRF", name: "Transf. (TRF)", desc: "Change Mgmt", type: "muted" },
+        { id: "DA",  name: "Data & AI (DA)", desc: "Analytics Platform", type: "muted" },
+        { id: "ITF", name: "IT Found. (ITF)", desc: "Infrastructure", type: "muted" }
+      ]
+    }
+  };
+
+  // -----------------------------------------------------------
+  // 2. LOGIC: MAPPING PROCESS -> STAGE
+  // -----------------------------------------------------------
+  function getStageForProcess(p) {
+    const id = p.id;
+    const name = (p.name || "").toLowerCase();
+
+    // 1. D2O (Design) -> Plan Phase
+    if(id.startsWith("D2O")) return "S1";
+
+    // 2. L2C (Commercial)
+    if(id.startsWith("L2C")) {
+      if(id.includes("_01") || id.includes("_02") || id.includes("_03")) return "S1"; // Mktg/Quote
+      if(id.includes("_04") || id.includes("_05")) return "S2"; // Contract/Order
+      if(id.includes("Billing") || id.includes("_06") || id.includes("_07")) return "S6"; // Invoice
+      if(id.includes("_08")) return "S6"; // Care
+      return "S1";
+    }
+
+    // 3. O2D (Operations)
+    if(id.startsWith("O2D")) {
+      if(id.includes("10") || id.includes("11")) return "S5"; // Last Mile / POD
+      if(id.includes("01")) return "S2"; // Data Entry
+      if(id.includes("02") || id.includes("03") || id.includes("07")) return "S3"; // Pickup/Customs
+      return "S4"; // Linehaul/Network
+    }
+
+    // 4. P2R (Resolution)
+    if(id.startsWith("P2R")) {
+      if(name.includes("claim") || name.includes("compensation")) return "S6";
+      if(name.includes("root cause")) return "S6";
+      return "S4"; // In-transit incidents
+    }
+
+    // 5. Finance / Support
+    if(id.startsWith("R2R")) {
+      if(name.includes("credit")) return "S2"; // Risk check at booking
+      return "S6";
+    }
+    
+    // 6. Manage / Change -> Default to S1 or S6 usually, or spread
+    if(id.startsWith("S2E") || id.startsWith("I2P")) return "S1";
+    if(id.startsWith("GRC") && name.includes("audit")) return "S6";
+    if(id.startsWith("ITF") && name.includes("driver")) return "S5";
+
+    return "S1"; // Default fallthrough
+  }
+
+  // -----------------------------------------------------------
+  // 3. RENDER ENGINE
+  // -----------------------------------------------------------
+  const container = document.getElementById('matrix-container');
+  let ALL_DATA = [];
+
+  async function loadData() {
+    try {
+      const res = await fetch("data.json");
+      const root = await res.json();
+      walk(root);
+      renderMatrix();
+    } catch(e) {
+      console.error(e);
+      container.innerHTML = `<div style="padding:40px; grid-column:1/-1; text-align:center">
+        <h3 style="color:var(--dhl-red)">Data Error</h3>
+        <p>Ensure <b>data.json</b> is in the same folder.</p>
+      </div>`;
+    }
+  }
+
+  function walk(node) {
+    if(node.id) {
+      // Logic: We want L3 or L4 nodes mostly. 
+      // Filter out High-level L0/L1 parents to avoid duplicates.
+      if((!node.children || node.children.length === 0) || node.id.split('_').length > 2) {
+        ALL_DATA.push(node);
+      }
+    }
+    if(node.children) node.children.forEach(walk);
+  }
+
+  function renderMatrix() {
+    container.innerHTML = "";
+
+    // A. Render Top-Left Corner
+    const corner = document.createElement("div");
+    corner.className = "corner-block";
+    corner.innerHTML = "Value Chain<br>Matrix";
+    container.appendChild(corner);
+
+    // B. Render Column Headers (Stages)
+    STAGES.forEach(st => {
+      const h = document.createElement("div");
+      h.className = "stage-header";
+      h.innerHTML = `
+        <span class="stage-num">${st.num}</span>
+        <span class="stage-title">${st.title}</span>
+        <span class="stage-desc">${st.desc}</span>
+      `;
+      container.appendChild(h);
+    });
+
+    // C. Render Rows (Groups -> Lanes)
+    Object.values(GROUPS).forEach(group => {
+      // 1. Group Header
+      const gh = document.createElement("div");
+      gh.className = `group-header ${group.styleClass}`;
+      gh.onclick = () => toggleGroup(group.id);
+      gh.innerHTML = `<span>${group.label}</span> <span style="opacity:0.5">▼</span>`;
+      container.appendChild(gh);
+
+      // 2. Rows
+      group.rows.forEach(l0 => {
+        // Determine Visual Style (Hero vs Muted)
+        const laneClass = l0.type === 'hero' ? 'lane-hero' : 
+                          l0.type === 'muted' ? 'lane-muted' : 'lane-support';
+        
+        // Row Label
+        const label = document.createElement("div");
+        label.className = `l0-label group-${group.id} ${laneClass}`;
+        label.innerHTML = `<b>${l0.name}</b><span>${l0.desc}</span>`;
+        container.appendChild(label);
+
+        // Cells for each Stage
+        STAGES.forEach(st => {
+          const cell = document.createElement("div");
+          cell.className = `cell group-${group.id} ${laneClass}`;
+          
+          // Filter Processes
+          const processes = ALL_DATA.filter(p => {
+            const isL0 = p.id.startsWith(l0.id + "_") || p.id === l0.id;
+            return isL0 && getStageForProcess(p) === st.id;
+          });
+
+          // Sort (Layout stability)
+          processes.sort((a,b) => a.id.localeCompare(b.id));
+
+          // Render Cards
+          processes.forEach(p => {
+            const card = document.createElement("div");
+            card.className = `card l0-${l0.id}`;
+            card.innerHTML = `
+              <div class="card-id">${p.id}</div>
+              <div class="card-name">${p.name.split(':').pop().trim()}</div>
+            `;
+            card.onclick = (e) => showPopup(e, p);
+            cell.appendChild(card);
+          });
+
+          container.appendChild(cell);
+        });
+      });
+    });
+  }
+
+  // -----------------------------------------------------------
+  // 4. INTERACTION UTILS
+  // -----------------------------------------------------------
+  function toggleGroup(gid) {
+    const rows = document.querySelectorAll(`.group-${gid}`);
+    rows.forEach(r => r.classList.toggle('collapsed'));
+  }
+
+  function showPopup(e, p) {
+    e.stopPropagation();
+    document.getElementById('d_id').textContent = p.id;
+    document.getElementById('d_name').textContent = p.name.split(':').pop();
+    document.getElementById('d_owner').textContent = p.owner || "Unassigned";
+    document.getElementById('d_cat').textContent = p.category || "Process";
+    document.getElementById('d_desc').textContent = p.description || "No description provided.";
+    document.getElementById('d_trigger').textContent = p.trigger || "Continuous";
+    document.getElementById('d_outcome').textContent = p.outcome || "Process End";
+    
+    document.getElementById('popupOverlay').style.display = 'flex';
+  }
+
+  function closePopup() {
+    document.getElementById('popupOverlay').style.display = 'none';
+  }
+
+  // Start
+  loadData();
+
+</script>
+</body>
+</html>
