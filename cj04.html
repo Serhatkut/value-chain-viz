@@ -3,34 +3,32 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>DHL eCommerce · End-to-End Customer Journey</title>
+  <title>DHL eCommerce · Customer Journey Map</title>
+  <link href="https://fonts.googleapis.com/css2?family=Delivery:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* =========================
-       DHL BRAND & UI VARS
+       DHL BRAND TOKENS
        ========================= */
     :root {
       --dhl-red: #D40511;
-      --dhl-red-dark: #b0040e;
       --dhl-yellow: #FFCC00;
       --dhl-black: #101828;
       
-      --bg-app: #f2f4f8;
-      --border: #e6e8ee;
+      --bg: #F2F4F7;
+      --surface: #FFFFFF;
+      --border: #E4E7EC;
       
-      --col-w: 260px; 
-      --lane-label-w: 240px;
-      
-      /* Visual Hierarchy Heights */
-      --h-hero: 160px;   /* Dominant rows */
-      --h-norm: 110px;   /* Support rows */
-      --h-muted: 80px;   /* Background rows */
+      --col-w: 260px; /* Wider to fit text */
+      --lane-head-w: 220px;
     }
+
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: "Delivery", "Helvetica Neue", Helvetica, Arial, sans-serif;
-      background: var(--bg-app);
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
       color: var(--dhl-black);
       height: 100vh;
       display: flex;
@@ -42,7 +40,7 @@
        HEADER
        ========================= */
     header {
-      height: 70px;
+      height: 60px;
       background: var(--dhl-red);
       color: white;
       display: flex;
@@ -50,498 +48,360 @@
       padding: 0 24px;
       justify-content: space-between;
       flex-shrink: 0;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 60;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .brand { font-weight: 900; font-size: 22px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 14px; }
-    .brand-logo { 
-      background: white; color: var(--dhl-red); 
-      height: 32px; padding: 0 12px; border-radius: 4px; 
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; font-weight: 900;
-    }
+    .brand { font-family: 'Delivery', sans-serif; font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+    .brand span { background: var(--dhl-yellow); color: var(--dhl-red); padding: 2px 6px; border-radius: 4px; font-size: 14px; }
     
-    .controls { display: flex; gap: 16px; align-items: center; }
-    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; opacity: 0.9; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }
+    .legend { display: flex; gap: 16px; font-size: 11px; font-weight: 600; opacity: 0.9; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
 
     /* =========================
-       MAIN MATRIX GRID
+       GRID LAYOUT
        ========================= */
-    #matrix-container {
+    .grid-container {
       flex: 1;
       overflow: auto;
       display: grid;
-      grid-template-columns: var(--lane-label-w) repeat(6, var(--col-w)); 
-      background: var(--bg-app);
-      position: relative;
+      grid-template-columns: var(--lane-head-w) repeat(6, var(--col-w)); 
+      background: var(--bg);
     }
 
-    /* =========================
-       TIMELINE HEADERS (Sticky Top)
-       ========================= */
-    .corner-block {
+    /* Sticky Headers */
+    .corner-plate {
       position: sticky; top: 0; left: 0; z-index: 50;
-      background: var(--dhl-red);
-      border-right: 1px solid #b0040e;
-      border-bottom: 4px solid var(--dhl-yellow);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 900; font-size: 13px; color: white;
-      text-transform: uppercase; letter-spacing: 1px;
-      text-align: center; line-height: 1.4;
-      padding: 10px;
-    }
-
-    .stage-header {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: #fff;
-      border-bottom: 4px solid var(--dhl-yellow);
+      background: var(--surface); 
       border-right: 1px solid var(--border);
-      padding: 14px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      border-bottom: 3px solid var(--dhl-red);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 900; font-size: 12px; color: var(--dhl-red);
+      text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .stage-num { font-size: 11px; color: #999; font-weight: 800; text-transform: uppercase; }
-    .stage-title { font-weight: 800; font-size: 15px; color: var(--dhl-red); text-transform: uppercase; }
-    .stage-desc { font-weight: 500; font-size: 11px; color: #555; margin-top: 2px; }
 
-    /* =========================
-       SWIMLANES (ROWS)
-       ========================= */
-    
-    /* 1. Group Headers */
-    .group-header {
-      grid-column: 1 / -1;
-      padding: 8px 20px;
-      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-      cursor: pointer;
+    .stage-head {
+      position: sticky; top: 0; z-index: 40;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
+      border-bottom: 3px solid var(--dhl-red);
+      padding: 12px 16px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .stage-step { font-size: 10px; font-weight: 700; color: #98A2B3; text-transform: uppercase; }
+    .stage-title { font-size: 13px; font-weight: 800; color: var(--dhl-black); text-transform: uppercase; }
+
+    /* Swimlane Headers */
+    .lane-label {
       position: sticky; left: 0; z-index: 30;
-      display: flex; justify-content: space-between; align-items: center;
-      transition: background 0.2s;
-    }
-    
-    .gh-manage { background: #e0e0e0; color: #444; border-top: 1px solid #ccc; }
-    .gh-run { background: var(--dhl-black); color: var(--dhl-yellow); border-top: 4px solid var(--dhl-yellow); }
-    .gh-change { background: #e0e0e0; color: #444; border-top: 1px solid #ccc; }
-
-    /* 2. Lane Labels (Left Sticky) */
-    .l0-label {
-      position: sticky; left: 0; z-index: 20;
+      background: var(--surface);
       border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 16px; display: flex; flex-direction: column; justify-content: center;
-      transition: all 0.2s;
+      padding: 20px; display: flex; flex-direction: column; justify-content: center;
     }
-    .l0-label b { font-size: 14px; margin-bottom: 6px; display: block; }
-    .l0-label span { font-size: 11px; line-height: 1.3; display: block; }
+    .lane-label strong { font-size: 14px; display: block; margin-bottom: 4px; }
+    .lane-label span { font-size: 10px; color: #667085; line-height: 1.3; }
 
-    /* 3. The Cells */
+    /* Lane Styles */
+    .lane-hero .lane-label { border-left: 5px solid var(--dhl-red); background: #FFF; }
+    .lane-hero .cell { background: #FFF; }
+    
+    .lane-support .lane-label { border-left: 5px solid #98A2B3; background: #F9FAFB; }
+    .lane-support .cell { background: #F9FAFB; }
+
     .cell {
       border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
       padding: 12px;
-      display: flex; flex-direction: column; gap: 10px;
+      display: flex; flex-direction: column; gap: 12px;
+      min-height: 180px;
       align-content: flex-start;
-      transition: background 0.2s;
     }
-    .cell:hover { background: rgba(0,0,0,0.02); }
 
     /* =========================
-       HIERARCHY STYLES (The "Spotlight")
+       PROCESS GROUP (CONTAINER)
        ========================= */
-    
-    /* HERO LANES (L2C, O2D, P2R) */
-    .lane-hero .l0-label { background: #fff; border-right: 4px solid var(--dhl-red); }
-    .lane-hero .l0-label b { color: var(--dhl-red); font-size: 18px; }
-    .lane-hero .cell { background: #fff; min-height: var(--h-hero); }
-    .lane-hero .cell:hover { background: #fffdf5; }
-    
-    /* SUPPORT LANES */
-    .lane-support .l0-label { background: #fdfdfd; border-right: 3px solid #ccc; }
-    .lane-support .l0-label b { color: #333; }
-    .lane-support .cell { background: #fdfdfd; min-height: var(--h-norm); }
-
-    /* BACKGROUND LANES */
-    .lane-muted .l0-label { background: #f4f4f4; border-right: 1px solid #ddd; }
-    .lane-muted .l0-label b { color: #666; font-size: 12px; }
-    .lane-muted .l0-label span { color: #999; }
-    .lane-muted .cell { background: #f4f4f4; min-height: var(--h-muted); }
-    .lane-muted .card { transform: scale(0.95); opacity: 0.8; }
+    .group-container {
+      background: transparent;
+    }
+    .group-header {
+      font-size: 10px; font-weight: 800; color: #667085; text-transform: uppercase;
+      margin-bottom: 6px; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;
+    }
+    .group-header::after {
+      content: ""; flex: 1; height: 1px; background: #E4E7EC;
+    }
 
     /* =========================
-       CARDS (L1 PROCESSES)
+       PROCESS ITEM (VISIBLE CARD)
        ========================= */
-    .card {
+    .process-item {
       background: white;
-      border: 1px solid #dcdcdc;
-      border-left-width: 5px;
+      border: 1px solid #D0D5DD;
+      border-left: 3px solid #ccc; /* Default color */
       border-radius: 6px;
-      padding: 10px 14px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+      padding: 8px 10px;
+      margin-bottom: 6px;
       cursor: pointer;
+      transition: all 0.15s ease;
       position: relative;
-      transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
-    
-    /* Hero cards get a bit more pop */
-    .lane-hero .card { box-shadow: 0 4px 10px rgba(0,0,0,0.08); padding: 14px 16px; }
-    .lane-hero .card-name { font-size: 13px; font-weight: 800; }
-    
-    /* Hover Effects */
-    .card:hover { 
-      transform: translateY(-3px); 
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12); 
+    .process-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       border-color: var(--dhl-red);
-      z-index: 5;
+      z-index: 2;
     }
 
-    /* Card Text */
-    .card-id { font-size: 10px; font-weight: 700; color: #888; margin-bottom: 5px; display: flex; justify-content: space-between; }
-    .card-name { font-size: 12px; font-weight: 700; line-height: 1.35; color: var(--dhl-black); }
-    
-    /* Card Border Colors by L0 */
-    .card.l0-L2C { border-left-color: var(--dhl-yellow); }
-    .card.l0-O2D { border-left-color: var(--dhl-red); }
-    .card.l0-P2R { border-left-color: #d35400; } /* Burnt Orange */
-    .card.l0-R2R { border-left-color: #2980b9; } /* Blue */
-    .card.l0-S2E { border-left-color: #7f8c8d; } /* Gray */
-    .card.l0-ITF { border-left-color: #8e44ad; } /* Purple */
+    .pi-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+    .pi-id { font-size: 9px; font-weight: 700; color: #98A2B3; }
+    .pi-owner { 
+      font-size: 8px; background: #F2F4F7; color: #344054; padding: 1px 4px; border-radius: 3px; font-weight: 600; 
+      max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pi-name { font-size: 11px; font-weight: 600; color: #101828; line-height: 1.3; }
+
+    /* L0 Colors */
+    .l0-L2C { border-left-color: var(--dhl-yellow); }
+    .l0-O2D { border-left-color: var(--dhl-red); }
+    .l0-D2O, .l0-S2E { border-left-color: #475569; }
+    .l0-ITF, .l0-DA { border-left-color: #7C3AED; }
+    .l0-P2R { border-left-color: #F97316; }
 
     /* =========================
-       POPUP
+       MODAL
        ========================= */
-    .popup-overlay {
+    .modal-overlay {
       position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(16,24,40,0.4); z-index: 1000;
-      display: none; align-items: center; justify-content: center;
-      backdrop-filter: blur(3px);
+      background: rgba(16, 24, 40, 0.5); backdrop-filter: blur(3px);
+      z-index: 200; display: none; align-items: center; justify-content: center;
     }
-    .popup {
-      background: white; width: 500px; max-width: 90%;
-      border-radius: 12px; padding: 0;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.3);
-      animation: popIn 0.2s ease-out;
+    .modal {
+      background: white; width: 800px; max-width: 90%; max-height: 85vh;
+      border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     }
-    @keyframes popIn { from {transform: scale(0.95); opacity:0} to {transform: scale(1); opacity:1} }
+    .modal-header {
+      background: var(--dhl-red); color: white; padding: 16px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-body { padding: 24px; overflow-y: auto; background: #F9FAFB; }
     
-    .popup-header {
-      background: var(--dhl-red); color: white;
-      padding: 24px 28px; display: flex; justify-content: space-between; align-items: flex-start;
-      border-radius: 12px 12px 0 0;
+    .chevron-container { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 10px; }
+    .chevron {
+      background: white; border: 1px solid #D0D5DD; padding: 8px 12px; min-width: 120px;
+      font-size: 10px; font-weight: 600; color: #344054; text-align: center;
+      clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%);
+      margin-left: -8px; display: flex; align-items: center; justify-content: center;
     }
-    .popup-body { padding: 28px; }
-    .pop-row { margin-bottom: 18px; }
-    .pop-lbl { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; margin-bottom: 6px; }
-    .pop-val { font-size: 14px; line-height: 1.5; color: #111; }
-
-    /* Collapsed Utility */
-    .collapsed { display: none !important; }
+    .chevron:first-child { margin-left: 0; clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%); }
 
   </style>
 </head>
 <body>
 
 <header>
-  <div class="brand">
-    <div class="brand-logo">DHL</div>
-    End-to-End Customer Journey
-  </div>
-  <div class="controls">
-    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Ops (O2D)</div>
+  <div class="brand"><span>DHL</span> eCommerce Journey</div>
+  <div class="legend">
     <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Sales (L2C)</div>
-    <div class="legend-item"><div class="dot" style="background:#999"></div> Enablers</div>
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Ops (O2D)</div>
+    <div class="legend-item"><div class="dot" style="background:#475569"></div> Strategy</div>
   </div>
 </header>
 
-<div id="matrix-container">
+<div class="grid-container" id="grid">
   </div>
 
-<div class="popup-overlay" id="popupOverlay" onclick="closePopup()">
-  <div class="popup" onclick="event.stopPropagation()">
-    <div class="popup-header">
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
       <div>
-        <div style="font-size:12px; opacity:0.8; font-weight:700" id="d_id">ID</div>
-        <div style="font-size:20px; font-weight:800; margin-top:4px" id="d_name">Process Name</div>
+        <div style="font-size:10px; font-weight:700; opacity:0.8; text-transform:uppercase">Process Detail</div>
+        <div style="font-size:18px; font-weight:800; margin-top:2px" id="m_title">Process Name</div>
       </div>
-      <button style="background:none; border:none; color:white; font-size:28px; cursor:pointer;" onclick="closePopup()">&times;</button>
+      <button style="background:none; border:none; color:white; font-size:24px; cursor:pointer" onclick="closeModal()">&times;</button>
     </div>
-    <div class="popup-body">
-      <div style="display:flex; gap:30px; margin-bottom:20px;">
-        <div><div class="pop-lbl">Owner</div><div class="pop-val" id="d_owner">—</div></div>
-        <div><div class="pop-lbl">Category</div><div class="pop-val" id="d_cat">—</div></div>
+    <div class="modal-body">
+      <div style="display:flex; gap:24px; margin-bottom:20px; font-size:12px;">
+        <div><strong>Owner:</strong> <span id="m_owner">-</span></div>
+        <div><strong>Trigger:</strong> <span id="m_trigger">-</span></div>
+        <div><strong>Outcome:</strong> <span id="m_outcome">-</span></div>
       </div>
+      <div style="margin-bottom:20px; font-size:13px; line-height:1.5; color:#475569" id="m_desc">-</div>
       
-      <div class="pop-row">
-        <div class="pop-lbl">Description</div>
-        <div class="pop-val" id="d_desc">—</div>
-      </div>
-
-      <div style="background:#f9f9f9; border:1px solid #eee; padding:16px; border-radius:8px;">
-        <div style="margin-bottom:12px;">
-          <div class="pop-lbl">Trigger</div>
-          <div class="pop-val" id="d_trigger" style="font-style:italic">—</div>
-        </div>
-        <div>
-          <div class="pop-lbl">Outcome</div>
-          <div class="pop-val" id="d_outcome" style="font-weight:700; color:var(--dhl-red)">—</div>
-        </div>
-      </div>
+      <div style="font-size:10px; font-weight:700; color:#98A2B3; text-transform:uppercase; margin-bottom:8px;">Sub-Process Flow</div>
+      <div class="chevron-container" id="m_flow"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // -----------------------------------------------------------
-  // 1. DATA CONFIGURATION
-  // -----------------------------------------------------------
-  
-  // The Columns (Customer Timeline)
+  // 1. DATA CONFIG
   const STAGES = [
-    { id: "S1", num: "01", title: "Decide & Shop", desc: "Strategy, Design, Browsing" },
-    { id: "S2", num: "02", title: "Book & Pay",    desc: "Order Entry, Risk, Contracts" },
-    { id: "S3", num: "03", title: "Processing",    desc: "Pickup, Sort, Customs" },
-    { id: "S4", num: "04", title: "Transit",       desc: "Linehaul, Network Flow" },
-    { id: "S5", num: "05", title: "Last Mile",     desc: "Final Delivery & Handover" },
-    { id: "S6", num: "06", title: "Support",       desc: "Claims, Returns, Audit" }
+    { id: "S1", name: "Setup & Book" },
+    { id: "S2", name: "First Mile" },
+    { id: "S3", name: "In Transit (Org)" },
+    { id: "S4", name: "In Transit (Dest)" },
+    { id: "S5", name: "Last Mile" },
+    { id: "S6", name: "Post Delivery" }
   ];
 
-  // The Rows (L0 Process Areas) with Visual Hierarchy settings
-  const GROUPS = {
-    manage: {
-      id: "manage", label: "Manage the Business", styleClass: "gh-manage",
-      rows: [
-        { id: "S2E", name: "Strategy (S2E)", desc: "Strategy to Execute", type: "muted" },
-        { id: "GRC", name: "Governance (GRC)", desc: "Risk & Compliance", type: "muted" },
-        { id: "EA_PM", name: "Architecture (EA)", desc: "Ent. Arch & KPIs", type: "muted" }
-      ]
-    },
-    run: {
-      id: "run", label: "Run the Business (Core)", styleClass: "gh-run",
-      rows: [
-        { id: "D2O", name: "Design (D2O)", desc: "Network & Product", type: "support" },
-        { id: "L2C", name: "Commercial (L2C)", desc: "Lead to Cash", type: "hero" },
-        { id: "O2D", name: "Operations (O2D)", desc: "Order to Delivery", type: "hero" },
-        { id: "P2R", name: "Resolution (P2R)", desc: "Issue to Resolution", type: "hero" },
-        { id: "R2R", name: "Finance (R2R)", desc: "Record to Report", type: "support" },
-        { id: "S2P", name: "Sourcing (S2P)", desc: "Source to Pay", type: "support" },
-        { id: "H2R", name: "HR (H2R)", desc: "Hire to Retire", type: "support" }
-      ]
-    },
-    change: {
-      id: "change", label: "Change the Business", styleClass: "gh-change",
-      rows: [
-        { id: "I2P", name: "Innovation (I2P)", desc: "Idea to Product", type: "muted" },
-        { id: "TRF", name: "Transf. (TRF)", desc: "Change Mgmt", type: "muted" },
-        { id: "DA",  name: "Data & AI (DA)", desc: "Analytics Platform", type: "muted" },
-        { id: "ITF", name: "IT Found. (ITF)", desc: "Infrastructure", type: "muted" }
-      ]
-    }
-  };
+  const LANES = [
+    { id: "COMM", name: "Commercial", desc: "Sales & Care", class: "lane-hero" },
+    { id: "OPS", name: "Operations", desc: "Logistics Flow", class: "lane-hero" },
+    { id: "FOUND", name: "Foundation", desc: "Strategy & IT", class: "lane-support" }
+  ];
 
-  // -----------------------------------------------------------
-  // 2. LOGIC: MAPPING PROCESS -> STAGE
-  // -----------------------------------------------------------
-  function getStageForProcess(p) {
-    const id = p.id;
-    const name = (p.name || "").toLowerCase();
-
-    // 1. D2O (Design) -> Plan Phase (Crucial per user feedback)
-    if(id.startsWith("D2O")) return "S1";
-
-    // 2. L2C (Commercial)
-    if(id.startsWith("L2C")) {
-      if(id.includes("_01") || id.includes("_02") || id.includes("_03")) return "S1"; // Mktg/Quote
-      if(id.includes("_04") || id.includes("_05")) return "S2"; // Contract/Order
-      if(id.includes("Billing") || id.includes("_06") || id.includes("_07")) return "S6"; // Invoice
-      if(id.includes("_08")) return "S6"; // Care
-      return "S1";
-    }
-
-    // 3. O2D (Operations)
-    if(id.startsWith("O2D")) {
-      if(id.includes("10") || id.includes("11")) return "S5"; // Last Mile / POD
-      if(id.includes("01")) return "S2"; // Data Entry
-      if(id.includes("02") || id.includes("03") || id.includes("07")) return "S3"; // Pickup/Customs
-      return "S4"; // Linehaul/Network
-    }
-
-    // 4. P2R (Resolution)
-    if(id.startsWith("P2R")) {
-      if(name.includes("claim") || name.includes("compensation")) return "S6";
-      if(name.includes("root cause")) return "S6";
-      return "S4"; // In-transit incidents
-    }
-
-    // 5. Finance / Support
-    if(id.startsWith("R2R")) {
-      if(name.includes("credit")) return "S2"; // Risk check at booking
-      return "S6";
-    }
+  // 2. GROUP DEFINITIONS (Visual Containers)
+  // maps multiple L1 IDs to a visual header
+  const GROUPS = [
+    // --- STAGE 1 ---
+    { title: "Strategy", lane: "FOUND", stage: "S1", ids: ["S2E_01", "D2O_01", "D2O_02"] },
+    { title: "Sales", lane: "COMM", stage: "S1", ids: ["L2C_01", "L2C_02"] },
+    { title: "Onboarding", lane: "COMM", stage: "S1", ids: ["L2C_03", "L2C_04"] },
+    { title: "Booking", lane: "COMM", stage: "S1", ids: ["L2C_05"] },
     
-    // 6. Manage / Change -> Default to S1 or S6 usually, or spread
-    if(id.startsWith("S2E") || id.startsWith("I2P")) return "S1";
-    if(id.startsWith("GRC") && name.includes("audit")) return "S6";
-    if(id.startsWith("ITF") && name.includes("driver")) return "S5";
+    // --- STAGE 2 ---
+    { title: "Data Entry", lane: "OPS", stage: "S2", ids: ["O2D_01"] },
+    { title: "Pickup", lane: "OPS", stage: "S2", ids: ["O2D_02", "O2D_03"] },
+    { title: "IT Platforms", lane: "FOUND", stage: "S2", ids: ["ITF_01", "ITF_04"] },
 
-    return "S1"; // Default fallthrough
-  }
+    // --- STAGE 3 ---
+    { title: "Linehaul", lane: "OPS", stage: "S3", ids: ["O2D_04"] },
+    { title: "Export", lane: "OPS", stage: "S3", ids: ["O2D_07"] },
+    
+    // --- STAGE 4 ---
+    { title: "Gateway", lane: "OPS", stage: "S4", ids: ["O2D_08", "O2D_09"] },
+    { title: "Incidents", lane: "OPS", stage: "S4", ids: ["P2R_01", "P2R_02"] },
 
-  // -----------------------------------------------------------
-  // 3. RENDER ENGINE
-  // -----------------------------------------------------------
-  const container = document.getElementById('matrix-container');
-  let ALL_L1_DATA = []; // Stores only L1 nodes
+    // --- STAGE 5 ---
+    { title: "Delivery", lane: "OPS", stage: "S5", ids: ["O2D_10", "O2D_11"] },
+    { title: "Driver App", lane: "FOUND", stage: "S5", ids: ["ITF_02"] },
 
-  async function loadData() {
+    // --- STAGE 6 ---
+    { title: "Billing", lane: "COMM", stage: "S6", ids: ["L2C_06", "R2R_01"] },
+    { title: "Support", lane: "COMM", stage: "S6", ids: ["P2R_03", "L2C_08"] },
+    { title: "Returns", lane: "OPS", stage: "S6", ids: ["O2D_12"] },
+    { title: "Audit", lane: "FOUND", stage: "S6", ids: ["GRC_04"] }
+  ];
+
+  let INDEX = new Map();
+
+  async function init() {
+    renderSkeleton();
     try {
       const res = await fetch("data.json");
       const root = await res.json();
-      extractL1Nodes(root);
-      renderMatrix();
-    } catch(e) {
-      console.error(e);
-      container.innerHTML = `<div style="padding:40px; grid-column:1/-1; text-align:center">
-        <h3 style="color:var(--dhl-red)">Data Error</h3>
-        <p>Ensure <b>data.json</b> is in the same folder.</p>
-      </div>`;
-    }
+      buildIndex(root);
+      renderItems();
+    } catch(e) { console.error(e); }
   }
 
-  // Recursively find nodes that are strictly "L1" (Depth 2: L0->L1)
-  function extractL1Nodes(node) {
-    if(node.id) {
-        const parts = node.id.split('_');
-        // Check for L1 pattern (e.g. L2C_01, O2D_10)
-        // Usually L0 is 'L2C' (1 part), L1 is 'L2C_01' (2 parts)
-        // Some codes might be inconsistent, so we also check children depth.
-        // Rule: We want the Main Process Steps, not the sub-activities.
-        
-        if (parts.length === 2) {
-             ALL_L1_DATA.push(node);
-             // Stop recursion here to avoid picking up L2 children
-             return; 
-        }
-        // Special case: if ID structure is different but it is a direct child of L0 root
-        // (Assuming L0 roots are depth 1)
-        if (parts.length === 1 && node.children && node.children.length > 0) {
-            // This is an L0 root (e.g. "L2C"), go inside to get L1s
-             node.children.forEach(extractL1Nodes);
-             return;
-        }
-    }
-    // Continue searching if not an L1
-    if(node.children) node.children.forEach(extractL1Nodes);
+  function buildIndex(node) {
+    if(node.id) INDEX.set(node.id, node);
+    if(node.children) node.children.forEach(buildIndex);
   }
 
-  function renderMatrix() {
-    container.innerHTML = "";
+  function renderSkeleton() {
+    const grid = document.getElementById('grid');
+    
+    // Corner
+    const corner = document.createElement('div');
+    corner.className = 'corner-plate';
+    corner.textContent = "AREA";
+    grid.appendChild(corner);
 
-    // A. Render Top-Left Corner
-    const corner = document.createElement("div");
-    corner.className = "corner-block";
-    corner.innerHTML = "Process<br>Areas";
-    container.appendChild(corner);
-
-    // B. Render Column Headers (Stages)
-    STAGES.forEach(st => {
-      const h = document.createElement("div");
-      h.className = "stage-header";
-      h.innerHTML = `
-        <span class="stage-num">${st.num}</span>
-        <span class="stage-title">${st.title}</span>
-        <span class="stage-desc">${st.desc}</span>
-      `;
-      container.appendChild(h);
+    // Headers
+    STAGES.forEach(s => {
+      const h = document.createElement('div');
+      h.className = 'stage-head';
+      h.innerHTML = `<div class="stage-step">${s.id}</div><div class="stage-title">${s.name}</div>`;
+      grid.appendChild(h);
     });
 
-    // C. Render Rows (Groups -> Lanes)
-    Object.values(GROUPS).forEach(group => {
-      // 1. Group Header
-      const gh = document.createElement("div");
-      gh.className = `group-header ${group.styleClass}`;
-      gh.onclick = () => toggleGroup(group.id);
-      gh.innerHTML = `<span>${group.label}</span> <span style="opacity:0.5">▼</span>`;
-      container.appendChild(gh);
+    // Lanes
+    LANES.forEach(l => {
+      const lab = document.createElement('div');
+      lab.className = `lane-label ${l.class}`;
+      lab.innerHTML = `<strong>${l.name}</strong><span>${l.desc}</span>`;
+      grid.appendChild(lab);
 
-      // 2. Rows
-      group.rows.forEach(l0 => {
-        // Determine Visual Style (Hero vs Muted)
-        const laneClass = l0.type === 'hero' ? 'lane-hero' : 
-                          l0.type === 'muted' ? 'lane-muted' : 'lane-support';
-        
-        // Row Label
-        const label = document.createElement("div");
-        label.className = `l0-label group-${group.id} ${laneClass}`;
-        label.innerHTML = `<b>${l0.name}</b><span>${l0.desc}</span>`;
-        container.appendChild(label);
-
-        // Cells for each Stage
-        STAGES.forEach(st => {
-          const cell = document.createElement("div");
-          cell.className = `cell group-${group.id} ${laneClass}`;
-          
-          // Filter Processes: Use ONLY the L1 Dataset
-          const processes = ALL_L1_DATA.filter(p => {
-            const isL0 = p.id.startsWith(l0.id + "_") || p.id === l0.id;
-            return isL0 && getStageForProcess(p) === st.id;
-          });
-
-          // Sort (Layout stability)
-          processes.sort((a,b) => a.id.localeCompare(b.id));
-
-          // Render Cards
-          processes.forEach(p => {
-            const card = document.createElement("div");
-            card.className = `card l0-${l0.id}`;
-            // Clean up name: remove ID prefix if present
-            const cleanName = p.name.includes(':') ? p.name.split(':')[1].trim() : p.name;
-            
-            card.innerHTML = `
-              <div class="card-id">${p.id}</div>
-              <div class="card-name">${cleanName}</div>
-            `;
-            card.onclick = (e) => showPopup(e, p);
-            cell.appendChild(card);
-          });
-
-          container.appendChild(cell);
-        });
+      STAGES.forEach(s => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.id = `c_${l.id}_${s.id}`;
+        grid.appendChild(cell);
       });
     });
   }
 
-  // -----------------------------------------------------------
-  // 4. INTERACTION UTILS
-  // -----------------------------------------------------------
-  function toggleGroup(gid) {
-    const rows = document.querySelectorAll(`.group-${gid}`);
-    rows.forEach(r => r.classList.toggle('collapsed'));
+  function renderItems() {
+    GROUPS.forEach(g => {
+      const cell = document.getElementById(`c_${g.lane}_${g.stage}`);
+      if(!cell) return;
+
+      // Create Group Container
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'group-container';
+      
+      const head = document.createElement('div');
+      head.className = 'group-header';
+      head.textContent = g.title;
+      groupDiv.appendChild(head);
+
+      // Render Processes inside Group
+      g.ids.forEach(pid => {
+        const node = INDEX.get(pid);
+        if(!node) return; // skip if not in JSON
+
+        const item = document.createElement('div');
+        item.className = `process-item l0-${pid.split('_')[0]}`;
+        const nameClean = node.name.includes(':') ? node.name.split(':')[1].trim() : node.name;
+        
+        item.innerHTML = `
+          <div class="pi-head">
+            <span class="pi-id">${pid}</span>
+            <span class="pi-owner">${node.owner || "TBD"}</span>
+          </div>
+          <div class="pi-name">${nameClean}</div>
+        `;
+        item.onclick = () => openModal(node);
+        groupDiv.appendChild(item);
+      });
+
+      cell.appendChild(groupDiv);
+    });
   }
 
-  function showPopup(e, p) {
-    e.stopPropagation();
-    document.getElementById('d_id').textContent = p.id;
-    document.getElementById('d_name').textContent = p.name.includes(':') ? p.name.split(':')[1].trim() : p.name;
-    document.getElementById('d_owner').textContent = p.owner || "Unassigned";
-    document.getElementById('d_cat').textContent = p.category || "Process";
-    document.getElementById('d_desc').textContent = p.description || "No description provided.";
-    document.getElementById('d_trigger').textContent = p.trigger || "Continuous";
-    document.getElementById('d_outcome').textContent = p.outcome || "Process End";
+  function openModal(node) {
+    document.getElementById('m_title').textContent = node.name.includes(':') ? node.name.split(':')[1].trim() : node.name;
+    document.getElementById('m_owner').textContent = node.owner || "-";
+    document.getElementById('m_desc').textContent = node.description || "No description.";
+    document.getElementById('m_trigger').textContent = node.trigger || "-";
+    document.getElementById('m_outcome').textContent = node.outcome || "-";
+
+    const flow = document.getElementById('m_flow');
+    flow.innerHTML = "";
     
-    document.getElementById('popupOverlay').style.display = 'flex';
+    if(node.children && node.children.length > 0) {
+      node.children.forEach(c => {
+        const chev = document.createElement('div');
+        chev.className = 'chevron';
+        chev.textContent = c.name.includes(':') ? c.name.split(':')[1].trim() : c.name;
+        flow.appendChild(chev);
+      });
+    } else {
+      flow.innerHTML = `<span style="font-size:11px;color:#999;font-style:italic">No sub-processes found.</span>`;
+    }
+
+    document.getElementById('modal').style.display = 'flex';
   }
 
-  function closePopup() {
-    document.getElementById('popupOverlay').style.display = 'none';
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
   }
 
-  // Start
-  loadData();
-
+  init();
 </script>
 </body>
 </html>
