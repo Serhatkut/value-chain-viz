@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>DHL eCommerce · Enhanced Customer Journey</title>
+
+  <style>
+    :root{
+      --dhl-red:#D40511;
+      --dhl-yellow:#FFCC00;
+      --bg:#f6f6f7;
+      --card:#ffffff;
+      --ink:#101828;
+      --muted:#667085;
+      --line:#e6e8ee;
+      --radius:16px;
+      --shadow: 0 10px 26px rgba(0,0,0,.08);
+      --laneH: 140px;
+      --stepW: 340px;
+      --gap: 14px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--ink);
+      background:var(--bg);
+    }
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:100;
+      background:rgba(255,255,255,.95);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);
+    }
+
+    .topbar{
+      padding:14px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:20px;
+    }
+
+    .brand{ display:flex; gap:12px; align-items:center; }
+    .logo{ width:32px; height:32px; background:var(--dhl-red); border-radius:8px; box-shadow:0 4px 10px rgba(212,5,17,0.3); }
+    
+    .search-box{
+      flex:1;
+      max-width:600px;
+      position:relative;
+    }
+    .search-box input{
+      width:100%;
+      padding:10px 16px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      outline:none;
+      transition: all 0.2s;
+    }
+    .search-box input:focus{ border-color:var(--dhl-red); box-shadow:0 0 0 4px rgba(212,5,17,0.1); }
+
+    /* Navigation Mini-Map */
+    .mini-map {
+      display: flex;
+      background: #fff;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--line);
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .mini-map-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 20px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .mini-map-btn:hover { background: var(--dhl-yellow); }
+
+    main{
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .hscroll {
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      overflow: auto;
+      box-shadow: var(--shadow);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 200px repeat(var(--cols), var(--stepW));
+      width: max-content;
+    }
+
+    .lane-label {
+      position: sticky;
+      left: 0;
+      z-index: 10;
+      background: #fdfdfd;
+      padding: 20px;
+      border-right: 2px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .cell {
+      padding: 15px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      min-height: var(--laneH);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .step-card {
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .step-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      border-color: var(--dhl-red);
+    }
+    .step-card.active { border: 2px solid var(--dhl-red); background: #fffdf5; }
+
+    .step-id { font-size: 10px; font-family: monospace; color: var(--muted); }
+    .step-name { font-weight: 700; font-size: 13px; margin: 4px 0; }
+    
+    .meta-badges { display: flex; gap: 4px; margin-top: 8px; }
+    .badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; background: var(--bg); text-transform: uppercase; }
+
+    .flash { animation: flash-highlight 1.5s ease-out; }
+    @keyframes flash-highlight {
+      0% { background-color: var(--dhl-yellow); }
+      100% { background-color: transparent; }
+    }
+
+    aside .card {
+      position: sticky;
+      top: 140px;
+      background: white;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .detail-row { margin-bottom: 15px; }
+    .detail-label { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 4px; }
+    .detail-value { font-size: 14px; line-height: 1.5; }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div style="font-weight: 800; font-size: 16px;">DHL eCommerce</div>
+        <div style="font-size: 12px; color: var(--muted);">Customer Journey Ecosystem</div>
+      </div>
+    </div>
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search processes, triggers, or owners...">
+    </div>
+    <div id="data-status" class="badge">Connecting...</div>
+  </div>
+  <div class="mini-map" id="miniMap"></div>
+</header>
+
+<main>
+  <section class="hscroll">
+    <div class="grid" id="journeyGrid"></div>
+  </section>
+
+  <aside>
+    <div class="card">
+      <div id="detailView">
+        <h2 id="selName" style="margin-top:0">Select a Step</h2>
+        <div class="detail-row">
+          <div class="detail-label">Process ID</div>
+          <div class="detail-value" id="selId">—</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Owner</div>
+          <div class="detail-value" id="selOwner">—</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Description</div>
+          <div class="detail-value" id="selDesc">Click any process card in the journey to see details.</div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-label">Trigger → Outcome</div>
+          <div class="detail-value"><i id="selTrigger">—</i> <br> ➔ <b id="selOutcome">—</b></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<script>
+  let rawData = null;
+  const index = new Map();
+
+  const PHASES = [
+    { id: "P1", name: "Decide & Onboard", ids: ["L2C_01", "L2C_02"] },
+    { id: "P2", name: "Shipment Prep", ids: ["L2C_05", "O2D_01"] },
+    { id: "P3", name: "In Transit", ids: ["O2D_03", "O2D_04", "O2D_07"] },
+    { id: "P4", name: "Delivery", ids: ["O2D_10"] },
+    { id: "P5", name: "Billing", ids: ["L2C_06", "R2R_01"] },
+    { id: "P6", name: "Support", ids: ["P2R_01", "P2R_03"] }
+  ];
+
+  const LANES = [
+    { key: "commercial", label: "Commercial", color: "#FFF4CC" },
+    { key: "ops", label: "Operations", color: "#FFE5E5" },
+    { key: "finance", label: "Finance", color: "#E5F0FF" }
+  ];
+
+  async function init() {
+    try {
+      // FIX: Changed from data_all.json to data.json
+      const response = await fetch('data.json');
+      rawData = await response.json();
+      buildIndex(rawData);
+      document.getElementById('data-status').textContent = "Connected";
+      renderJourney();
+      renderMiniMap();
+    } catch (e) {
+      document.getElementById('data-status').textContent = "Connection Error";
+      console.error(e);
+    }
+  }
+
+  function buildIndex(node) {
+    if (node.id) index.set(node.id, node);
+    if (node.children) node.children.forEach(buildIndex);
+  }
+
+  function renderMiniMap() {
+    const container = document.getElementById('miniMap');
+    PHASES.forEach(ph => {
+      const btn = document.createElement('button');
+      btn.className = 'mini-map-btn';
+      btn.textContent = ph.name;
+      btn.onclick = () => {
+        const target = document.getElementById(`phase-${ph.id}`);
+        target.scrollIntoView({ behavior: 'smooth', inline: 'start' });
+        target.classList.add('flash');
+        setTimeout(() => target.classList.remove('flash'), 1500);
+      };
+      container.appendChild(btn);
+    });
+  }
+
+  function renderJourney() {
+    const grid = document.getElementById('journeyGrid');
+    grid.style.setProperty('--cols', PHASES.length);
+
+    // Render Headers
+    grid.innerHTML = '<div class="lane-label" style="height:60px"><b>Stream / Phase</b></div>';
+    PHASES.forEach(ph => {
+      const h = document.createElement('div');
+      h.className = 'cell';
+      h.id = `phase-${ph.id}`;
+      h.style.background = '#f8f9fa';
+      h.innerHTML = `<div style="font-weight:800; font-size:14px">${ph.name}</div>`;
+      grid.appendChild(h);
+    });
+
+    // Render Lanes
+    LANES.forEach(lane => {
+      const label = document.createElement('div');
+      label.className = 'lane-label';
+      label.innerHTML = `<b>${lane.label}</b>`;
+      grid.appendChild(label);
+
+      PHASES.forEach(ph => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.style.backgroundColor = lane.color + '20'; // 20% opacity
+
+        // Filter processes for this lane and phase (simplified logic)
+        const relevantIds = ph.ids.filter(id => {
+            if(lane.key === 'commercial') return id.startsWith('L2C');
+            if(lane.key === 'ops') return id.startsWith('O2D');
+            if(lane.key === 'finance') return id.startsWith('R2R');
+            return false;
+        });
+
+        relevantIds.forEach(id => {
+          const data = index.get(id);
+          if (data) cell.appendChild(createCard(data));
+        });
+        
+        grid.appendChild(cell);
+      });
+    });
+  }
+
+  function createCard(data) {
+    const card = document.createElement('div');
+    card.className = 'step-card';
+    card.innerHTML = `
+      <div class="step-id">${data.id}</div>
+      <div class="step-name">${data.name.split(':').pop()}</div>
+      <div class="meta-badges">
+        <span class="badge" title="Owner">${data.owner || 'TBD'}</span>
+        ${data.trigger ? '<span class="badge" style="background:#e8f5e9">Trigger</span>' : ''}
+      </div>
+    `;
+    card.onclick = () => showDetail(data, card);
+    return card;
+  }
+
+  function showDetail(data, el) {
+    document.querySelectorAll('.step-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    
+    document.getElementById('selName').textContent = data.name.split(':').pop();
+    document.getElementById('selId').textContent = data.id;
+    document.getElementById('selOwner').textContent = data.owner || 'Not Assigned';
+    document.getElementById('selDesc').textContent = data.description || 'No description available.';
+    document.getElementById('selTrigger').textContent = data.trigger || 'Manual';
+    document.getElementById('selOutcome').textContent = data.outcome || 'Process Completion';
+  }
+
+  init();
+</script>
+</body>
+</html>
