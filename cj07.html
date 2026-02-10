@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>DHL eCommerce · Service Blueprint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Delivery:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================
+       DHL BRAND & THEME
+       ========================= */
+    :root {
+      --dhl-red: #D40511;
+      --dhl-yellow: #FFCC00;
+      --dhl-black: #101828;
+      
+      --bg: #F5F7FA;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      
+      --lane-head-w: 260px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--dhl-black);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* =========================
+       HEADER
+       ========================= */
+    header {
+      height: 60px;
+      background: var(--dhl-red);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .brand { font-family: 'Delivery', sans-serif; font-weight: 900; font-size: 22px; display: flex; align-items: center; gap: 12px; }
+    .brand span { background: var(--dhl-yellow); color: var(--dhl-red); padding: 2px 8px; border-radius: 4px; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    
+    .legend { display: flex; gap: 24px; font-size: 12px; font-weight: 600; }
+    .legend-item { display: flex; align-items: center; gap: 8px; color: white; }
+    .dot { width: 10px; height: 10px; border-radius: 2px; background: white; }
+
+    /* =========================
+       GRID LAYOUT
+       ========================= */
+    .blueprint-grid {
+      flex: 1;
+      overflow: auto;
+      display: grid;
+      /* Lane Header + 6 Stages (Equal Width) */
+      grid-template-columns: var(--lane-head-w) repeat(6, minmax(220px, 1fr)); 
+      background: var(--bg);
+    }
+
+    /* --- STICKY HEADERS --- */
+    .corner-plate {
+      position: sticky; top: 0; left: 0; z-index: 60;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
+      border-bottom: 4px solid var(--dhl-red);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 10px; text-align: center;
+    }
+    .cp-title { font-weight: 900; font-size: 14px; color: var(--dhl-red); text-transform: uppercase; }
+
+    .stage-head {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
+      border-bottom: 4px solid var(--dhl-red);
+      padding: 16px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .stage-voice { font-family: 'Delivery', sans-serif; font-size: 16px; font-weight: 900; color: var(--dhl-black); font-style: italic; }
+    .stage-meta { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; display: flex; justify-content: space-between; }
+
+    /* --- LANE HEADERS --- */
+    .lane-label {
+      position: sticky; left: 0; z-index: 40;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 24px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .lane-title { font-size: 16px; font-weight: 800; color: var(--dhl-black); margin-bottom: 6px; }
+    .lane-desc { font-size: 11px; color: #64748B; line-height: 1.4; }
+    
+    .l0-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .tag { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; border: 1px solid #CBD5E1; color: #64748B; }
+
+    /* Lane Colors */
+    .lane-comm { border-left: 6px solid var(--dhl-yellow); }
+    .lane-ops { border-left: 6px solid var(--dhl-red); }
+    .lane-cont { border-left: 6px solid #2563EB; background: #EFF6FF; }
+    .lane-found { border-left: 6px solid #475569; background: #F8FAFC; }
+
+    /* --- CELLS --- */
+    .cell {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 12px; display: flex; flex-direction: column; gap: 8px;
+      min-height: 180px; position: relative;
+    }
+    .cell.cell-cont { min-height: 100px; justify-content: center; background: #EFF6FF; padding: 0; }
+    .cell.cell-found { background: #F8FAFC; }
+
+    /* =========================
+       L1 SMART TILES
+       ========================= */
+    .tile {
+      background: white;
+      border: 1px solid #CBD5E1;
+      border-left: 4px solid #ccc;
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px -4px rgba(0,0,0,0.1);
+      border-color: var(--dhl-red);
+      z-index: 10;
+    }
+
+    /* Tile Colors */
+    .t-L2C { border-left-color: var(--dhl-yellow); }
+    .t-O2D { border-left-color: var(--dhl-red); }
+    .t-D2O, .t-S2E { border-left-color: #475569; background: #F1F5F9; }
+    .t-ITF { border-left-color: #7C3AED; background: #F3E8FF; }
+    .t-P2R { border-left-color: #F97316; }
+
+    .t-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .t-id { font-size: 10px; font-weight: 800; color: #64748B; }
+    .t-owner { font-size: 9px; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; color: #334155; }
+    .t-name { font-size: 11px; font-weight: 700; color: #0F172A; line-height: 1.3; }
+
+    /* =========================
+       CONTINUOUS STREAMS
+       ========================= */
+    .stream-bar {
+      height: 32px;
+      background: white;
+      border: 1px solid #BFDBFE;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px;
+      box-shadow: 0 2px 4px rgba(37,99,235,0.1);
+      position: absolute;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .stream-bar:hover { transform: scale(1.01); background: #EFF6FF; border-color: #2563EB; }
+    
+    .sb-track { width: 90%; left: 5%; top: 15px; background: linear-gradient(90deg, #EFF6FF, #FFF, #EFF6FF); }
+    .sb-issue { width: 94%; left: 3%; top: 55px; border-color: #FDBA74; color: #C2410C; background: linear-gradient(90deg, #FFF7ED, #FFF, #FFF7ED); }
+
+    /* =========================
+       MODAL (Drill Down)
+       ========================= */
+    .modal-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
+      z-index: 200; display: none; align-items: center; justify-content: center;
+    }
+    .modal {
+      background: white; width: 1000px; max-width: 95%; max-height: 90vh;
+      border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    }
+    .modal-header {
+      background: var(--dhl-red); color: white; padding: 20px 28px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-body { padding: 30px; overflow-y: auto; background: #F8FAFC; }
+    
+    /* L2 CHEVRON FLOW */
+    .chevron-track { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 20px; }
+    .chevron {
+      background: white; border: 1px solid #CBD5E1; padding: 14px 20px; min-width: 180px;
+      font-size: 12px; font-weight: 700; color: #334155; text-align: center;
+      clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%);
+      margin-left: -12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      position: relative;
+      cursor: help; /* Hints at hover */
+    }
+    .chevron:first-child { margin-left: 0; clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%); }
+    .chevron:hover { background: var(--dhl-yellow); color: var(--dhl-red); border-color: var(--dhl-yellow); z-index: 10; }
+
+    /* L3 POPOVER (The "Hover List") */
+    .l3-popover {
+      display: none;
+      position: absolute; top: 110%; left: 0; width: 100%;
+      background: white; border: 1px solid #CBD5E1; border-radius: 6px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      padding: 10px; z-index: 20; text-align: left;
+    }
+    .chevron:hover .l3-popover { display: block; }
+    
+    .l3-item { font-size: 10px; color: #475569; padding: 4px 0; border-bottom: 1px solid #F1F5F9; display: flex; gap: 6px; }
+    .l3-item:last-child { border-bottom: none; }
+    .l3-dot { color: var(--dhl-red); font-weight: 900; }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span>DHL</span> eCommerce Blueprint</div>
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Commercial</div>
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Operations</div>
+    <div class="legend-item"><div class="dot" style="background:#2563EB"></div> Continuous</div>
+    <div class="legend-item"><div class="dot" style="background:#475569"></div> Foundation</div>
+  </div>
+</header>
+
+<div class="blueprint-grid" id="grid">
+  </div>
+
+<div class="modal-overlay" id="modal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div style="font-size:11px; font-weight:700; opacity:0.9; text-transform:uppercase">L1 Process Drill-down</div>
+        <div style="font-size:22px; font-weight:800; margin-top:2px" id="m_title">Process Name</div>
+      </div>
+      <button style="background:none; border:none; color:white; font-size:28px; cursor:pointer" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#FFF7ED; border:1px solid #FFEDD5; padding:12px; border-radius:6px; margin-bottom:24px; display:flex; gap:12px; align-items:center">
+        <div style="font-size:20px">💡</div>
+        <div style="font-size:13px; color:#9A3412">
+          <strong>Interaction Tip:</strong> Hover over the L2 Chevrons below to reveal the <strong>L3 Activities</strong> list.
+        </div>
+      </div>
+
+      <div style="font-size:11px; font-weight:800; color:#94A3B8; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px;">Level 2 Sub-Process Flow</div>
+      <div class="chevron-track" id="m_flow"></div>
+      
+      <div style="margin-top:30px; font-size:14px; line-height:1.6; color:#334155" id="m_desc">-</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // 1. DATA CONFIGURATION
+  const STAGES = [
+    { id: "S1", num: "01", name: "Shipment Prep", voice: "I plan & prepare" },
+    { id: "S2", num: "02", name: "Booking & Pickup", voice: "I book & handover" },
+    { id: "S3", num: "03", name: "Export & Transit", voice: "My parcel is moving" },
+    { id: "S4", num: "04", name: "Import & Gateway", voice: "It's arriving" },
+    { id: "S5", num: "05", name: "Last Mile Del.", voice: "I receive it" },
+    { id: "S6", num: "06", name: "After Sales",    voice: "I review & return" }
+  ];
+
+  const LANES = [
+    { id: "COMM", name: "Commercial", desc: "Frontstage", class: "lane-comm", tags: ["L2C"] },
+    { id: "OPS", name: "Operations", desc: "Logistics Flow", class: "lane-ops", tags: ["O2D"] },
+    { id: "CONT", name: "Continuous", desc: "Always On", class: "lane-cont", tags: [] },
+    { id: "FOUND", name: "Foundation", desc: "Backstage", class: "lane-found", tags: ["D2O", "S2E", "ITF"] }
+  ];
+
+  // 2. MAPPING LOGIC (L1s to Stages)
+  // Maps specific L1 codes to the new "Express-style" stages
+  const MAP = [
+    // --- STAGE 1: PREP ---
+    { id: "S2E_01", stage: "S1", lane: "FOUND" },
+    { id: "D2O_02", stage: "S1", lane: "FOUND" },
+    { id: "L2C_01", stage: "S1", lane: "COMM" },
+    { id: "L2C_02", stage: "S1", lane: "COMM" },
+    
+    // --- STAGE 2: BOOKING ---
+    { id: "L2C_05", stage: "S2", lane: "COMM" }, // Booking
+    { id: "O2D_01", stage: "S2", lane: "OPS" },  // Data Entry
+    { id: "O2D_02", stage: "S2", lane: "OPS" },  // Pickup
+    { id: "ITF_04", stage: "S2", lane: "FOUND" }, // API
+
+    // --- STAGE 3: EXPORT ---
+    { id: "O2D_03", stage: "S3", lane: "OPS" },  // Sort Origin
+    { id: "O2D_04", stage: "S3", lane: "OPS" },  // Linehaul
+    { id: "O2D_07", stage: "S3", lane: "OPS" },  // Export Customs
+    { id: "L2C_08", stage: "S3", lane: "COMM" }, // Tracking Msg
+
+    // --- STAGE 4: IMPORT ---
+    { id: "O2D_08", stage: "S4", lane: "OPS" },  // Gateway
+    { id: "O2D_09", stage: "S4", lane: "OPS" },  // Deconsolidation
+    { id: "P2R_02", stage: "S4", lane: "OPS" },  // Incidents
+    { id: "GRC_02", stage: "S4", lane: "FOUND" }, // Compliance
+
+    // --- STAGE 5: LAST MILE ---
+    { id: "O2D_10", stage: "S5", lane: "OPS" },  // Last Mile
+    { id: "O2D_11", stage: "S5", lane: "OPS" },  // POD
+    { id: "ITF_02", stage: "S5", lane: "FOUND" }, // Driver App
+
+    // --- STAGE 6: POST ---
+    { id: "L2C_06", stage: "S6", lane: "COMM" }, // Invoice
+    { id: "P2R_03", stage: "S6", lane: "COMM" }, // Claims
+    { id: "O2D_12", stage: "S6", lane: "OPS" },  // Returns
+    { id: "GRC_04", stage: "S6", lane: "FOUND" }  // Audit
+  ];
+
+  let INDEX = new Map();
+
+  async function init() {
+    renderSkeleton();
+    try {
+      const res = await fetch("data.json");
+      const root = await res.json();
+      buildIndex(root);
+      renderTiles();
+    } catch(e) { console.error(e); }
+  }
+
+  function buildIndex(node) {
+    if(node.id) INDEX.set(node.id, node);
+    if(node.children) node.children.forEach(buildIndex);
+  }
+
+  function renderSkeleton() {
+    const grid = document.getElementById('grid');
+    
+    // Corner
+    const corner = document.createElement('div');
+    corner.className = 'corner-plate';
+    corner.innerHTML = `<div class="cp-title">Process<br>Map</div>`;
+    grid.appendChild(corner);
+
+    // Headers
+    STAGES.forEach(s => {
+      const h = document.createElement('div');
+      h.className = 'stage-head';
+      h.innerHTML = `
+        <div class="stage-meta"><span>Step ${s.num}</span><span>${s.name}</span></div>
+        <div class="stage-voice">"${s.voice}"</div>
+      `;
+      grid.appendChild(h);
+    });
+
+    // Lanes
+    LANES.forEach(l => {
+      // Lane Header
+      const lab = document.createElement('div');
+      lab.className = `lane-label ${l.class}`;
+      let tagHtml = l.tags.map(t => `<span class="tag">${t}</span>`).join("");
+      lab.innerHTML = `
+        <div class="l0-tags">${tagHtml}</div>
+        <div class="lane-title">${l.name}</div>
+        <div class="lane-desc">${l.desc}</div>
+      `;
+      grid.appendChild(lab);
+
+      // Continuous Lane Logic
+      if(l.id === 'CONT') {
+         const row = document.createElement('div');
+         row.className = `cell cell-cont`;
+         row.style.gridColumn = "2 / span 6"; 
+         row.innerHTML = `
+           <div class="stream-bar sb-track" style="width:90%; top:15px" onclick="openStream('L2C_08')">
+             <span>⟵ Track & Trace Visibility ⟶</span>
+           </div>
+           <div class="stream-bar sb-issue" style="width:94%; top:55px" onclick="openStream('P2R_01')">
+             <span>⟵ Issue Resolution & Care ⟶</span>
+           </div>
+         `;
+         grid.appendChild(row);
+      } else {
+         STAGES.forEach(s => {
+           const cell = document.createElement('div');
+           cell.className = `cell ${l.id === 'FOUND' ? 'cell-found' : ''}`;
+           cell.id = `c_${l.id}_${s.id}`;
+           grid.appendChild(cell);
+         });
+      }
+    });
+  }
+
+  function renderTiles() {
+    MAP.forEach(m => {
+      const cell = document.getElementById(`c_${m.lane}_${m.stage}`);
+      if(!cell) return;
+
+      const node = INDEX.get(m.id);
+      const name = node ? (node.name.includes(':') ? node.name.split(':')[1].trim() : node.name) : m.id;
+      const owner = node ? (node.owner || "TBD") : "-";
+      const l0 = m.id.split('_')[0];
+
+      const tile = document.createElement('div');
+      tile.className = `tile t-${l0}`;
+      tile.innerHTML = `
+        <div class="t-head">
+          <span class="t-id">${m.id}</span>
+          <span class="t-owner">${owner}</span>
+        </div>
+        <div class="t-name">${name}</div>
+      `;
+      
+      if(node) tile.onclick = () => openModal(node);
+      cell.appendChild(tile);
+    });
+  }
+
+  function openStream(id) {
+    const node = INDEX.get(id);
+    if(node) openModal(node);
+  }
+
+  function openModal(node) {
+    document.getElementById('m_title').textContent = node.name.includes(':') ? node.name.split(':')[1].trim() : node.name;
+    document.getElementById('m_desc').textContent = node.description || "No description provided.";
+    
+    const track = document.getElementById('m_flow');
+    track.innerHTML = "";
+    
+    if(node.children && node.children.length > 0) {
+      node.children.forEach(c => {
+        // L2 Chevron
+        const chev = document.createElement('div');
+        chev.className = 'chevron';
+        const cName = c.name.includes(':') ? c.name.split(':')[1].trim() : c.name;
+        
+        // L3 Popover Generation
+        let l3Html = "";
+        if(c.children && c.children.length > 0) {
+           l3Html = `<div class="l3-popover">`;
+           c.children.forEach(l3 => {
+             const l3n = l3.name.includes(':') ? l3.name.split(':')[1].trim() : l3.name;
+             l3Html += `<div class="l3-item"><span class="l3-dot">•</span> ${l3n}</div>`;
+           });
+           l3Html += `</div>`;
+        } else {
+           l3Html = `<div class="l3-popover"><div class="l3-item" style="color:#999;font-style:italic">No L3 activities defined</div></div>`;
+        }
+
+        chev.innerHTML = `
+          <span>${cName}</span>
+          <div style="font-size:9px; color:#94A3B8; margin-top:4px">${c.id}</div>
+          ${l3Html}
+        `;
+        track.appendChild(chev);
+      });
+    } else {
+      track.innerHTML = `<span style="font-size:12px;color:#94A3B8;padding:10px;">No L2 sub-processes defined.</span>`;
+    }
+
+    document.getElementById('modal').style.display = 'flex';
+  }
+
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+
+  init();
+</script>
+</body>
+</html>
