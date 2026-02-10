@@ -8,19 +8,23 @@
 
   <style>
     /* =========================
-       DHL BRAND TOKENS
+       DHL THEME
        ========================= */
     :root {
       --dhl-red: #D40511;
       --dhl-yellow: #FFCC00;
       --dhl-black: #101828;
       
-      --bg: #F5F7FA;
+      --bg: #F2F4F7;
       --surface: #FFFFFF;
-      --border: #E2E8F0;
+      --border: #E4E7EC;
       
-      --lane-head-w: 240px;
-      --col-min: 210px;
+      --head-h: 60px;
+      --lane-w: 240px;
+      --col-min: 190px;
+      
+      /* Deck Height */
+      --deck-h: 320px;
     }
 
     * { box-sizing: border-box; }
@@ -40,7 +44,7 @@
        HEADER
        ========================= */
     header {
-      height: 60px;
+      height: var(--head-h);
       background: var(--dhl-red);
       color: white;
       display: flex;
@@ -49,80 +53,81 @@
       justify-content: space-between;
       flex-shrink: 0;
       z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-    .brand { font-family: 'Delivery', sans-serif; font-weight: 900; font-size: 22px; display: flex; align-items: center; gap: 12px; }
-    .brand span { background: var(--dhl-yellow); color: var(--dhl-red); padding: 2px 8px; border-radius: 4px; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .brand { font-family: 'Delivery', sans-serif; font-weight: 900; font-size: 20px; display: flex; align-items: center; gap: 12px; }
+    .brand span { background: var(--dhl-yellow); color: var(--dhl-red); padding: 2px 8px; border-radius: 4px; font-size: 14px; }
     
-    .legend { display: flex; gap: 24px; font-size: 12px; font-weight: 600; }
-    .legend-item { display: flex; align-items: center; gap: 8px; color: white; }
+    .legend { display: flex; gap: 20px; font-size: 11px; font-weight: 600; }
+    .legend-item { display: flex; align-items: center; gap: 6px; color: white; }
     .dot { width: 10px; height: 10px; border-radius: 2px; background: white; }
 
     /* =========================
-       GRID LAYOUT
+       MAIN GRID (TOP HALF)
        ========================= */
-    .blueprint-grid {
+    .grid-wrapper {
       flex: 1;
       overflow: auto;
       display: grid;
       /* Lane Header + 7 Stages */
-      grid-template-columns: var(--lane-head-w) repeat(7, minmax(var(--col-min), 1fr)); 
+      grid-template-columns: var(--lane-w) repeat(7, minmax(var(--col-min), 1fr)); 
+      /* Explicit Rows for Stability */
+      grid-template-rows: auto auto auto auto auto auto;
       background: var(--bg);
+      padding-bottom: var(--deck-h); /* Space for fixed deck */
     }
 
-    /* --- HEADERS --- */
+    /* Sticky Headers */
     .corner-plate {
       position: sticky; top: 0; left: 0; z-index: 60;
       background: var(--surface); 
       border-right: 1px solid var(--border);
       border-bottom: 4px solid var(--dhl-red);
       display: flex; align-items: center; justify-content: center;
-      padding: 10px; 
+      padding: 10px; grid-row: 1; grid-column: 1;
     }
-    .cp-title { font-weight: 900; font-size: 14px; color: var(--dhl-red); text-transform: uppercase; text-align: center; }
+    .cp-title { font-weight: 900; font-size: 13px; color: var(--dhl-red); text-transform: uppercase; text-align: center; }
 
     .stage-head {
       position: sticky; top: 0; z-index: 50;
       background: var(--surface); 
       border-right: 1px solid var(--border);
       border-bottom: 4px solid var(--dhl-red);
-      padding: 16px; display: flex; flex-direction: column; gap: 6px;
+      padding: 12px 16px; display: flex; flex-direction: column; gap: 4px;
+      grid-row: 1;
     }
-    .stage-voice { font-family: 'Delivery', sans-serif; font-size: 14px; font-weight: 900; color: var(--dhl-black); font-style: italic; line-height: 1.2; }
-    .stage-meta { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; display: flex; justify-content: space-between; }
+    .stage-voice { font-family: 'Delivery', sans-serif; font-size: 13px; font-weight: 900; color: var(--dhl-black); font-style: italic; }
+    .stage-meta { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; }
 
-    /* --- LANE LABELS --- */
+    /* Lane Labels */
     .lane-label {
       position: sticky; left: 0; z-index: 40;
       background: var(--surface);
       border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 24px; display: flex; flex-direction: column; justify-content: center;
+      padding: 20px; display: flex; flex-direction: column; justify-content: center;
     }
-    .lane-title { font-size: 16px; font-weight: 800; color: var(--dhl-black); margin-bottom: 6px; }
-    .lane-desc { font-size: 11px; color: #64748B; line-height: 1.4; }
+    .lane-title { font-size: 14px; font-weight: 800; color: var(--dhl-black); margin-bottom: 4px; }
+    .lane-desc { font-size: 10px; color: #64748B; line-height: 1.3; }
     
-    .l0-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
-    .tag { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; border: 1px solid #CBD5E1; color: #64748B; }
+    /* Lane Styling */
+    .lane-comm { border-left: 6px solid var(--dhl-yellow); background:#FFFBEB; }
+    .lane-ops { border-left: 6px solid var(--dhl-red); background:#FEF2F2; }
+    .lane-cont { border-left: 6px solid #2563EB; background:#EFF6FF; }
+    .lane-found { border-left: 6px solid #475569; background:#F8FAFC; }
 
-    /* Lane Colors */
-    .lane-comm { border-left: 6px solid var(--dhl-yellow); }
-    .lane-ops { border-left: 6px solid var(--dhl-red); }
-    .lane-cont { border-left: 6px solid #2563EB; background: #EFF6FF; }
-    .lane-found { border-left: 6px solid #475569; background: #F8FAFC; }
-
-    /* --- CELLS --- */
+    /* Cells */
     .cell {
       border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 12px; display: flex; flex-direction: column; gap: 8px;
-      min-height: 180px; position: relative;
+      padding: 10px; display: flex; flex-direction: column; gap: 8px;
+      min-height: 160px; background: white;
     }
-    .cell.cell-cont { min-height: 60px; justify-content: center; background: #EFF6FF; padding: 0; border-bottom: none; }
-    .cell.cell-found { background: #F8FAFC; min-height: 140px; }
+    .cell-cont { background: #EFF6FF; min-height: 90px; justify-content: center; }
+    .cell-found { background: #F8FAFC; }
 
     /* =========================
-       L1 SMART TILES
+       PROCESS TILES (L1)
        ========================= */
     .tile {
       background: white;
@@ -141,90 +146,82 @@
       border-color: var(--dhl-red);
       z-index: 10;
     }
+    .tile.active { border-color: var(--dhl-red); background: #FFF7ED; box-shadow: 0 0 0 2px var(--dhl-red); }
 
-    /* Tile Colors */
-    .t-L2C { border-left-color: var(--dhl-yellow); }
-    .t-O2D { border-left-color: var(--dhl-red); }
-    .t-D2O, .t-S2E { border-left-color: #475569; background: #F1F5F9; }
-    .t-ITF { border-left-color: #7C3AED; background: #F3E8FF; }
-    .t-P2R { border-left-color: #F97316; }
+    /* Spanning Tiles (For Continuous Lanes) */
+    .tile-span {
+      height: 40px; display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: white; border: 1px solid #93C5FD; border-left: 5px solid #2563EB;
+      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+      width: 98%; margin: 0 auto;
+    }
+    .tile-span:hover { background: #EFF6FF; transform: scale(1.01); }
+    .tile-span .t-name { font-size: 12px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px; }
 
+    /* Tile Content */
     .t-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
     .t-id { font-size: 10px; font-weight: 800; color: #64748B; }
-    .t-owner { font-size: 9px; background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 3px; color: #334155; }
     .t-name { font-size: 11px; font-weight: 700; color: #0F172A; line-height: 1.3; }
 
-    /* =========================
-       CONTINUOUS STREAMS
-       ========================= */
-    .stream-bar {
-      height: 34px;
-      background: white;
-      border: 1px solid #BFDBFE;
-      border-radius: 17px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px;
-      box-shadow: 0 2px 4px rgba(37,99,235,0.1);
-      position: absolute; width: 96%; left: 2%;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    .stream-bar:hover { transform: scale(1.01); background: #EFF6FF; border-color: #2563EB; }
-    
-    .sb-track { background: linear-gradient(90deg, #EFF6FF, #FFF, #EFF6FF); }
-    .sb-issue { border-color: #FDBA74; color: #C2410C; background: linear-gradient(90deg, #FFF7ED, #FFF, #FFF7ED); }
+    /* Color Coding */
+    .c-L2C { border-left-color: var(--dhl-yellow); }
+    .c-O2D { border-left-color: var(--dhl-red); }
+    .c-P2R { border-left-color: #F97316; }
+    .c-ITF { border-left-color: #7C3AED; }
+    .c-D2O { border-left-color: #475569; }
 
     /* =========================
-       MODAL (Drill Down)
+       BOTTOM DECK (DETAIL VIEW)
        ========================= */
-    .modal-overlay {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(15,23,42,0.6); backdrop-filter: blur(4px);
-      z-index: 200; display: none; align-items: center; justify-content: center;
+    #deck {
+      position: fixed; bottom: 0; left: 0; width: 100%; height: var(--deck-h);
+      background: white; border-top: 4px solid var(--dhl-red);
+      z-index: 200; box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column;
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .modal {
-      background: white; width: 1100px; max-width: 95%; max-height: 90vh;
-      border-radius: 12px; display: flex; flex-direction: column;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-    }
-    .modal-header {
-      background: var(--dhl-red); color: white; padding: 20px 28px;
+    #deck.open { transform: translateY(0); }
+
+    .deck-header {
+      padding: 12px 24px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .modal-body { padding: 30px; overflow-y: visible; /* ALLOW POPOVER TO OVERFLOW */ background: #F8FAFC; }
+    .deck-title { font-size: 16px; font-weight: 800; color: var(--dhl-black); text-transform: uppercase; }
+    .deck-meta { font-size: 11px; color: #64748B; display: flex; gap: 16px; }
     
-    /* L2 CHEVRON FLOW */
-    .chevron-track { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 50px; /* Space for popover */ overflow-y: visible; }
-    
-    .chevron {
-      background: white; border: 1px solid #CBD5E1; padding: 14px 20px; min-width: 180px;
-      font-size: 12px; font-weight: 700; color: #334155; text-align: center;
-      clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%, 8% 50%);
-      margin-left: -12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      position: relative;
-      cursor: help; 
+    .deck-body {
+      flex: 1; padding: 20px 24px; overflow-x: auto; 
+      display: flex; gap: 16px; align-items: flex-start;
+      background: #FFFFFF;
     }
-    .chevron:first-child { margin-left: 0; clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%); }
-    .chevron:hover { background: var(--dhl-yellow); color: var(--dhl-red); border-color: var(--dhl-yellow); z-index: 100; }
 
-    /* L3 POPOVER (FIXED) */
-    .l3-popover {
-      display: none;
-      position: absolute; 
-      top: 100%; left: 10px; width: 220px;
-      background: white; border: 1px solid #94A3B8; border-radius: 6px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      padding: 12px; z-index: 9999; text-align: left;
+    /* L2/L3 Cards */
+    .l2-col {
+      min-width: 220px; max-width: 240px;
+      background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;
+      display: flex; flex-direction: column;
+      flex-shrink: 0;
     }
-    
-    /* Show on hover */
-    .chevron:hover .l3-popover { display: block; animation: fadeIn 0.1s ease-out; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
-    
-    .l3-header { font-size: 10px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px; }
-    .l3-item { font-size: 11px; color: #334155; padding: 4px 0; display: flex; gap: 6px; line-height: 1.3; }
-    .l3-dot { color: var(--dhl-red); font-weight: 900; }
+    .l2-head {
+      padding: 10px; background: #FFF; border-bottom: 2px solid var(--dhl-yellow);
+      font-size: 11px; font-weight: 700; color: #0F172A;
+      border-radius: 6px 6px 0 0;
+    }
+    .l3-list { padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .l3-item {
+      font-size: 10px; padding: 4px 6px; background: white; border: 1px solid #E2E8F0; border-radius: 4px;
+      color: #475569; display: flex; gap: 6px;
+    }
+    .l3-item::before { content: "•"; color: var(--dhl-red); font-weight: bold; }
+
+    .close-btn { 
+      background: #E2E8F0; border: none; padding: 6px 12px; border-radius: 4px; 
+      font-size: 11px; font-weight: 700; cursor: pointer; color: #475569;
+    }
+    .close-btn:hover { background: #CBD5E1; color: #0F172A; }
+
+    /* Empty State */
+    .deck-empty { padding: 40px; text-align: center; color: #94A3B8; font-style: italic; width: 100%; }
 
   </style>
 </head>
@@ -234,110 +231,108 @@
   <div class="brand"><span>DHL</span> eCommerce Blueprint</div>
   <div class="legend">
     <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Commercial</div>
-    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Operations</div>
-    <div class="legend-item"><div class="dot" style="background:#2563EB"></div> Continuous</div>
-    <div class="legend-item"><div class="dot" style="background:#475569"></div> Foundation</div>
+    <div class="legend-item"><div class="dot" style="background:#2563EB"></div> Visibility</div>
+    <div class="legend-item"><div class="dot" style="background:#F97316"></div> Resolution</div>
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Ops</div>
   </div>
 </header>
 
-<div class="blueprint-grid" id="grid">
+<div class="grid-wrapper" id="grid">
   </div>
 
-<div class="modal-overlay" id="modal" onclick="closeModal()">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <div>
-        <div style="font-size:11px; font-weight:700; opacity:0.9; text-transform:uppercase">Process Detail</div>
-        <div style="font-size:22px; font-weight:800; margin-top:2px" id="m_title">Process Name</div>
-      </div>
-      <button style="background:none; border:none; color:white; font-size:28px; cursor:pointer" onclick="closeModal()">&times;</button>
+<div id="deck">
+  <div class="deck-header">
+    <div>
+      <div style="font-size:10px; font-weight:700; color:#94A3B8; margin-bottom:2px">SELECTED PROCESS</div>
+      <div class="deck-title" id="d_title">Select a Process</div>
     </div>
-    <div class="modal-body">
-      <div style="background:#FFF7ED; border:1px solid #FFEDD5; padding:12px; border-radius:6px; margin-bottom:24px; display:flex; gap:12px; align-items:center">
-        <div style="font-size:20px">🔎</div>
-        <div style="font-size:13px; color:#9A3412">
-          <strong>View Sub-Activities:</strong> Hover your mouse over the blue/yellow steps below to see the granular Level 3 list.
-        </div>
-      </div>
-
-      <div style="font-size:11px; font-weight:800; color:#94A3B8; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px;">Level 2 Process Flow</div>
-      <div class="chevron-track" id="m_flow"></div>
-      
-      <div style="margin-top:20px; font-size:14px; line-height:1.6; color:#334155" id="m_desc">-</div>
+    <div class="deck-meta">
+      <span id="d_id">ID: -</span>
+      <span id="d_owner">Owner: -</span>
     </div>
+    <button class="close-btn" onclick="closeDeck()">CLOSE PANEL</button>
+  </div>
+  <div class="deck-body" id="d_body">
+    <div class="deck-empty">Click any process tile above to view Level 2 steps & Level 3 activities here.</div>
   </div>
 </div>
 
 <script>
+  // 1. DATA CONFIGURATION
   const STAGES = [
-    { id: "S1", num: "01", name: "Awareness & Plan", voice: "I discover & plan" },
-    { id: "S2", num: "02", name: "Offer & Account",  voice: "I get a quote" },
-    { id: "S3", num: "03", name: "Onboard & Book",   voice: "I join & book" },
-    { id: "S4", num: "04", name: "Export & Transit", voice: "My parcel moves" },
-    { id: "S5", num: "05", name: "Import & Arrive",  voice: "It arrives locally" },
-    { id: "S6", num: "06", name: "Delivery",         voice: "I receive it" },
-    { id: "S7", num: "07", name: "Post-Shipment",    voice: "I review & pay" }
+    { id: "S1", name: "Awareness & Plan", voice: "I discover" },
+    { id: "S2", name: "Offer & Account",  voice: "I get a quote" },
+    { id: "S3", name: "Onboard & Book",   voice: "I book" },
+    { id: "S4", name: "Export & Transit", voice: "It moves" },
+    { id: "S5", name: "Import & Arrive",  voice: "It arrives" },
+    { id: "S6", name: "Delivery",         voice: "I receive" },
+    { id: "S7", name: "Post-Shipment",    voice: "I review" }
   ];
 
-  // Explicit Rows
-  const LANES = [
-    { id: "COMM", name: "Commercial", desc: "Frontstage", class: "lane-comm", tags: ["L2C"] },
-    { id: "CONT_A", name: "Visibility", desc: "Continuous", class: "lane-cont", tags: [] },
-    { id: "CONT_B", name: "Resolution", desc: "Omnichannel", class: "lane-cont", tags: [] },
-    { id: "OPS", name: "Operations", desc: "Logistics Flow", class: "lane-ops", tags: ["O2D"] },
-    { id: "FOUND", name: "Foundation", desc: "Backstage", class: "lane-found", tags: ["D2O", "ITF", "GRC"] }
+  // 2. GRID ROWS (Explicit)
+  const ROWS = [
+    { id: "COMM", name: "Commercial", desc: "Frontstage", class: "lane-comm" },
+    { id: "CONT_VIS", name: "Visibility", desc: "Data Stream", class: "lane-cont" },
+    { id: "CONT_RES", name: "Resolution", desc: "Care Stream", class: "lane-cont" },
+    { id: "OPS", name: "Operations", desc: "Logistics", class: "lane-ops" },
+    { id: "FOUND", name: "Foundation", desc: "Backstage", class: "lane-found" }
   ];
 
-  // Mapping L1s to Stages
-  const MAP = [
+  // 3. TILE MAPPING (L1s)
+  // 'span' indicates how many columns a continuous tile should take
+  const TILES = [
     // S1
-    { id: "S2E_01", stage: "S1", lane: "FOUND" },
-    { id: "L2C_01", stage: "S1", lane: "COMM" },
-    { id: "D2O_01", stage: "S1", lane: "FOUND" },
-
+    { id: "S2E_01", stage: 1, row: "FOUND" },
+    { id: "L2C_01", stage: 1, row: "COMM" },
+    { id: "D2O_01", stage: 1, row: "FOUND" },
+    
     // S2
-    { id: "L2C_02", stage: "S2", lane: "COMM" },
-    { id: "L2C_03", stage: "S2", lane: "COMM" },
-    { id: "R2R_04", stage: "S2", lane: "FOUND" },
-
+    { id: "L2C_02", stage: 2, row: "COMM" },
+    { id: "L2C_03", stage: 2, row: "COMM" },
+    
     // S3
-    { id: "L2C_04", stage: "S3", lane: "COMM" }, // Account Setup
-    { id: "L2C_05", stage: "S3", lane: "COMM" }, // Booking
-    { id: "O2D_01", stage: "S3", lane: "OPS" },  // Data
-    { id: "O2D_02", stage: "S3", lane: "OPS" },  // Pickup
-    { id: "ITF_04", stage: "S3", lane: "FOUND" },
-
+    { id: "L2C_05", stage: 3, row: "COMM" },
+    { id: "O2D_01", stage: 3, row: "OPS" },
+    { id: "O2D_02", stage: 3, row: "OPS" },
+    
     // S4
-    { id: "O2D_03", stage: "S4", lane: "OPS" }, // Sort
-    { id: "O2D_04", stage: "S4", lane: "OPS" }, // Linehaul
-    { id: "O2D_07", stage: "S4", lane: "OPS" }, // Export
-
+    { id: "O2D_04", stage: 4, row: "OPS" },
+    { id: "O2D_07", stage: 4, row: "OPS" },
+    
     // S5
-    { id: "O2D_08", stage: "S5", lane: "OPS" }, // Gateway
-    { id: "O2D_09", stage: "S5", lane: "OPS" }, // Deconsolidation
-    { id: "GRC_02", stage: "S5", lane: "FOUND" },
-
+    { id: "O2D_08", stage: 5, row: "OPS" },
+    { id: "GRC_02", stage: 5, row: "FOUND" },
+    
     // S6
-    { id: "O2D_10", stage: "S6", lane: "OPS" }, // Last Mile
-    { id: "O2D_11", stage: "S6", lane: "OPS" }, // POD
-    { id: "ITF_02", stage: "S6", lane: "FOUND" },
-
+    { id: "O2D_10", stage: 6, row: "OPS" },
+    { id: "O2D_11", stage: 6, row: "OPS" },
+    { id: "ITF_02", stage: 6, row: "FOUND" },
+    
     // S7
-    { id: "L2C_06", stage: "S7", lane: "COMM" },
-    { id: "P2R_03", stage: "S7", lane: "COMM" },
-    { id: "O2D_12", stage: "S7", lane: "OPS" },
-    { id: "GRC_04", stage: "S7", lane: "FOUND" }
+    { id: "L2C_06", stage: 7, row: "COMM" },
+    { id: "P2R_03", stage: 7, row: "COMM" },
+    { id: "O2D_12", stage: 7, row: "OPS" },
+
+    // CONTINUOUS STREAMS (Spanning)
+    // Visibility: Booking(3) -> Delivery(6) = Span 4
+    { id: "L2C_08", stage: 3, row: "CONT_VIS", span: 4, label: "L2C_08: End-to-End Visibility & Tracking" },
+    
+    // Resolution: Transit(4) -> Post(7) = Span 4
+    { id: "P2R_01", stage: 4, row: "CONT_RES", span: 4, label: "P2R_01: Network Incident Resolution" },
+    
+    // Omnichannel Care: S1 -> S7 = Span 7
+    { id: "L2C_09", stage: 1, row: "CONT_RES", span: 7, label: "Omnichannel Customer Care (Always On)" }
   ];
 
   let INDEX = new Map();
 
   async function init() {
-    renderSkeleton();
+    renderGrid();
     try {
       const res = await fetch("data.json");
       const root = await res.json();
       buildIndex(root);
-      renderTiles();
+      hydrateTiles();
     } catch(e) { console.error(e); }
   }
 
@@ -346,145 +341,143 @@
     if(node.children) node.children.forEach(buildIndex);
   }
 
-  function renderSkeleton() {
+  function renderGrid() {
     const grid = document.getElementById('grid');
     
-    // Corner
+    // 1. Corner
     const corner = document.createElement('div');
     corner.className = 'corner-plate';
-    corner.innerHTML = `<div class="cp-title">Blueprint<br>View</div>`;
+    corner.innerHTML = `<div class="cp-title">Service<br>Blueprint</div>`;
     grid.appendChild(corner);
 
-    // Stage Headers
+    // 2. Stage Headers
     STAGES.forEach(s => {
       const h = document.createElement('div');
       h.className = 'stage-head';
       h.innerHTML = `
-        <div class="stage-meta"><span>Stage ${s.num}</span><span>${s.name}</span></div>
+        <div class="stage-meta">Step ${s.num}</div>
         <div class="stage-voice">"${s.voice}"</div>
       `;
       grid.appendChild(h);
     });
 
-    // Render 5 Rows
-    LANES.forEach(l => {
-      // Lane Header
-      const lab = document.createElement('div');
-      lab.className = `lane-label ${l.class}`;
-      let tagHtml = l.tags.map(t => `<span class="tag">${t}</span>`).join("");
-      lab.innerHTML = `
-        <div class="l0-tags">${tagHtml}</div>
-        <div class="lane-title">${l.name}</div>
-        <div class="lane-desc">${l.desc}</div>
-      `;
-      grid.appendChild(lab);
+    // 3. Rows & Cells
+    // We render explicit cells, but allow tiles to span multiple cells via grid-column
+    ROWS.forEach((r, rIdx) => {
+       // Row Label
+       const lab = document.createElement('div');
+       lab.className = `lane-label ${r.class}`;
+       lab.style.gridRow = rIdx + 2; // +2 because row 1 is headers
+       lab.gridColumn = 1;
+       lab.innerHTML = `<div class="lane-title">${r.name}</div><div class="lane-desc">${r.desc}</div>`;
+       grid.appendChild(lab);
 
-      // Lane Cells or Continuous Bars
-      if(l.id === 'CONT_A') {
-         // Visibility Stream
-         const row = document.createElement('div');
-         row.className = `cell cell-cont`;
-         row.style.gridColumn = "5 / span 4"; // S3 to S6
-         row.innerHTML = `<div class="stream-bar sb-track" onclick="openStream('L2C_08')"><span>⟵ L2C_08: Continuous Visibility ⟶</span></div>`;
-         grid.appendChild(row);
-         // Empty cells before
-         for(let i=1; i<4; i++) grid.appendChild(createCell());
+       // Create a container for the row track to hold cells
+       // Actually, we just create cells for each stage in this row
+       STAGES.forEach((s, sIdx) => {
+         const cell = document.createElement('div');
+         cell.className = `cell ${r.id === 'FOUND' ? 'cell-found' : ''}`;
+         if(r.id.startsWith('CONT')) cell.classList.add('cell-cont');
          
-      } else if(l.id === 'CONT_B') {
-         // Resolution Stream
-         const row = document.createElement('div');
-         row.className = `cell cell-cont`;
-         row.style.gridColumn = "5 / span 5"; // S3 to S7
-         row.innerHTML = `<div class="stream-bar sb-issue" onclick="openStream('P2R_01')"><span>⟵ P2R_01: Omnichannel Resolution ⟶</span></div>`;
-         grid.appendChild(row);
-         // Empty cells before
-         for(let i=1; i<4; i++) grid.appendChild(createCell());
+         cell.style.gridRow = rIdx + 2;
+         cell.style.gridColumn = sIdx + 2; // +2 because col 1 is label
+         cell.id = `cell_${r.id}_${sIdx+1}`; // 1-based index
+         grid.appendChild(cell);
+       });
+    });
+  }
 
+  function hydrateTiles() {
+    TILES.forEach(t => {
+      // Find parent cell
+      // Note: If it spans, we put it in the start cell and style it to break out
+      // BUT for CSS Grid cleaner approach: we place the tile directly in grid?
+      // No, let's keep it simple: Place in start cell, use absolute width or flex grow?
+      // Better: CSS Grid Item placement.
+      
+      const node = INDEX.get(t.id);
+      const name = t.label || (node ? (node.name.includes(':') ? node.name.split(':')[1].trim() : node.name) : t.id);
+      const l0 = t.id.split('_')[0];
+      
+      const el = document.createElement('div');
+      el.onclick = () => openDeck(t.id, name);
+      
+      if(t.span) {
+        // Continuous Stream Item
+        // We need to target the grid area directly
+        el.className = `tile-span c-${l0}`;
+        el.innerHTML = `<span class="t-name">${name}</span>`;
+        
+        // Find row index
+        const rIdx = ROWS.findIndex(r => r.id === t.row) + 2;
+        const cStart = t.stage + 1;
+        const cEnd = cStart + t.span;
+        
+        el.style.gridRow = rIdx;
+        el.style.gridColumn = `${cStart} / ${cEnd}`;
+        el.style.alignSelf = "center";
+        el.style.zIndex = 10;
+        
+        document.getElementById('grid').appendChild(el); // Append to grid directly
+        
       } else {
-         STAGES.forEach(s => {
-           const cell = createCell(l.id, s.id);
-           if(l.id === 'FOUND') cell.classList.add('cell-found');
-           grid.appendChild(cell);
-         });
+        // Standard Tile
+        el.className = `tile c-${l0}`;
+        const owner = node ? (node.owner || "Ops") : "-";
+        el.innerHTML = `
+          <div class="t-head"><span class="t-id">${t.id}</span><span class="t-owner">${owner}</span></div>
+          <div class="t-name">${name}</div>
+        `;
+        document.getElementById(`cell_${t.row}_${t.stage}`).appendChild(el);
       }
     });
   }
 
-  function createCell(laneId, stageId) {
-    const d = document.createElement('div');
-    d.className = 'cell';
-    if(laneId && stageId) d.id = `c_${laneId}_${stageId}`;
-    return d;
-  }
-
-  function renderTiles() {
-    MAP.forEach(m => {
-      const cell = document.getElementById(`c_${m.lane}_${m.stage}`);
-      if(!cell) return;
-
-      const node = INDEX.get(m.id);
-      const name = node ? (node.name.includes(':') ? node.name.split(':')[1].trim() : node.name) : m.id;
-      const owner = node ? (node.owner || "TBD") : "-";
-      const l0 = m.id.split('_')[0];
-
-      const tile = document.createElement('div');
-      tile.className = `tile t-${l0}`;
-      tile.innerHTML = `
-        <div class="t-head">
-          <span class="t-id">${m.id}</span>
-          <span class="t-owner">${owner}</span>
-        </div>
-        <div class="t-name">${name}</div>
-      `;
-      if(node) tile.onclick = () => openModal(node);
-      cell.appendChild(tile);
-    });
-  }
-
-  function openStream(id) {
+  function openDeck(id, name) {
     const node = INDEX.get(id);
-    if(node) openModal(node);
-  }
+    document.getElementById('d_title').textContent = name;
+    document.getElementById('d_id').textContent = "ID: " + id;
+    document.getElementById('d_owner').textContent = "Owner: " + (node ? (node.owner || "TBD") : "TBD");
+    
+    // Highlight Active
+    document.querySelectorAll('.tile, .tile-span').forEach(el => el.classList.remove('active'));
+    // (Identifying the clicked element strictly is hard here without passing 'this', but visual feedback in deck is enough)
 
-  function openModal(node) {
-    document.getElementById('m_title').textContent = node.name.includes(':') ? node.name.split(':')[1].trim() : node.name;
-    document.getElementById('m_desc').textContent = node.description || "No description provided.";
-    
-    const track = document.getElementById('m_flow');
-    track.innerHTML = "";
-    
-    if(node.children && node.children.length > 0) {
-      node.children.forEach(c => {
-        // L2 Chevron
-        const chev = document.createElement('div');
-        chev.className = 'chevron';
-        const cName = c.name.includes(':') ? c.name.split(':')[1].trim() : c.name;
+    const body = document.getElementById('d_body');
+    body.innerHTML = "";
+
+    if(!node || !node.children || node.children.length === 0) {
+      body.innerHTML = `<div class="deck-empty">No Level 2 sub-processes found for this item.</div>`;
+    } else {
+      // Render Columns
+      node.children.forEach(l2 => {
+        const col = document.createElement('div');
+        col.className = 'l2-col';
+        const l2Name = l2.name.includes(':') ? l2.name.split(':')[1].trim() : l2.name;
         
-        // RECURSIVE L3 FINDER
-        let l3Html = "";
-        if(c.children && c.children.length > 0) {
-           l3Html = `<div class="l3-popover"><div class="l3-header">Activities (L3)</div>`;
-           c.children.forEach(l3 => {
-             const l3n = l3.name.includes(':') ? l3.name.split(':')[1].trim() : l3.name;
-             l3Html += `<div class="l3-item"><span class="l3-dot">•</span> ${l3n}</div>`;
+        let l3HTML = "";
+        if(l2.children && l2.children.length > 0) {
+           l2.children.forEach(l3 => {
+             const l3Name = l3.name.includes(':') ? l3.name.split(':')[1].trim() : l3.name;
+             l3HTML += `<div class="l3-item">${l3Name}</div>`;
            });
-           l3Html += `</div>`;
         } else {
-           l3Html = `<div class="l3-popover"><div class="l3-item" style="color:#999;font-style:italic">No L3 data</div></div>`;
+           l3HTML = `<div class="l3-item" style="color:#ccc; font-style:italic">No L3 activities</div>`;
         }
 
-        chev.innerHTML = `<span>${cName}</span><div style="font-size:9px; color:#94A3B8; margin-top:4px">${c.id}</div>${l3Html}`;
-        track.appendChild(chev);
+        col.innerHTML = `
+          <div class="l2-head">${l2Name}</div>
+          <div class="l3-list">${l3HTML}</div>
+        `;
+        body.appendChild(col);
       });
-    } else {
-      track.innerHTML = `<span style="font-size:12px;color:#94A3B8;padding:10px;">No L2 sub-processes defined.</span>`;
     }
 
-    document.getElementById('modal').style.display = 'flex';
+    document.getElementById('deck').classList.add('open');
   }
 
-  function closeModal() {
-    document.getElementById('modal').style.display = 'none';
+  function closeDeck() {
+    document.getElementById('deck').classList.remove('open');
   }
 
   init();
