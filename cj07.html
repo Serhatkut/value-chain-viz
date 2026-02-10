@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>DHL eCommerce · End-to-End Journey Blueprint</title>
+  <title>DHL eCommerce · Service Blueprint</title>
   <link href="https://fonts.googleapis.com/css2?family=Delivery:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -40,7 +40,7 @@
        HEADER
        ========================= */
     header {
-      height: 64px;
+      height: 60px;
       background: var(--dhl-red);
       color: white;
       display: flex;
@@ -70,16 +70,16 @@
       background: var(--bg);
     }
 
-    /* --- STICKY HEADERS --- */
+    /* --- HEADERS --- */
     .corner-plate {
       position: sticky; top: 0; left: 0; z-index: 60;
       background: var(--surface); 
       border-right: 1px solid var(--border);
       border-bottom: 4px solid var(--dhl-red);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      padding: 10px; text-align: center;
+      display: flex; align-items: center; justify-content: center;
+      padding: 10px; 
     }
-    .cp-title { font-weight: 900; font-size: 14px; color: var(--dhl-red); text-transform: uppercase; }
+    .cp-title { font-weight: 900; font-size: 14px; color: var(--dhl-red); text-transform: uppercase; text-align: center; }
 
     .stage-head {
       position: sticky; top: 0; z-index: 50;
@@ -91,7 +91,7 @@
     .stage-voice { font-family: 'Delivery', sans-serif; font-size: 14px; font-weight: 900; color: var(--dhl-black); font-style: italic; line-height: 1.2; }
     .stage-meta { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; display: flex; justify-content: space-between; }
 
-    /* --- LANE HEADERS --- */
+    /* --- LANE LABELS --- */
     .lane-label {
       position: sticky; left: 0; z-index: 40;
       background: var(--surface);
@@ -118,8 +118,8 @@
       padding: 12px; display: flex; flex-direction: column; gap: 8px;
       min-height: 180px; position: relative;
     }
-    .cell.cell-cont { min-height: 110px; justify-content: center; background: #EFF6FF; padding: 0; }
-    .cell.cell-found { background: #F8FAFC; }
+    .cell.cell-cont { min-height: 60px; justify-content: center; background: #EFF6FF; padding: 0; border-bottom: none; }
+    .cell.cell-found { background: #F8FAFC; min-height: 140px; }
 
     /* =========================
        L1 SMART TILES
@@ -165,7 +165,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px;
       box-shadow: 0 2px 4px rgba(37,99,235,0.1);
-      position: absolute;
+      position: absolute; width: 96%; left: 2%;
       cursor: pointer;
       transition: transform 0.2s;
     }
@@ -184,17 +184,18 @@
     }
     .modal {
       background: white; width: 1100px; max-width: 95%; max-height: 90vh;
-      border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+      border-radius: 12px; display: flex; flex-direction: column;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
     }
     .modal-header {
       background: var(--dhl-red); color: white; padding: 20px 28px;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .modal-body { padding: 30px; overflow-y: auto; background: #F8FAFC; }
+    .modal-body { padding: 30px; overflow-y: visible; /* ALLOW POPOVER TO OVERFLOW */ background: #F8FAFC; }
     
     /* L2 CHEVRON FLOW */
-    .chevron-track { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 30px; }
+    .chevron-track { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 50px; /* Space for popover */ overflow-y: visible; }
+    
     .chevron {
       background: white; border: 1px solid #CBD5E1; padding: 14px 20px; min-width: 180px;
       font-size: 12px; font-weight: 700; color: #334155; text-align: center;
@@ -205,21 +206,24 @@
       cursor: help; 
     }
     .chevron:first-child { margin-left: 0; clip-path: polygon(0% 0%, 92% 0%, 100% 50%, 92% 100%, 0% 100%); }
-    .chevron:hover { background: var(--dhl-yellow); color: var(--dhl-red); border-color: var(--dhl-yellow); z-index: 10; }
+    .chevron:hover { background: var(--dhl-yellow); color: var(--dhl-red); border-color: var(--dhl-yellow); z-index: 100; }
 
-    /* L3 POPOVER (The "Hover List") */
+    /* L3 POPOVER (FIXED) */
     .l3-popover {
       display: none;
-      position: absolute; top: 110%; left: 0; width: 220px;
+      position: absolute; 
+      top: 100%; left: 10px; width: 220px;
       background: white; border: 1px solid #94A3B8; border-radius: 6px;
-      box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2);
-      padding: 12px; z-index: 50; text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      padding: 12px; z-index: 9999; text-align: left;
     }
+    
+    /* Show on hover */
     .chevron:hover .l3-popover { display: block; animation: fadeIn 0.1s ease-out; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:translateY(0)} }
     
     .l3-header { font-size: 10px; font-weight: 800; color: #94A3B8; text-transform: uppercase; margin-bottom: 6px; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px; }
-    .l3-item { font-size: 11px; color: #334155; padding: 3px 0; display: flex; gap: 6px; line-height: 1.3; }
+    .l3-item { font-size: 11px; color: #334155; padding: 4px 0; display: flex; gap: 6px; line-height: 1.3; }
     .l3-dot { color: var(--dhl-red); font-weight: 900; }
 
   </style>
@@ -227,7 +231,7 @@
 <body>
 
 <header>
-  <div class="brand"><span>DHL</span> eCommerce Journey Blueprint</div>
+  <div class="brand"><span>DHL</span> eCommerce Blueprint</div>
   <div class="legend">
     <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Commercial</div>
     <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Operations</div>
@@ -243,7 +247,7 @@
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-header">
       <div>
-        <div style="font-size:11px; font-weight:700; opacity:0.9; text-transform:uppercase">Process Drill-down</div>
+        <div style="font-size:11px; font-weight:700; opacity:0.9; text-transform:uppercase">Process Detail</div>
         <div style="font-size:22px; font-weight:800; margin-top:2px" id="m_title">Process Name</div>
       </div>
       <button style="background:none; border:none; color:white; font-size:28px; cursor:pointer" onclick="closeModal()">&times;</button>
@@ -252,76 +256,77 @@
       <div style="background:#FFF7ED; border:1px solid #FFEDD5; padding:12px; border-radius:6px; margin-bottom:24px; display:flex; gap:12px; align-items:center">
         <div style="font-size:20px">🔎</div>
         <div style="font-size:13px; color:#9A3412">
-          <strong>L3 Visibility:</strong> Hover over any <strong>Level 2</strong> step below to see the granular <strong>Level 3 Activities</strong>.
+          <strong>View Sub-Activities:</strong> Hover your mouse over the blue/yellow steps below to see the granular Level 3 list.
         </div>
       </div>
 
-      <div style="font-size:11px; font-weight:800; color:#94A3B8; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px;">Level 2 Sub-Process Flow</div>
+      <div style="font-size:11px; font-weight:800; color:#94A3B8; text-transform:uppercase; margin-bottom:12px; letter-spacing:0.5px;">Level 2 Process Flow</div>
       <div class="chevron-track" id="m_flow"></div>
       
-      <div style="margin-top:30px; font-size:14px; line-height:1.6; color:#334155" id="m_desc">-</div>
+      <div style="margin-top:20px; font-size:14px; line-height:1.6; color:#334155" id="m_desc">-</div>
     </div>
   </div>
 </div>
 
 <script>
-  // 1. DATA CONFIGURATION
-  // Extended 7-Step Journey to match "Awareness -> Offer -> Onboard" flow
   const STAGES = [
-    { id: "S1", num: "01", name: "Brand Awareness", voice: "I discover DHL" },
-    { id: "S2", num: "02", name: "Offer & Account", voice: "I get a quote" },
-    { id: "S3", num: "03", name: "Onboarding",      voice: "I set up & integrate" },
-    { id: "S4", num: "04", name: "Booking & Pickup",voice: "I ship & handover" },
-    { id: "S5", num: "05", name: "Transit Network", voice: "My parcel moves" },
-    { id: "S6", num: "06", name: "Delivery",        voice: "I receive it" },
-    { id: "S7", num: "07", name: "Post-Shipment",   voice: "I review & pay" }
+    { id: "S1", num: "01", name: "Awareness & Plan", voice: "I discover & plan" },
+    { id: "S2", num: "02", name: "Offer & Account",  voice: "I get a quote" },
+    { id: "S3", num: "03", name: "Onboard & Book",   voice: "I join & book" },
+    { id: "S4", num: "04", name: "Export & Transit", voice: "My parcel moves" },
+    { id: "S5", num: "05", name: "Import & Arrive",  voice: "It arrives locally" },
+    { id: "S6", num: "06", name: "Delivery",         voice: "I receive it" },
+    { id: "S7", num: "07", name: "Post-Shipment",    voice: "I review & pay" }
   ];
 
+  // Explicit Rows
   const LANES = [
     { id: "COMM", name: "Commercial", desc: "Frontstage", class: "lane-comm", tags: ["L2C"] },
+    { id: "CONT_A", name: "Visibility", desc: "Continuous", class: "lane-cont", tags: [] },
+    { id: "CONT_B", name: "Resolution", desc: "Omnichannel", class: "lane-cont", tags: [] },
     { id: "OPS", name: "Operations", desc: "Logistics Flow", class: "lane-ops", tags: ["O2D"] },
-    { id: "CONT", name: "Continuous", desc: "Always On", class: "lane-cont", tags: [] },
     { id: "FOUND", name: "Foundation", desc: "Backstage", class: "lane-found", tags: ["D2O", "ITF", "GRC"] }
   ];
 
-  // 2. MAPPING LOGIC (L1s to Stages)
+  // Mapping L1s to Stages
   const MAP = [
-    // --- S1: AWARENESS ---
-    { id: "S2E_01", stage: "S1", lane: "FOUND" }, // Market Strategy
-    { id: "L2C_01", stage: "S1", lane: "COMM" },  // Marketing Campaign
-    { id: "D2O_01", stage: "S1", lane: "FOUND" }, // Network Design
+    // S1
+    { id: "S2E_01", stage: "S1", lane: "FOUND" },
+    { id: "L2C_01", stage: "S1", lane: "COMM" },
+    { id: "D2O_01", stage: "S1", lane: "FOUND" },
 
-    // --- S2: OFFER ---
-    { id: "L2C_02", stage: "S2", lane: "COMM" }, // Pricing/Quote
-    { id: "L2C_03", stage: "S2", lane: "COMM" }, // Contract
-    { id: "R2R_04", stage: "S2", lane: "FOUND" }, // Credit Risk
+    // S2
+    { id: "L2C_02", stage: "S2", lane: "COMM" },
+    { id: "L2C_03", stage: "S2", lane: "COMM" },
+    { id: "R2R_04", stage: "S2", lane: "FOUND" },
 
-    // --- S3: ONBOARDING ---
+    // S3
     { id: "L2C_04", stage: "S3", lane: "COMM" }, // Account Setup
-    { id: "ITF_04", stage: "S3", lane: "FOUND" }, // API Integration
-    { id: "D2O_02", stage: "S3", lane: "FOUND" }, // Product Config
+    { id: "L2C_05", stage: "S3", lane: "COMM" }, // Booking
+    { id: "O2D_01", stage: "S3", lane: "OPS" },  // Data
+    { id: "O2D_02", stage: "S3", lane: "OPS" },  // Pickup
+    { id: "ITF_04", stage: "S3", lane: "FOUND" },
 
-    // --- S4: BOOKING ---
-    { id: "L2C_05", stage: "S4", lane: "COMM" }, // Booking Entry
-    { id: "O2D_01", stage: "S4", lane: "OPS" },  // Data Check
-    { id: "O2D_02", stage: "S4", lane: "OPS" },  // Pickup
+    // S4
+    { id: "O2D_03", stage: "S4", lane: "OPS" }, // Sort
+    { id: "O2D_04", stage: "S4", lane: "OPS" }, // Linehaul
+    { id: "O2D_07", stage: "S4", lane: "OPS" }, // Export
 
-    // --- S5: TRANSIT ---
-    { id: "O2D_03", stage: "S5", lane: "OPS" },  // Sort
-    { id: "O2D_04", stage: "S5", lane: "OPS" },  // Linehaul
-    { id: "O2D_07", stage: "S5", lane: "OPS" },  // Export
-    { id: "O2D_08", stage: "S5", lane: "OPS" },  // Import
+    // S5
+    { id: "O2D_08", stage: "S5", lane: "OPS" }, // Gateway
+    { id: "O2D_09", stage: "S5", lane: "OPS" }, // Deconsolidation
+    { id: "GRC_02", stage: "S5", lane: "FOUND" },
 
-    // --- S6: DELIVERY ---
-    { id: "O2D_10", stage: "S6", lane: "OPS" },  // Last Mile
-    { id: "O2D_11", stage: "S6", lane: "OPS" },  // POD
-    { id: "ITF_02", stage: "S6", lane: "FOUND" }, // Driver App
+    // S6
+    { id: "O2D_10", stage: "S6", lane: "OPS" }, // Last Mile
+    { id: "O2D_11", stage: "S6", lane: "OPS" }, // POD
+    { id: "ITF_02", stage: "S6", lane: "FOUND" },
 
-    // --- S7: POST ---
-    { id: "L2C_06", stage: "S7", lane: "COMM" }, // Invoice
-    { id: "P2R_03", stage: "S7", lane: "COMM" }, // Claims
-    { id: "O2D_12", stage: "S7", lane: "OPS" },  // Returns
-    { id: "GRC_04", stage: "S7", lane: "FOUND" } // Audit
+    // S7
+    { id: "L2C_06", stage: "S7", lane: "COMM" },
+    { id: "P2R_03", stage: "S7", lane: "COMM" },
+    { id: "O2D_12", stage: "S7", lane: "OPS" },
+    { id: "GRC_04", stage: "S7", lane: "FOUND" }
   ];
 
   let INDEX = new Map();
@@ -347,10 +352,10 @@
     // Corner
     const corner = document.createElement('div');
     corner.className = 'corner-plate';
-    corner.innerHTML = `<div class="cp-title">Process<br>Map</div>`;
+    corner.innerHTML = `<div class="cp-title">Blueprint<br>View</div>`;
     grid.appendChild(corner);
 
-    // Headers
+    // Stage Headers
     STAGES.forEach(s => {
       const h = document.createElement('div');
       h.className = 'stage-head';
@@ -361,7 +366,7 @@
       grid.appendChild(h);
     });
 
-    // Lanes
+    // Render 5 Rows
     LANES.forEach(l => {
       // Lane Header
       const lab = document.createElement('div');
@@ -374,48 +379,42 @@
       `;
       grid.appendChild(lab);
 
-      // Continuous Lane Logic (Spans across stages 4-7 mainly)
-      if(l.id === 'CONT') {
+      // Lane Cells or Continuous Bars
+      if(l.id === 'CONT_A') {
+         // Visibility Stream
          const row = document.createElement('div');
          row.className = `cell cell-cont`;
-         row.style.gridColumn = "5 / span 4"; // Spans from Booking (Col 5) to End (Col 8) - Adjusting for grid math
-         // Actually grid cols are: Head(1) + 7 stages = 8 columns total.
-         // Booking is Stage 4 => Col 5. Delivery is Stage 6 => Col 7.
-         
-         // Stream 1: Visibility (Booking to Delivery)
-         // Stream 2: Omnichannel (Booking to Post)
-         
-         // We'll just put a spanning container starting at Col 5 (Stage 4)
-         
-         row.innerHTML = `
-           <div class="stream-bar sb-track" style="width:120%; left:-20%; top:15px" onclick="openStream('L2C_08')">
-             <span>⟵ Track & Trace Visibility ⟶</span>
-           </div>
-           <div class="stream-bar sb-issue" style="width:140%; left:-20%; top:55px" onclick="openStream('P2R_01')">
-             <span>⟵ Omnichannel Care & Resolution ⟶</span>
-           </div>
-         `;
+         row.style.gridColumn = "5 / span 4"; // S3 to S6
+         row.innerHTML = `<div class="stream-bar sb-track" onclick="openStream('L2C_08')"><span>⟵ L2C_08: Continuous Visibility ⟶</span></div>`;
          grid.appendChild(row);
+         // Empty cells before
+         for(let i=1; i<4; i++) grid.appendChild(createCell());
          
-         // Fill empty cells for S1-S3
-         for(let i=1; i<=3; i++){
-            const empty = document.createElement('div');
-            empty.className = 'cell cell-cont';
-            grid.appendChild(empty);
-         }
-         // And S4 cell is the row above. S5, S6, S7 covered by span? 
-         // CSS Grid spanning is tricky in loops. 
-         // Simplified: Just render empty cells for this row and absolute position the bars over them?
-         // Better: Let's just use the absolute bar method inside a container that spans S4-S7.
+      } else if(l.id === 'CONT_B') {
+         // Resolution Stream
+         const row = document.createElement('div');
+         row.className = `cell cell-cont`;
+         row.style.gridColumn = "5 / span 5"; // S3 to S7
+         row.innerHTML = `<div class="stream-bar sb-issue" onclick="openStream('P2R_01')"><span>⟵ P2R_01: Omnichannel Resolution ⟶</span></div>`;
+         grid.appendChild(row);
+         // Empty cells before
+         for(let i=1; i<4; i++) grid.appendChild(createCell());
+
       } else {
          STAGES.forEach(s => {
-           const cell = document.createElement('div');
-           cell.className = `cell ${l.id === 'FOUND' ? 'cell-found' : ''}`;
-           cell.id = `c_${l.id}_${s.id}`;
+           const cell = createCell(l.id, s.id);
+           if(l.id === 'FOUND') cell.classList.add('cell-found');
            grid.appendChild(cell);
          });
       }
     });
+  }
+
+  function createCell(laneId, stageId) {
+    const d = document.createElement('div');
+    d.className = 'cell';
+    if(laneId && stageId) d.id = `c_${laneId}_${stageId}`;
+    return d;
   }
 
   function renderTiles() {
@@ -437,7 +436,6 @@
         </div>
         <div class="t-name">${name}</div>
       `;
-      
       if(node) tile.onclick = () => openModal(node);
       cell.appendChild(tile);
     });
@@ -465,21 +463,17 @@
         // RECURSIVE L3 FINDER
         let l3Html = "";
         if(c.children && c.children.length > 0) {
-           l3Html = `<div class="l3-popover"><div class="l3-header">L3 Activities</div>`;
+           l3Html = `<div class="l3-popover"><div class="l3-header">Activities (L3)</div>`;
            c.children.forEach(l3 => {
              const l3n = l3.name.includes(':') ? l3.name.split(':')[1].trim() : l3.name;
              l3Html += `<div class="l3-item"><span class="l3-dot">•</span> ${l3n}</div>`;
            });
            l3Html += `</div>`;
         } else {
-           l3Html = `<div class="l3-popover"><div class="l3-item" style="color:#999;font-style:italic">No L3 activities defined in JSON</div></div>`;
+           l3Html = `<div class="l3-popover"><div class="l3-item" style="color:#999;font-style:italic">No L3 data</div></div>`;
         }
 
-        chev.innerHTML = `
-          <span>${cName}</span>
-          <div style="font-size:9px; color:#94A3B8; margin-top:4px">${c.id}</div>
-          ${l3Html}
-        `;
+        chev.innerHTML = `<span>${cName}</span><div style="font-size:9px; color:#94A3B8; margin-top:4px">${c.id}</div>${l3Html}`;
         track.appendChild(chev);
       });
     } else {
