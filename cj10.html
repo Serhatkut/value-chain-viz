@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>DHL eCommerce · Value Chain Blueprint</title>
+  <link href="https://fonts.googleapis.com/css2?family=Delivery:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================
+       DHL THEME VARIABLES
+       ========================= */
+    :root {
+      --dhl-red: #D40511;
+      --dhl-yellow: #FFCC00;
+      --dhl-black: #101828;
+      
+      --bg: #F5F7FA;
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      
+      --head-h: 64px;
+      --lane-w: 220px;
+      --col-min: 180px;
+      
+      --deck-h: 320px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--dhl-black);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* =========================
+       HEADER
+       ========================= */
+    header {
+      height: var(--head-h);
+      background: var(--dhl-red);
+      color: white;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .brand { font-family: 'Delivery', sans-serif; font-weight: 900; font-size: 22px; display: flex; align-items: center; gap: 12px; }
+    .brand span { background: var(--dhl-yellow); color: var(--dhl-red); padding: 2px 8px; border-radius: 4px; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    
+    .legend { display: flex; gap: 20px; font-size: 11px; font-weight: 600; }
+    .legend-item { display: flex; align-items: center; gap: 6px; color: white; }
+    .dot { width: 10px; height: 10px; border-radius: 2px; background: white; }
+
+    /* =========================
+       MAIN GRID LAYOUT
+       ========================= */
+    .grid-wrapper {
+      flex: 1;
+      overflow: auto;
+      display: grid;
+      /* Lane Header + 7 Journey Stages */
+      grid-template-columns: var(--lane-w) repeat(7, minmax(var(--col-min), 1fr)); 
+      /* Explicit Rows */
+      grid-template-rows: auto auto auto auto auto auto auto auto;
+      background: var(--bg);
+      padding-bottom: var(--deck-h); 
+    }
+
+    /* --- STAGE HEADERS --- */
+    .corner-plate {
+      position: sticky; top: 0; left: 0; z-index: 60;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
+      border-bottom: 4px solid var(--dhl-red);
+      display: flex; align-items: center; justify-content: center;
+      padding: 10px; grid-row: 1; grid-column: 1;
+    }
+    .cp-title { font-weight: 900; font-size: 12px; color: var(--dhl-red); text-transform: uppercase; text-align: center; }
+
+    .stage-head {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--surface); 
+      border-right: 1px solid var(--border);
+      border-bottom: 4px solid var(--dhl-red);
+      padding: 12px 16px; display: flex; flex-direction: column; gap: 4px;
+      grid-row: 1;
+    }
+    .stage-title { font-size: 13px; font-weight: 800; color: var(--dhl-black); text-transform: uppercase; }
+    .stage-voice { font-family: 'Delivery', sans-serif; font-size: 11px; font-weight: 700; color: #64748B; font-style: italic; }
+
+    /* --- ROW LABELS --- */
+    .lane-label {
+      position: sticky; left: 0; z-index: 40;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 20px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .lane-title { font-size: 14px; font-weight: 800; color: var(--dhl-black); margin-bottom: 4px; }
+    .lane-desc { font-size: 10px; color: #64748B; line-height: 1.3; }
+    
+    /* Row Background Colors */
+    .bg-comm { background:#FFFBEB; border-left: 6px solid var(--dhl-yellow); }
+    .bg-ops { background:#FEF2F2; border-left: 6px solid var(--dhl-red); }
+    .bg-chain { background:#F8FAFC; border-left: 6px solid #475569; }
+
+    /* --- CELLS (For Mapped Rows) --- */
+    .cell {
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 10px; display: flex; flex-direction: column; gap: 8px;
+      min-height: 140px; background: white;
+    }
+    
+    /* --- CHAIN CONTAINER (For Horizontal Rows) --- */
+    .chain-track {
+      grid-column: 2 / -1; /* Span across all stage columns */
+      display: flex; align-items: center; gap: 0; /* No gap, use negative margin on tiles */
+      padding: 10px 20px;
+      background: #F1F5F9;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    /* =========================
+       PROCESS TILES (CHEVRONS)
+       ========================= */
+    /* Mapped Tile (White) */
+    .tile {
+      background: white;
+      border: 1px solid #CBD5E1;
+      border-left: 4px solid #ccc;
+      clip-path: polygon(0% 0%, 95% 0%, 100% 50%, 95% 100%, 0% 100%);
+      padding: 8px 16px 8px 10px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      margin-right: -5px;
+    }
+    .tile:hover {
+      transform: translateX(3px);
+      background: #FFF7ED;
+      border-color: var(--dhl-red);
+      z-index: 10;
+    }
+
+    /* Chain Tile (Yellow) */
+    .tile-chain {
+      flex: 0 0 200px; /* Fixed width for chain items */
+      height: 50px;
+      background: var(--dhl-yellow);
+      border-bottom: 2px solid #E6B800; /* Darker yellow border */
+      clip-path: polygon(0% 0%, 95% 0%, 100% 50%, 95% 100%, 0% 100%);
+      margin-right: -12px; /* Overlap to look connected */
+      padding: 0 20px 0 24px;
+      display: flex; flex-direction: column; justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+    }
+    .tile-chain:hover {
+      transform: scale(1.02);
+      z-index: 10;
+      background: #FFD633;
+    }
+    
+    /* Tile Content */
+    .t-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+    .t-id { font-size: 10px; font-weight: 800; color: #64748B; }
+    .t-name { font-size: 11px; font-weight: 700; color: #0F172A; line-height: 1.2; }
+    
+    /* Chain Content Override */
+    .tile-chain .t-id { color: #856404; font-size: 9px; }
+    .tile-chain .t-name { font-size: 11px; font-weight: 800; color: #101828; text-transform: uppercase; }
+
+    /* L0 Colors for Mapped Tiles */
+    .c-L2C { border-left-color: var(--dhl-yellow); }
+    .c-O2D { border-left-color: var(--dhl-red); }
+
+    /* =========================
+       BOTTOM DECK (DETAIL VIEW)
+       ========================= */
+    #deck {
+      position: fixed; bottom: 0; left: 0; width: 100%; height: var(--deck-h);
+      background: white; border-top: 4px solid var(--dhl-red);
+      z-index: 200; box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+      display: flex; flex-direction: column;
+      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #deck.open { transform: translateY(0); }
+
+    .deck-header {
+      padding: 10px 24px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .deck-title { font-size: 16px; font-weight: 800; color: var(--dhl-black); text-transform: uppercase; }
+    .deck-meta { font-size: 11px; color: #64748B; display: flex; gap: 16px; }
+    
+    .deck-body {
+      flex: 1; padding: 20px 24px; overflow-x: auto; 
+      display: flex; gap: 16px; align-items: flex-start;
+      background: #FFFFFF;
+    }
+
+    /* Detail Cards */
+    .l2-col {
+      min-width: 240px; max-width: 260px;
+      background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;
+      display: flex; flex-direction: column;
+      flex-shrink: 0;
+    }
+    .l2-head {
+      padding: 8px 10px; background: #FFF; border-bottom: 2px solid var(--dhl-yellow);
+      display: flex; justify-content: space-between; align-items: center;
+      border-radius: 6px 6px 0 0;
+    }
+    .l2-id { font-size: 9px; font-weight: 800; color: #94A3B8; }
+    .l2-name { font-size: 11px; font-weight: 700; color: #0F172A; }
+
+    .l3-list { padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .l3-item {
+      font-size: 10px; padding: 4px 6px; background: white; border: 1px solid #E2E8F0; border-radius: 4px;
+      color: #334155; display: flex; flex-direction: column; gap: 2px;
+    }
+    .l3-row { display: flex; justify-content: space-between; }
+    .l3-id { font-weight: 800; color: var(--dhl-red); font-size: 9px; }
+
+    .close-btn { 
+      background: #E2E8F0; border: none; padding: 6px 12px; border-radius: 4px; 
+      font-size: 11px; font-weight: 700; cursor: pointer; color: #475569;
+    }
+    .close-btn:hover { background: #CBD5E1; color: #0F172A; }
+
+    .deck-empty { padding: 40px; text-align: center; color: #94A3B8; font-style: italic; width: 100%; }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand"><span>DHL</span> eCommerce Blueprint</div>
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Commercial</div>
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Operations</div>
+    <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Enabling Chains</div>
+  </div>
+</header>
+
+<div class="grid-wrapper" id="grid">
+  </div>
+
+<div id="deck">
+  <div class="deck-header">
+    <div>
+      <div style="font-size:10px; font-weight:700; color:#94A3B8; margin-bottom:2px">PROCESS DETAILS</div>
+      <div class="deck-title" id="d_title">Select a Process</div>
+    </div>
+    <div class="deck-meta">
+      <span id="d_id">ID: -</span>
+      <span id="d_owner">Owner: -</span>
+    </div>
+    <button class="close-btn" onclick="closeDeck()">CLOSE PANEL</button>
+  </div>
+  <div class="deck-body" id="d_body">
+    <div class="deck-empty">Click any yellow chevron or process tile to view details.</div>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // 1. DATA MODEL (Mock Data)
+  // ==========================================
+  const MOCK_DATA = [
+    // COMMERCIAL
+    { id: "L2C_01", name: "Market Analysis", owner: "Strategy", children: [{id:"L2C_01_01", name:"Competitor Scan", children:[{id:"L3_01", name:"Data Collection"}]}] },
+    { id: "L2C_04", name: "Account Setup", owner: "CS", children: [{id:"L2C_04_01", name:"Config Portal", children:[{id:"L3_02", name:"Create Admin User"}]}] },
+    { id: "L2C_05", name: "Booking Entry", owner: "CS", children: [{id:"L2C_05_01", name:"Validate Address", children:[{id:"L3_03", name:"API Check"}]}] },
+    // OPS
+    { id: "O2D_02", name: "Pickup", owner: "Ops", children: [{id:"O2D_02_01", name:"Dispatch Driver", children:[{id:"L3_04", name:"Route Opt"}]}] },
+    { id: "O2D_04", name: "Linehaul", owner: "Network", children: [{id:"O2D_04_01", name:"Load Truck", children:[{id:"L3_05", name:"Scan Handling Units"}]}] },
+    // D2O CHAIN
+    { id: "D2O_01", name: "Network Design", owner: "Design", children: [{id:"D2O_01_01", name:"Capacity Plan", children:[{id:"L3_06", name:"Forecast Vol"}]}] },
+    { id: "D2O_02", name: "Product Design", owner: "Product", children: [{id:"D2O_02_01", name:"Service Level", children:[{id:"L3_07", name:"Define SLAs"}]}] },
+    { id: "D2O_03", name: "Process Model", owner: "Eng", children: [{id:"D2O_03_01", name:"SOP Creation", children:[{id:"L3_08", name:"Write SOP"}]}] },
+    // P2R CHAIN
+    { id: "P2R_01", name: "Detect Issue", owner: "CS", children: [{id:"P2R_01_01", name:"Monitor", children:[{id:"L3_09", name:"Alert"}]}] },
+    { id: "P2R_02", name: "Resolve", owner: "Ops", children: [{id:"P2R_02_01", name:"Reroute", children:[{id:"L3_10", name:"Update Label"}]}] },
+    { id: "P2R_03", name: "Claims", owner: "Finance", children: [{id:"P2R_03_01", name:"Adjudicate", children:[{id:"L3_11", name:"Pay Claim"}]}] },
+    // RES CHAIN
+    { id: "S2P_01", name: "Sourcing", owner: "Procure", children: [{id:"S2P_01_01", name:"RFP", children:[{id:"L3_12", name:"Select Vendor"}]}] },
+    { id: "H2R_01", name: "Recruiting", owner: "HR", children: [{id:"H2R_01_01", name:"Interview", children:[{id:"L3_13", name:"Screen CV"}]}] }
+  ];
+
+  // ==========================================
+  // 2. CONFIGURATION
+  // ==========================================
+  const STAGES = [
+    { id: "S1", name: "Awareness & Plan", num: "01", voice: "I discover" },
+    { id: "S2", name: "Offer & Account",  num: "02", voice: "I agree" },
+    { id: "S3", name: "Onboarding",       num: "03", voice: "I integrate" },
+    { id: "S4", name: "Booking & Collect",num: "04", voice: "I ship" },
+    { id: "S5", name: "Export & Transit", num: "05", voice: "It moves" },
+    { id: "S6", name: "Import & Last Mile",num: "06", voice: "I receive" },
+    { id: "S7", name: "Post-Shipment",    num: "07", voice: "I pay/return" }
+  ];
+
+  // Definition of Rows
+  const ROWS = [
+    { id: "COMM", name: "Commercial", desc: "L2C (Lead to Cash)", type: "mapped", class: "bg-comm" },
+    { id: "OPS", name: "Operations", desc: "O2D (Order to Del)", type: "mapped", class: "bg-ops" },
+    { id: "VIS", name: "Visibility", desc: "Track & Trace", type: "chain", class: "bg-chain" },
+    { id: "RES", name: "Resolution", desc: "P2R (Issue Mgmt)", type: "chain", class: "bg-chain" },
+    { id: "DES", name: "Design", desc: "D2O (Design to Ops)", type: "chain", class: "bg-chain" },
+    { id: "SRC", name: "Resources", desc: "S2P & H2R", type: "chain", class: "bg-chain" },
+    { id: "FND", name: "Foundation", desc: "Strategy & IT", type: "chain", class: "bg-chain" }
+  ];
+
+  // TILE PLACEMENT
+  // Type: 'mapped' (needs stage & row) OR 'chain' (needs row, order is array index)
+  const TILES = [
+    // --- MAPPED: COMM ---
+    { id: "L2C_01", stage: 1, row: "COMM", label: "Marketing" },
+    { id: "L2C_02", stage: 2, row: "COMM", label: "Pricing" },
+    { id: "L2C_03", stage: 2, row: "COMM", label: "Contract" },
+    { id: "L2C_04", stage: 3, row: "COMM", label: "Account Setup" },
+    { id: "L2C_05", stage: 4, row: "COMM", label: "Booking" },
+    { id: "L2C_06", stage: 7, row: "COMM", label: "Invoicing" },
+    // --- MAPPED: OPS ---
+    { id: "O2D_02", stage: 4, row: "OPS", label: "Pickup" },
+    { id: "O2D_03", stage: 5, row: "OPS", label: "Sort Origin" },
+    { id: "O2D_04", stage: 5, row: "OPS", label: "Linehaul" },
+    { id: "O2D_07", stage: 5, row: "OPS", label: "Export" },
+    { id: "O2D_08", stage: 6, row: "OPS", label: "Import" },
+    { id: "O2D_10", stage: 6, row: "OPS", label: "Last Mile" },
+    { id: "O2D_12", stage: 7, row: "OPS", label: "Returns" },
+    
+    // --- CHAINS (Horizontal Flow) ---
+    // Visibility
+    { id: "L2C_08", row: "VIS", label: "L2C_08: Event Ingestion" },
+    { id: "L2C_09", row: "VIS", label: "L2C_09: Notifications" },
+    { id: "L2C_10", row: "VIS", label: "L2C_10: Analytics" },
+    // Resolution
+    { id: "P2R_01", row: "RES", label: "P2R_01: Detect Issue" },
+    { id: "P2R_02", row: "RES", label: "P2R_02: Notify Cust" },
+    { id: "P2R_03", row: "RES", label: "P2R_03: Resolve" },
+    { id: "P2R_04", row: "RES", label: "P2R_04: Claims" },
+    // Design
+    { id: "D2O_01", row: "DES", label: "D2O_01: Market Scan" },
+    { id: "D2O_02", row: "DES", label: "D2O_02: Product Design" },
+    { id: "D2O_03", row: "DES", label: "D2O_03: Network Plan" },
+    { id: "D2O_04", row: "DES", label: "D2O_04: Launch" },
+    // Resources
+    { id: "S2P_01", row: "SRC", label: "S2P_01: Source" },
+    { id: "S2P_02", row: "SRC", label: "S2P_02: Contract" },
+    { id: "H2R_01", row: "SRC", label: "H2R_01: Hire" },
+    { id: "H2R_02", row: "SRC", label: "H2R_02: Pay" },
+    // Foundation
+    { id: "S2E_01", row: "FND", label: "S2E_01: Strategy" },
+    { id: "ITF_01", row: "FND", label: "ITF_01: Architecture" },
+    { id: "GRC_01", row: "FND", label: "GRC_01: Compliance" }
+  ];
+
+  let INDEX = new Map();
+
+  async function init() {
+    renderGridStructure();
+    try {
+      const res = await fetch("data.json");
+      if(res.ok) {
+        const root = await res.json();
+        buildIndex(root);
+      } else {
+        buildMockIndex();
+      }
+    } catch(e) { buildMockIndex(); }
+    renderTiles();
+  }
+
+  function buildIndex(node) {
+    if(node.id) INDEX.set(node.id, node);
+    if(node.children) node.children.forEach(buildIndex);
+  }
+  function buildMockIndex() { MOCK_DATA.forEach(n => INDEX.set(n.id, n)); }
+
+  function renderGridStructure() {
+    const grid = document.getElementById('grid');
+    
+    // 1. Corner
+    const corner = document.createElement('div');
+    corner.className = 'corner-plate';
+    corner.innerHTML = `<div class="cp-title">Blueprint<br>View</div>`;
+    grid.appendChild(corner);
+
+    // 2. Stage Headers
+    STAGES.forEach(s => {
+      const h = document.createElement('div');
+      h.className = 'stage-head';
+      h.style.gridColumn = parseInt(s.num) + 1;
+      h.innerHTML = `<div class="stage-title">${s.name}</div><div class="stage-voice">"${s.voice}"</div>`;
+      grid.appendChild(h);
+    });
+
+    // 3. Rows
+    ROWS.forEach((r, rIdx) => {
+       const rowNum = rIdx + 2;
+       
+       // Label
+       const lab = document.createElement('div');
+       lab.className = `lane-label ${r.class}`;
+       lab.style.gridRow = rowNum;
+       lab.style.gridColumn = 1;
+       lab.innerHTML = `<div class="lane-title">${r.name}</div><div class="lane-desc">${r.desc}</div>`;
+       grid.appendChild(lab);
+
+       if(r.type === 'mapped') {
+         // Create explicit cells for mapped rows (Comm/Ops)
+         STAGES.forEach((s, sIdx) => {
+           const cell = document.createElement('div');
+           cell.className = 'cell';
+           cell.style.gridRow = rowNum;
+           cell.style.gridColumn = sIdx + 2;
+           cell.id = `cell_${r.id}_${sIdx+1}`;
+           grid.appendChild(cell);
+         });
+       } else {
+         // Create single spanning container for Chains
+         const track = document.createElement('div');
+         track.className = 'chain-track';
+         track.style.gridRow = rowNum;
+         track.id = `track_${r.id}`;
+         grid.appendChild(track);
+       }
+    });
+  }
+
+  function renderTiles() {
+    TILES.forEach(t => {
+      const node = INDEX.get(t.id);
+      const name = t.label || (node ? (node.name.includes(':') ? node.name.split(':')[1].trim() : node.name) : t.id);
+      const l0 = t.id.split('_')[0];
+      
+      const el = document.createElement('div');
+      el.onclick = () => openDeck(t.id, name);
+      
+      // Determine Container
+      const rowDef = ROWS.find(r => r.id === t.row);
+      
+      if(rowDef.type === 'mapped') {
+        el.className = `tile c-${l0}`;
+        el.innerHTML = `<div class="t-head"><span class="t-id">${t.id}</span></div><div class="t-name">${name}</div>`;
+        document.getElementById(`cell_${t.row}_${t.stage}`).appendChild(el);
+      } else {
+        // Horizontal Chain Tile (Yellow)
+        el.className = `tile-chain`;
+        el.innerHTML = `<span class="t-id">${t.id}</span><span class="t-name">${name.split(':')[1] || name}</span>`;
+        document.getElementById(`track_${t.row}`).appendChild(el);
+      }
+    });
+  }
+
+  function openDeck(id, name) {
+    const node = INDEX.get(id);
+    document.getElementById('d_title').textContent = name;
+    document.getElementById('d_id').textContent = "ID: " + id;
+    document.getElementById('d_owner').textContent = "Owner: " + (node ? (node.owner || "TBD") : "TBD");
+    
+    const body = document.getElementById('d_body');
+    body.innerHTML = "";
+
+    if(!node || !node.children || node.children.length === 0) {
+      body.innerHTML = `<div class="deck-empty">No Level 2 sub-processes found.</div>`;
+    } else {
+      node.children.forEach(l2 => {
+        const col = document.createElement('div');
+        col.className = 'l2-col';
+        const l2Name = l2.name.includes(':') ? l2.name.split(':')[1].trim() : l2.name;
+        
+        let l3HTML = "";
+        if(l2.children && l2.children.length > 0) {
+           l2.children.forEach(l3 => {
+             const l3Name = l3.name.includes(':') ? l3.name.split(':')[1].trim() : l3.name;
+             l3HTML += `<div class="l3-item"><span class="l3-row"><span class="l3-id">${l3.id}</span></span><span>${l3Name}</span></div>`;
+           });
+        } else {
+           l3HTML = `<div class="l3-item" style="color:#ccc; font-style:italic">No L3 activities</div>`;
+        }
+
+        col.innerHTML = `<div class="l2-head"><span class="l2-name">${l2Name}</span><span class="l2-id">${l2.id}</span></div><div class="l3-list">${l3HTML}</div>`;
+        body.appendChild(col);
+      });
+    }
+    document.getElementById('deck').classList.add('open');
+  }
+
+  function closeDeck() {
+    document.getElementById('deck').classList.remove('open');
+  }
+
+  init();
+</script>
+</body>
+</html>
