@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DHL eCommerce · Hybrid Journey Map</title>
+
+  <style>
+    :root{
+      --dhl-red:#D40511;
+      --dhl-yellow:#FFCC00;
+      --ink:#101828;
+      --muted:#667085;
+      --bg:#F5F7FA;
+      --panel:#FFFFFF;
+      --line:rgba(16,24,40,0.12);
+
+      --header-h:56px;
+      --deck-collapsed-h:48px;
+      --deck-expanded-h:min(45vh, 550px);
+
+      --lane-label-w:260px;
+      --tile-h:54px;
+      
+      /* Standard Grid Column Min-Width */
+      --col-min-w: 190px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color:var(--ink);
+      background:var(--bg);
+      overflow:hidden;
+    }
+
+    /* ===== Layout Shell ===== */
+    .app{ height:100%; display:flex; flex-direction:column; }
+
+    /* Topbar */
+    .topbar{
+      height:var(--header-h); background:var(--dhl-red); color:#fff;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.15); z-index:50;
+    }
+    .topbar .title{ font-weight:900; font-size:18px; letter-spacing:0.5px; }
+    .pill{
+      background:rgba(255,255,255,0.2); padding:4px 10px; border-radius:99px;
+      font-size:12px; font-weight:700; margin-left:12px; border:1px solid rgba(255,255,255,0.3);
+    }
+
+    /* Split Screen */
+    .split{ position:relative; flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }
+    
+    .mapWrap{
+      position:absolute; inset:0 0 var(--deck-collapsed-h) 0;
+      display:flex; flex-direction:column; min-height:0;
+      transition: inset 240ms ease;
+    }
+    .mapWrap.deckOpen{ inset:0 0 var(--deck-expanded-h) 0; }
+
+    /* Map Header */
+    .mapHeader{
+      background:var(--panel); border-bottom:1px solid var(--line);
+      flex:0 0 auto; z-index:20;
+    }
+    .stageGrid{
+      display:grid; 
+      grid-template-columns: var(--lane-label-w) repeat(7, minmax(var(--col-min-w), 1fr));
+    }
+    .stageCorner{ padding:16px; border-right:1px solid var(--line); font-size:12px; font-weight:800; color:var(--muted); }
+    .stageCell{
+      padding:12px 14px; border-right:1px solid var(--line);
+      display:flex; flex-direction:column; justify-content:center;
+    }
+    .stageNo{ color:var(--dhl-red); font-weight:900; font-size:11px; text-transform:uppercase; }
+    .stageName{ font-weight:800; font-size:13px; margin:2px 0; }
+    .stageVoice{ font-size:11px; color:var(--muted); font-style:italic; }
+
+    /* Map Body */
+    .mapBody{ flex:1 1 auto; overflow:auto; background:#F2F4F8; padding-bottom:40px; }
+
+    /* Lane Container */
+    .laneRow{
+      background:white; margin-bottom:1px;
+      border-bottom:1px solid var(--line);
+      display:grid;
+      /* Default grid layout: Label | Content */
+      grid-template-columns: var(--lane-label-w) 1fr;
+    }
+    
+    /* Collapsed State */
+    .laneRow.collapsed .laneContent { display:none; }
+    .laneRow.collapsed .laneLabel { border-bottom:1px solid transparent; }
+
+    /* Left Label Column */
+    .laneLabel{
+      position:sticky; left:0; z-index:10;
+      background:#fff; border-right:1px solid var(--line);
+      padding:16px; display:flex; flex-direction:column; gap:4px;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+    }
+    .laneHead{ display:flex; justify-content:space-between; align-items:center; }
+    .laneName{ font-size:14px; font-weight:900; color:var(--ink); }
+    .laneBadge{ 
+      font-size:10px; font-weight:800; color:var(--dhl-red); 
+      background:rgba(212,5,17,0.08); padding:2px 6px; border-radius:4px; 
+    }
+    .laneDesc{ font-size:11px; color:var(--muted); line-height:1.3; margin-top:4px; }
+
+    /* Lane Controls (Buttons) */
+    .laneControls{
+      display:flex; gap:8px; margin-top:12px;
+    }
+    .iconBtn{
+      width:24px; height:24px; border-radius:4px; border:1px solid #E4E7EC;
+      background:white; color:#667085; display:flex; align-items:center; justify-content:center;
+      cursor:pointer; font-size:12px; transition:all 0.1s;
+    }
+    .iconBtn:hover{ background:#F9FAFB; color:var(--dhl-red); border-color:var(--dhl-red); }
+
+    /* =========================================
+       MODE A: GRID LAYOUT (Story Lanes)
+       ========================================= */
+    .laneGrid{
+      display:grid;
+      grid-template-columns: repeat(7, minmax(var(--col-min-w), 1fr));
+      gap:10px; padding:12px;
+      align-items:start; /* Tiles stick to top of lane */
+    }
+    .laneGrid .gridCell{
+      border-right:1px solid #F2F4F8; /* subtle guides */
+      min-height:80px; /* Force height */
+    }
+
+    /* =========================================
+       MODE B: BELT LAYOUT (Horizontal Scroll)
+       ========================================= */
+    .laneBelt{
+      display:flex;
+      gap:12px;
+      padding:16px 12px;
+      overflow-x:auto;
+      scroll-behavior:smooth;
+      align-items:center;
+      /* Hide scrollbar but keep function */
+      scrollbar-width: thin;
+    }
+    
+    /* =========================================
+       TILES (Shared Styles)
+       ========================================= */
+    .tile{
+      height:var(--tile-h);
+      background: linear-gradient(180deg, #FFF9E6 0%, #FFFFFF 100%);
+      border:1px solid #E0E0E0; border-left:4px solid var(--dhl-yellow);
+      border-radius:6px;
+      padding:8px 12px;
+      display:flex; align-items:center; gap:10px;
+      cursor:pointer; position:relative;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      transition: transform 0.15s, box-shadow 0.15s;
+      min-width: 220px;
+      
+      /* Chevron shape right side */
+      clip-path: polygon(0% 0%, 96% 0%, 100% 50%, 96% 100%, 0% 100%);
+      padding-right:20px; /* space for chevron tip */
+    }
+    .tile:hover{
+      transform:translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+      border-color:var(--dhl-yellow);
+    }
+    .tile.active{
+      background:var(--dhl-red); color:white; border-color:var(--dhl-red);
+    }
+    .tile.active .tileId, .tile.active .stageChip { color:white; border-color:rgba(255,255,255,0.3); background:rgba(255,255,255,0.2); }
+
+    /* Span Logic for Grid */
+    .tile.span{ z-index:2; background:#FEFCE8; border-left-color:#F59E0B; }
+    
+    /* Internal Tile Elements */
+    .tileId{ 
+      font-size:10px; font-weight:800; color:#666; 
+      border:1px solid #eee; padding:2px 6px; border-radius:4px; 
+    }
+    .tileName{ font-size:12px; font-weight:700; line-height:1.2; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+    
+    /* Belt-specific: Stage Chip */
+    .stageChip{
+      margin-left:auto; font-size:9px; font-weight:800; 
+      background:#F2F4F8; color:#475467; padding:2px 6px; border-radius:4px;
+      white-space:nowrap;
+    }
+
+    /* =========================================
+       DECK (Bottom Panel)
+       ========================================= */
+    .deck{
+      position:absolute; bottom:0; left:0; right:0; height:var(--deck-collapsed-h);
+      background:#fff; border-top:4px solid var(--dhl-yellow);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1); z-index:100;
+      transition: height 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display:flex; flex-direction:column;
+    }
+    .deck.open{ height:var(--deck-expanded-h); }
+    
+    .deckHandle{
+      flex:0 0 var(--deck-collapsed-h); display:flex; align-items:center; justify-content:space-between;
+      padding:0 20px; cursor:pointer; background:#fff;
+    }
+    .deckTitle{ font-weight:800; font-size:14px; }
+    .deckBody{ flex:1; overflow:auto; padding:20px; border-top:1px solid #eee; display:none; }
+    .deck.open .deckBody{ display:block; }
+
+    /* Details styling */
+    .detailFlow{ display:flex; gap:16px; overflow-x:auto; padding-bottom:10px; }
+    .l2Card{
+      min-width:240px; background:#F9FAFB; border:1px solid #EAECF0; border-radius:8px;
+      padding:12px;
+    }
+    .l2Head{ font-size:12px; font-weight:800; color:#101828; margin-bottom:8px; padding-bottom:8px; border-bottom:2px solid #ddd; }
+    .l3Item{ font-size:11px; color:#475467; padding:4px 0; display:flex; gap:6px; }
+    .l3Item::before{ content:"•"; color:var(--dhl-red); font-weight:bold; }
+
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="topbar">
+    <div class="title">DHL Customer Journey Map <span class="pill">Hybrid Layout</span></div>
+  </div>
+
+  <div class="split">
+    
+    <div id="mapWrap" class="mapWrap">
+      <div class="mapHeader">
+        <div class="stageGrid" id="stageHeader"></div>
+      </div>
+      
+      <div class="mapBody" id="mapBody"></div>
+    </div>
+
+    <div id="deck" class="deck">
+      <div class="deckHandle" id="deckHandle">
+        <div class="deckTitle" id="deckTitle">Select a process to view details</div>
+        <div style="font-size:11px; font-weight:700; color:#666">▲ EXPAND / ▼ COLLAPSE</div>
+      </div>
+      <div class="deckBody" id="deckBody">
+        <div style="color:#999; text-align:center; margin-top:40px;">Select a tile to view L2/L3 Breakdown</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // --- CONFIGURATION ---
+
+  // 1. Define Stages
+  const STAGES = [
+    { no:1, name:"Awareness", voice:"I discover" },
+    { no:2, name:"Offer",     voice:"I agree" },
+    { no:3, name:"Onboarding",voice:"I integrate" },
+    { no:4, name:"Booking",   voice:"I ship" },
+    { no:5, name:"Transit",   voice:"It moves" },
+    { no:6, name:"Delivery",  voice:"I receive" },
+    { no:7, name:"Post-Sales",voice:"I return/pay" }
+  ];
+
+  // 2. Define Lanes & Layout Types
+  // type: 'grid' = standard 7-column swimlane
+  // type: 'belt' = compact horizontal scroll lane
+  const LANES = [
+    { id: "COMM", label: "Commercial", l0: "L2C", type: "grid", sub: "Story Lane" },
+    { id: "OPS",  label: "Operations", l0: "O2D", type: "grid", sub: "Story Lane" },
+    { id: "DES",  label: "Design",     l0: "D2O", type: "grid", sub: "Story Lane" }, // Kept as grid per request
+    { id: "RES",  label: "Resolution", l0: "P2R", type: "belt", sub: "Horizontal Belt" },
+    { id: "SRC",  label: "Resources",  l0: ["S2P","H2R"], type: "belt", sub: "Sourcing & HR" },
+    { id: "FND",  label: "Foundation", l0: ["S2E","GRC","ITF"], type: "belt", sub: "Enablers" }
+  ];
+
+  // 3. Span Rules (Used for Grid Spans AND Belt Range Chips)
+  const SPAN_RULES = [
+    { match: { l1: "L2C_08" }, span: { from: 4, to: 7 } }, // Track & Trace
+    { match: { l0: "P2R" },    span: { from: 4, to: 7 } }  // All Resolution
+  ];
+
+  // --- LOGIC ---
+
+  let L0MAP = new Map();
+
+  function init(){
+    // Render Header
+    const h = document.getElementById('stageHeader');
+    h.innerHTML = `<div class="stageCorner">PROCESS AREA</div>` + 
+      STAGES.map(s => `
+        <div class="stageCell">
+          <div class="stageNo">Step ${s.no}</div>
+          <div class="stageName">${s.name}</div>
+          <div class="stageVoice">"${s.voice}"</div>
+        </div>
+      `).join('');
+
+    // Fetch Data
+    fetch('data.json')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => {
+        // Map L0s for easy access
+        if(data.children) data.children.forEach(l0 => {
+          const id = l0.name.split(':')[0].trim();
+          L0MAP.set(id, l0);
+        });
+        renderMap();
+      })
+      .catch(e => {
+        console.warn("Using Mock Data");
+        loadMockData(); // Fallback for demo
+        renderMap(); 
+      });
+
+    // Deck Logic
+    document.getElementById('deckHandle').onclick = () => {
+      document.getElementById('deck').classList.toggle('open');
+      document.getElementById('mapWrap').classList.toggle('deckOpen');
+    };
+  }
+
+  function renderMap(){
+    const container = document.getElementById('mapBody');
+    container.innerHTML = "";
+
+    LANES.forEach(lane => {
+      // 1. Create Lane Row
+      const row = document.createElement('div');
+      row.className = "laneRow";
+      row.id = `lane-${lane.id}`;
+
+      // 2. Create Label
+      const label = document.createElement('div');
+      label.className = "laneLabel";
+      
+      // Controls HTML
+      let controlsHtml = `
+        <div class="iconBtn" onclick="toggleLane('${lane.id}')" title="Toggle Lane">↕</div>
+      `;
+      // Only belts get scroll buttons
+      if(lane.type === 'belt'){
+        controlsHtml += `
+          <div class="iconBtn" onclick="scrollLane('${lane.id}', -200)">‹</div>
+          <div class="iconBtn" onclick="scrollLane('${lane.id}', 200)">›</div>
+        `;
+      }
+
+      label.innerHTML = `
+        <div>
+          <div class="laneHead">
+            <span class="laneName">${lane.label}</span>
+            <span class="laneBadge">${Array.isArray(lane.l0) ? 'MIX' : lane.l0}</span>
+          </div>
+          <div class="laneDesc">${lane.sub}</div>
+        </div>
+        <div class="laneControls">${controlsHtml}</div>
+      `;
+      row.appendChild(label);
+
+      // 3. Create Content Area
+      const content = document.createElement('div');
+      content.className = "laneContent"; // Helper class for collapsing
+      
+      // GATHER DATA
+      let items = [];
+      const codes = Array.isArray(lane.l0) ? lane.l0 : [lane.l0];
+      codes.forEach(c => {
+        const l0Node = L0MAP.get(c);
+        if(l0Node && l0Node.children) {
+          l0Node.children.forEach(l1 => {
+            const parsed = parseName(l1.name);
+            items.push({ ...parsed, node: l1, l0: c });
+          });
+        }
+      });
+
+      // RENDER BASED ON TYPE
+      if(lane.type === 'grid'){
+        content.className += " laneGrid";
+        // Fill Grid: We need specific placement
+        items.forEach(item => {
+          const col = getCol(item.l0, item.id, item.name);
+          const span = getSpan(item.l0, item.id);
+          
+          const tile = createTile(item, false); // false = no chip
+          tile.style.gridColumn = span ? `${span.from} / ${span.to + 1}` : `${col} / span 1`;
+          if(span) tile.classList.add('span');
+          
+          content.appendChild(tile);
+        });
+      } else {
+        // BELT MODE
+        content.className += " laneBelt";
+        content.id = `belt-${lane.id}`;
+        
+        // Sort items by logical stage order for the belt
+        items.sort((a,b) => {
+          const sA = getSpan(a.l0, a.id)?.from || getCol(a.l0, a.id, a.name);
+          const sB = getSpan(b.l0, b.id)?.from || getCol(b.l0, b.id, b.name);
+          return sA - sB;
+        });
+
+        items.forEach(item => {
+          // Calculate range string
+          const span = getSpan(item.l0, item.id);
+          const col = getCol(item.l0, item.id, item.name);
+          let rangeTxt = `S${col}`;
+          if(span) rangeTxt = `S${span.from}–S${span.to}`;
+          
+          const tile = createTile(item, true, rangeTxt);
+          content.appendChild(tile);
+        });
+      }
+
+      row.appendChild(content);
+      container.appendChild(row);
+    });
+  }
+
+  // Helper: Create Visual Tile
+  function createTile(item, showChip, chipText){
+    const div = document.createElement('div');
+    div.className = "tile";
+    div.onclick = () => openDeck(item);
+    
+    let html = `
+      <div class="tileId">${item.id}</div>
+      <div class="tileName">${item.cleanName}</div>
+    `;
+    
+    if(showChip){
+      html += `<div class="stageChip">${chipText}</div>`;
+    }
+    
+    div.innerHTML = html;
+    return div;
+  }
+
+  // --- HEURISTICS & UTILS ---
+
+  function parseName(str){
+    const parts = str.split(':');
+    const id = parts[0].trim();
+    return { id: id, cleanName: parts[1] ? parts[1].trim() : id, fullName: str };
+  }
+
+  function getCol(l0, id, name){
+    // Mock logic to assign columns based on keywords/IDs
+    // In real app, this might come from JSON properties
+    const n = parseInt(id.split('_')[1]) || 0;
+    const txt = (name||"").toLowerCase();
+    
+    if(l0 === "L2C"){
+      if(n === 8) return 4; // Track
+      if(n === 4) return 3; // Onboard
+      if(n === 1 || n === 2) return 1;
+      return 2;
+    }
+    if(l0 === "O2D"){
+      if(n === 1) return 4; // Booking
+      if(n === 4) return 5; // Transit
+      if(n === 10) return 6; // Delivery
+      return 4;
+    }
+    if(l0 === "P2R") return 4; // Starts mid journey
+    if(l0 === "D2O") return 1;
+    
+    if(txt.includes("pay")) return 7;
+    if(txt.includes("onboard")) return 3;
+    if(txt.includes("source")) return 2;
+    return 1; // Default
+  }
+
+  function getSpan(l0, id){
+    const rule = SPAN_RULES.find(r => 
+      (r.match.l0 && r.match.l0 === l0) || 
+      (r.match.l1 && r.match.l1 === id)
+    );
+    return rule ? rule.span : null;
+  }
+
+  // --- INTERACTION ---
+
+  window.toggleLane = (laneId) => {
+    const row = document.getElementById(`lane-${laneId}`);
+    row.classList.toggle('collapsed');
+  };
+
+  window.scrollLane = (laneId, amount) => {
+    const belt = document.getElementById(`belt-${laneId}`);
+    if(belt) belt.scrollBy({ left: amount, behavior: 'smooth' });
+  };
+
+  function openDeck(item){
+    // Highlight
+    document.querySelectorAll('.tile').forEach(t => t.classList.remove('active'));
+    // (In real DOM mapping we'd reference specific node, simple for now)
+    
+    // Fill Deck
+    const title = document.getElementById('deckTitle');
+    title.innerHTML = `${item.id}: ${item.cleanName} <span style="font-weight:400; color:#666; margin-left:10px">Owner: ${item.node.owner || "TBD"}</span>`;
+    
+    const body = document.getElementById('deckBody');
+    body.innerHTML = "";
+    
+    const container = document.createElement('div');
+    container.className = "detailFlow";
+    
+    if(item.node.children){
+      item.node.children.forEach(l2 => {
+        const p2 = parseName(l2.name);
+        const card = document.createElement('div');
+        card.className = "l2Card";
+        
+        let l3html = `<div style="font-style:italic; color:#999; font-size:11px">No activities</div>`;
+        
+        if(l2.children && l2.children.length > 0){
+          l3html = l2.children.map(l3 => {
+            const p3 = parseName(l3.name);
+            return `<div class="l3Item"><div>${p3.cleanName}</div></div>`;
+          }).join('');
+        }
+        
+        card.innerHTML = `
+          <div class="l2Head">${p2.cleanName} <span style="color:#d40511; font-size:10px">${p2.id}</span></div>
+          <div>${l3html}</div>
+        `;
+        container.appendChild(card);
+      });
+    } else {
+      body.innerHTML = "No sub-processes defined.";
+    }
+    
+    body.appendChild(container);
+    
+    // Open
+    document.getElementById('deck').classList.add('open');
+    document.getElementById('mapWrap').classList.add('deckOpen');
+  }
+
+  // --- MOCK DATA LOADER (Fallback) ---
+  function loadMockData(){
+    const mock = [
+      { name: "L2C: Commercial", children: [
+        { name: "L2C_01: Marketing", children: [] },
+        { name: "L2C_04: Onboarding", children: [{name:"L2C_04_01: Setup", children:[{name:"L3: Config API"}]}] },
+        { name: "L2C_08: Track & Trace", children: [] }
+      ]},
+      { name: "O2D: Operations", children: [
+        { name: "O2D_02: Pickup", children: [] },
+        { name: "O2D_04: Linehaul", children: [] },
+        { name: "O2D_10: Last Mile", children: [] }
+      ]},
+      { name: "P2R: Resolution", children: [
+        { name: "P2R_01: Intake", children: [] },
+        { name: "P2R_02: Resolve", children: [] },
+        { name: "P2R_03: Close", children: [] }
+      ]},
+      { name: "D2O: Design", children: [
+        { name: "D2O_01: Network Design", children: [] },
+        { name: "D2O_02: Product Design", children: [] }
+      ]},
+      { name: "S2P: Source to Pay", children: [
+        { name: "S2P_01: Sourcing", children: [] },
+        { name: "S2P_02: Contracting", children: [] }
+      ]}
+    ];
+    
+    mock.forEach(l0 => {
+      const id = l0.name.split(':')[0].trim();
+      L0MAP.set(id, l0);
+    });
+  }
+
+  // Run
+  init();
+
+</script>
+</body>
+</html>
