@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DHL eCommerce · Customer Journey Map</title>
+
+  <!-- Optional font fallback: Delivery is proprietary; we use system/Inter-like stack -->
+  <style>
+    :root{
+      --dhl-red:#D40511;
+      --dhl-yellow:#FFCC00;
+
+      --ink:#101828;
+      --muted:#667085;
+      --bg:#F5F7FA;
+      --panel:#FFFFFF;
+      --line:rgba(16,24,40,0.12);
+
+      --header-h:56px;
+      --deck-collapsed-h:48px;
+      --deck-expanded-h:min(42vh, 520px);
+
+      --lane-label-w:260px;
+
+      --tile-h:54px;
+      --tile-min-w:240px;
+
+      --shadow: 0 10px 26px rgba(16,24,40,0.10);
+      --shadow-2: 0 18px 44px rgba(16,24,40,0.14);
+
+      --radius:14px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--ink);
+      background:var(--bg);
+      overflow:hidden;
+    }
+
+    /* ===== App Shell ===== */
+    .app{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    .topbar{
+      height:var(--header-h);
+      background:var(--dhl-red);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 18px;
+      gap:12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+      z-index:50;
+      flex:0 0 auto;
+    }
+    .topbar .title{
+      font-weight:900;
+      letter-spacing:0.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.22);
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:850;
+      white-space:nowrap;
+    }
+
+    .topbar .right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+
+    .search{
+      position:relative;
+      min-width: 260px;
+      max-width: 38vw;
+      width: 420px;
+    }
+    .search input{
+      width:100%;
+      height:36px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.25);
+      outline:none;
+      padding:0 12px;
+      font-size:12px;
+      font-weight:750;
+      background: rgba(255,255,255,0.12);
+      color:#fff;
+    }
+    .search input::placeholder{ color: rgba(255,255,255,0.78); font-weight:700; }
+    .search input:focus{
+      box-shadow:0 0 0 3px rgba(255,204,0,0.35);
+      border-color: rgba(255,204,0,0.8);
+    }
+    .searchResults{
+      position:absolute;
+      top:42px;
+      right:0;
+      width:min(720px, 92vw);
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      box-shadow: var(--shadow-2);
+      overflow:hidden;
+      display:none;
+      z-index:999;
+      color:var(--ink);
+    }
+    .srHead{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 12px;
+      background:#F7F8FB;
+      border-bottom:1px solid var(--line);
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+    }
+    .srList{
+      max-height: 300px;
+      overflow:auto;
+    }
+    .srItem{
+      display:flex;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid rgba(16,24,40,0.06);
+      cursor:pointer;
+      align-items:flex-start;
+    }
+    .srItem:hover{ background:#FFF9E6; }
+    .srBadge{
+      flex:0 0 auto;
+      font-size:10px;
+      font-weight:950;
+      border-radius:999px;
+      padding:3px 8px;
+      border:1px solid rgba(16,24,40,0.14);
+      background:#FAFAFF;
+      margin-top:1px;
+      white-space:nowrap;
+    }
+    .srMain{ min-width:0; }
+    .srTitle{
+      font-size:12px;
+      font-weight:950;
+      margin:0 0 2px 0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .srPath{
+      font-size:11px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* ===== Split Screen ===== */
+    .split{
+      position:relative;
+      flex:1 1 auto;
+      min-height:0;
+    }
+
+    /* Top map area: height adapts based on deck state */
+    .mapWrap{
+      position:absolute;
+      inset:0 0 var(--deck-collapsed-h) 0; /* leaves space for collapsed deck */
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      transition: inset 240ms ease;
+    }
+    .mapWrap.deckOpen{
+      inset:0 0 var(--deck-expanded-h) 0;
+    }
+
+    /* ===== Map Header (sticky) ===== */
+    .mapHeader{
+      background:var(--panel);
+      border-bottom:1px solid var(--line);
+      box-shadow: 0 4px 14px rgba(16,24,40,0.06);
+      z-index:20;
+      flex:0 0 auto;
+    }
+
+    .stageGrid{
+      display:grid;
+      grid-template-columns: var(--lane-label-w) repeat(7, minmax(180px, 1fr));
+      align-items:stretch;
+      gap:0;
+    }
+
+    .stageCorner{
+      padding:10px 12px;
+      border-right:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .stageCorner .hint{
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+      line-height:1.2;
+    }
+
+    .stageCell{
+      padding:10px 10px 12px 10px;
+      border-right:1px solid var(--line);
+    }
+    .stageCell:last-child{ border-right:none; }
+
+    .stageNo{
+      font-size:11px;
+      font-weight:950;
+      color:var(--dhl-red);
+      margin-bottom:4px;
+    }
+    .stageName{
+      font-size:13px;
+      font-weight:950;
+      line-height:1.15;
+      margin-bottom:6px;
+    }
+    .stageVoice{
+      font-size:11px;
+      font-weight:850;
+      color:var(--muted);
+    }
+
+    /* ===== Map Body (scrollable) ===== */
+    .mapBody{
+      flex:1 1 auto;
+      min-height:0;
+      overflow:auto;
+      padding:10px 0;
+    }
+
+    .laneRow{
+      display:grid;
+      grid-template-columns: var(--lane-label-w) 1fr;
+      gap:0;
+      align-items:stretch;
+      border-bottom:1px solid rgba(16,24,40,0.08);
+      background: rgba(255,255,255,0.35);
+    }
+
+    .laneLabel{
+      position:sticky;
+      left:0;
+      z-index:10;
+      background: linear-gradient(180deg, #fff 0%, #F6F8FC 100%);
+      border-right:1px solid var(--line);
+      padding:14px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .laneTitle{
+      font-size:13px;
+      font-weight:950;
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .laneCode{
+      font-size:11px;
+      font-weight:950;
+      color:var(--dhl-red);
+      background: rgba(212,5,17,0.08);
+      border:1px solid rgba(212,5,17,0.18);
+      border-radius:999px;
+      padding:3px 8px;
+      white-space:nowrap;
+    }
+    .laneSub{
+      font-size:11px;
+      font-weight:800;
+      color:var(--muted);
+      line-height:1.25;
+    }
+
+    .laneGrid{
+      display:grid;
+      grid-template-columns: repeat(7, minmax(180px, 1fr));
+      gap:10px 10px;
+      padding:14px 10px 16px 10px;
+      align-content:start;
+    }
+
+    /* A swimlane sub-grid for positioned tiles (including spans) */
+    .laneGridInner{
+      grid-column: 1 / -1;
+      display:grid;
+      grid-template-columns: repeat(7, minmax(180px, 1fr));
+      gap:10px;
+      align-content:start;
+    }
+
+    /* ===== L1 Chevron Tile ===== */
+    .tile{
+      height: var(--tile-h);
+      min-width: var(--tile-min-w);
+      width: 100%;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 16px 10px 18px;
+      note: none;
+      cursor:pointer;
+      user-select:none;
+      border-radius:14px;
+      background: linear-gradient(180deg, #FFE89A 0%, var(--dhl-yellow) 88%);
+      color:#1a1a1a;
+      border:1px solid rgba(16,24,40,0.14);
+      box-shadow: 0 8px 18px rgba(16,24,40,0.10);
+      clip-path: polygon(
+        0% 0%,
+        calc(100% - 18px) 0%,
+        100% 50%,
+        calc(100% - 18px) 100%,
+        0% 100%,
+        18px 50%
+      );
+      transition: transform 120ms ease, box-shadow 120ms ease, filter 120ms ease;
+      overflow:hidden;
+    }
+    .tile:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(16,24,40,0.14);
+      filter: brightness(0.99);
+    }
+    .tile.active{
+      background: var(--dhl-red);
+      color:#fff;
+      border-color: rgba(0,0,0,0.18);
+      box-shadow: 0 0 0 3px rgba(255,204,0,0.65), 0 14px 30px rgba(16,24,40,0.16);
+    }
+    .tile.active .tileId{ color: var(--dhl-yellow); border-color: rgba(255,204,0,0.55); }
+    .tileId{
+      flex:0 0 auto;
+      font-size:11px;
+      font-weight:950;
+      color:var(--dhl-red);
+      background: rgba(255,255,255,0.6);
+      border:1px solid rgba(212,5,17,0.20);
+      padding:4px 8px;
+      border-radius:999px;
+      white-space:nowrap;
+      max-width: 40%;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tileName{
+      font-size:12px;
+      font-weight:900;
+      line-height:1.15;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      min-width:0;
+    }
+
+    /* Span tiles: still chevrons, but they can stretch across columns */
+    .tile.span{
+      min-width:0;
+    }
+
+    /* ===== Deck (bottom) ===== */
+    .deck{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:0;
+      height:var(--deck-collapsed-h);
+      background:var(--panel);
+      border-top: 3px solid var(--dhl-yellow);
+      box-shadow: 0 -12px 30px rgba(16,24,40,0.12);
+      transition: height 240ms ease;
+      z-index:40;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+    .deck.open{ height:var(--deck-expanded-h); }
+
+    .deckHandle{
+      height:var(--deck-collapsed-h);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:0 14px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .deckHandleLeft{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      min-width:0;
+    }
+    .deckIcon{
+      width:30px;height:30px;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(212,5,17,0.10);
+      border:1px solid rgba(212,5,17,0.18);
+      font-weight:950;
+      color:var(--dhl-red);
+      flex:0 0 auto;
+    }
+    .deckTitle{
+      font-size:12px;
+      font-weight:950;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 62vw;
+    }
+    .deckHint{
+      font-size:11px;
+      font-weight:850;
+      color:var(--muted);
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    .deckBody{
+      border-top:1px solid var(--line);
+      padding:12px 14px 14px 14px;
+      overflow:auto;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .l1Meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .l1Heading{
+      min-width: 280px;
+      flex: 1 1 380px;
+    }
+    .l1Heading .h1{
+      font-size:16px;
+      font-weight:980;
+      margin:0 0 4px 0;
+      line-height:1.15;
+    }
+    .l1Heading .desc{
+      margin:0;
+      font-size:12px;
+      color:var(--muted);
+      font-weight:750;
+      line-height:1.4;
+      max-width: 1100px;
+    }
+
+    .metaPills{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      align-items:center;
+      flex: 0 0 auto;
+    }
+    .metaPill{
+      font-size:11px;
+      font-weight:900;
+      border-radius:999px;
+      padding:6px 10px;
+      border:1px solid rgba(16,24,40,0.14);
+      background:#F7F8FB;
+      color:#1f2937;
+      white-space:nowrap;
+    }
+    .metaPill.owner{
+      background:#111827;
+      color:#fff;
+      border-color: rgba(0,0,0,0.16);
+    }
+    .metaPill.id{
+      background: rgba(212,5,17,0.08);
+      border-color: rgba(212,5,17,0.18);
+      color: var(--dhl-red);
+    }
+
+    /* L2 chain (horizontal) */
+    .l2Chain{
+      display:flex;
+      gap:10px;
+      overflow:auto;
+      padding-bottom:4px;
+      scroll-snap-type:x mandatory;
+    }
+    .l2Block{
+      flex: 0 0 min(380px, 92vw);
+      background:#fff;
+      border:1px solid rgba(16,24,40,0.12);
+      border-radius:14px;
+      box-shadow: 0 10px 20px rgba(16,24,40,0.06);
+      padding:10px 10px 8px 10px;
+      scroll-snap-align:start;
+      min-height: 120px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .l2Header{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(16,24,40,0.08);
+    }
+    .l2HeaderLeft{
+      min-width:0;
+    }
+    .l2Id{
+      font-size:11px;
+      font-weight:950;
+      color:var(--dhl-red);
+      margin-bottom:4px;
+    }
+    .l2Name{
+      font-size:13px;
+      font-weight:950;
+      line-height:1.15;
+      margin:0;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 320px;
+    }
+
+    .l3List{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding-top:2px;
+    }
+    .l3Item{
+      border-left: 3px solid rgba(16,24,40,0.18);
+      background:#FBFCFE;
+      border-radius:10px;
+      padding:8px 10px;
+      border-top:1px solid rgba(16,24,40,0.06);
+      border-right:1px solid rgba(16,24,40,0.06);
+      border-bottom:1px solid rgba(16,24,40,0.06);
+    }
+    .l3Top{
+      font-size:10px;
+      font-weight:950;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:0.3px;
+      margin-bottom:3px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .l3Name{
+      font-size:12px;
+      font-weight:850;
+      margin:0;
+      line-height:1.25;
+      color:#111827;
+    }
+
+    /* ===== Empty / Error ===== */
+    .empty{
+      padding:14px 12px;
+      color:var(--muted);
+      font-weight:800;
+      font-size:12px;
+    }
+    .error{
+      margin:12px 14px;
+      padding:12px 12px;
+      border-radius:14px;
+      background:#fff;
+      border:1px solid rgba(180,35,24,0.22);
+      color:#b42318;
+      font-weight:900;
+      box-shadow: var(--shadow);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 980px){
+      :root{ --lane-label-w: 220px; }
+      .search{ width: 320px; }
+      .tileId{ max-width: 52%; }
+    }
+    @media (max-width: 720px){
+      :root{ --lane-label-w: 200px; }
+      .pill{ display:none; }
+      .search{ width: 240px; min-width: 200px; }
+      .deckTitle{ max-width: 56vw; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">
+        <span>DHL eCommerce · Customer Journey Map</span>
+        <span class="pill">Single-file · Dynamic from <b>data.json</b></span>
+      </div>
+
+      <div class="right">
+        <div class="search">
+          <input id="searchInput" placeholder="Search ID or name… e.g., O2D_04, customs, onboarding" autocomplete="off" />
+          <div id="searchResults" class="searchResults" aria-hidden="true">
+            <div class="srHead">
+              <span id="srTitle">Results</span>
+              <span>Click to open</span>
+            </div>
+            <div id="srList" class="srList"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="split">
+      <!-- TOP: MAP -->
+      <div id="mapWrap" class="mapWrap">
+        <div class="mapHeader">
+          <div class="stageGrid" id="stageHeader"></div>
+        </div>
+
+        <div class="mapBody" id="mapBody">
+          <!-- lanes injected -->
+        </div>
+
+        <div id="errBox" class="error" style="display:none;"></div>
+      </div>
+
+      <!-- BOTTOM: DECK -->
+      <div id="deck" class="deck" aria-live="polite">
+        <div id="deckHandle" class="deckHandle" title="Click to expand/collapse">
+          <div class="deckHandleLeft">
+            <div class="deckIcon">≡</div>
+            <div id="deckHandleTitle" class="deckTitle">Select an L1 chevron to view details</div>
+          </div>
+          <div id="deckHint" class="deckHint">▲ Expand</div>
+        </div>
+
+        <div id="deckBody" class="deckBody" style="display:none;">
+          <!-- detail injected -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /***********************
+     * CONFIG: Journey & Lanes
+     ***********************/
+    const STAGES = [
+      { no: 1, name: "Awareness & Plan", voice: "I discover" },
+      { no: 2, name: "Offer & Account", voice: "I agree" },
+      { no: 3, name: "Onboarding", voice: "I integrate" },
+      { no: 4, name: "Booking & Collect", voice: "I ship" },
+      { no: 5, name: "Export & Transit", voice: "It moves" },
+      { no: 6, name: "Import & Last Mile", voice: "I receive" },
+      { no: 7, name: "Post-Shipment", voice: "I pay/return" }
+    ];
+
+    // Swimlanes (rows) — content is still fully dynamic from JSON; this just selects which L0 to show per lane.
+    const LANES = [
+      { key: "COMM", label: "Commercial", l0Codes: ["L2C"], sub: "Top Priority", laneCode: "L2C" },
+      { key: "OPS",  label: "Operations", l0Codes: ["O2D"], sub: "Core Logistics", laneCode: "O2D" },
+      { key: "DES",  label: "Design", l0Codes: ["D2O"], sub: "Network & Product Design", laneCode: "D2O" },
+      { key: "RESO", label: "Resolution", l0Codes: ["P2R"], sub: "Issue Management", laneCode: "P2R" },
+      { key: "RSRC", label: "Resources", l0Codes: ["S2P","H2R"], sub: "Sourcing & HR", laneCode: "S2P & H2R" },
+      { key: "FND",  label: "Foundation", l0Codes: ["S2E","GRC","ITF","EA_PM","DA","I2P","TRF","R2R"], sub: "Strategy & Enablers", laneCode: "S2E, GRC, IT, EA, DA" },
+    ];
+
+    // "Continuous" span logic — implemented by ID rules (still renders JSON tile text).
+    // Interpretation aligned to your intent:
+    // - Commercial: span the always-on "Commercial Customer Service & Claims" (L2C_08) from Booking to Post-Shipment.
+    // - Resolution: span ALL P2R L1 processes from Booking to Post-Shipment.
+    const SPAN_RULES = [
+      { match: { l0: "L2C", l1: "L2C_08" }, span: { from: 4, to: 7 } },
+      { match: { l0: "P2R" }, span: { from: 4, to: 7 } }
+    ];
+
+    /***********************
+     * Utilities
+     ***********************/
+    const $ = (sel) => document.querySelector(sel);
+    const esc = (s) => String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+
+    function parseInfo(name){
+      if(!name) return { id:"", name:"" };
+      const parts = String(name).split(":");
+      const id = parts[0].trim();
+      const nm = parts.slice(1).join(":").trim() || id;
+      return { id, name: nm };
+    }
+
+    function safeChildren(n){
+      return (n && Array.isArray(n.children)) ? n.children : [];
+    }
+
+    function getL0Map(root){
+      const m = new Map();
+      safeChildren(root).forEach(l0=>{
+        const inf = parseInfo(l0.name);
+        if(inf.id) m.set(inf.id, l0);
+      });
+      return m;
+    }
+
+    /***********************
+     * Column mapping (heuristics)
+     * - No hardcoded content text; we map by IDs/numbers/keywords.
+     * - Adjust anytime without touching rendering.
+     ***********************/
+    function colForL1(l0Id, l1Node){
+      const { id: l1Id, name: l1Name } = parseInfo(l1Node.name);
+      const n = extractTrailingNumber(l1Id); // e.g., O2D_04 -> 4
+
+      // Commercial (L2C)
+      if(l0Id === "L2C"){
+        if(n === 1) return 1;
+        if(n === 2) return 2;
+        if(n === 3) return 2;
+        if(n === 4) return 3;
+        if(n === 5) return 4;
+        if(n === 6) return 7;
+        if(n === 7) return 7;
+        if(n === 8) return 6; // will be overridden to span by rule above
+        return 3;
+      }
+
+      // Operations (O2D)
+      if(l0Id === "O2D"){
+        if(n === 1) return 4;
+        if(n === 2) return 4;
+        if(n === 3) return 4;
+        if(n === 4) return 5;
+        if(n === 5) return 5;
+        if(n === 6) return 5;
+        if(n === 7) return 6;
+        if(n === 8) return 6;
+        if(n === 9) return 6;
+        if(n === 10) return 6;
+        if(n === 11) return 6;
+        if(n === 12) return 7;
+        return 5;
+      }
+
+      // Design (D2O)
+      if(l0Id === "D2O"){
+        if(n === 1) return 2;
+        if(n === 2) return 2;
+        if(n === 3) return 3;
+        if(n === 4) return 4;
+        if(n === 5) return 4;
+        if(n === 6) return 5;
+        if(n === 7) return 6;
+        if(n === 8) return 7;
+        return 3;
+      }
+
+      // Resolution (P2R) handled mostly by span rules; default into Import/Last Mile.
+      if(l0Id === "P2R"){
+        return 6;
+      }
+
+      // Resources (S2P / H2R)
+      if(l0Id === "S2P" || l0Id === "H2R"){
+        // quick keyword hints
+        const nm = (l1Name || "").toLowerCase();
+        if(nm.includes("onboard")) return 3;
+        if(nm.includes("contract")) return 2;
+        if(nm.includes("procure") || nm.includes("source") || nm.includes("supplier")) return 2;
+        if(nm.includes("pay") || nm.includes("payroll")) return 7;
+        return 2;
+      }
+
+      // Foundation & Enablers
+      {
+        const nm = (l1Name || "").toLowerCase();
+        if(nm.includes("strategy") || nm.includes("vision") || nm.includes("governance")) return 1;
+        if(nm.includes("architecture") || nm.includes("portfolio")) return 2;
+        if(nm.includes("platform") || nm.includes("integration") || nm.includes("data")) return 3;
+        if(nm.includes("security") || nm.includes("risk") || nm.includes("compliance")) return 1;
+        return 2;
+      }
+    }
+
+    function extractTrailingNumber(id){
+      const m = String(id || "").match(/_(\d+)\s*$/);
+      return m ? Number(m[1]) : null;
+    }
+
+    function getSpanFor(l0Id, l1Id){
+      for(const r of SPAN_RULES){
+        const m = r.match || {};
+        const okL0 = (m.l0 == null) || (m.l0 === l0Id);
+        const okL1 = (m.l1 == null) || (m.l1 === l1Id);
+        if(okL0 && okL1) return r.span;
+      }
+      return null;
+    }
+
+    /***********************
+     * State
+     ***********************/
+    let ROOT = null;
+    let L0MAP = null;
+
+    // selection
+    let selected = {
+      l0Id: null,
+      l1Id: null,
+      l1Node: null
+    };
+
+    // Search index
+    let SEARCH_INDEX = []; // { level, id, name, path, nodeRefs }
+    let SEARCH_TIMER = null;
+
+    /***********************
+     * Render: Header (Stages)
+     ***********************/
+    function renderStageHeader(){
+      const wrap = $("#stageHeader");
+      wrap.innerHTML = "";
+
+      const corner = document.createElement("div");
+      corner.className = "stageCorner";
+      corner.innerHTML = `
+        <div class="hint">
+          <div style="font-weight:950;color:var(--ink);">Swimlanes</div>
+          <div>Click any L1 chevron to open the deck</div>
+        </div>
+        <div class="laneCode">L0 / Value Chain</div>
+      `;
+      wrap.appendChild(corner);
+
+      STAGES.forEach(s=>{
+        const cell = document.createElement("div");
+        cell.className = "stageCell";
+        cell.innerHTML = `
+          <div class="stageNo">Step ${esc(s.no)}</div>
+          <div class="stageName">${esc(s.name)}</div>
+          <div class="stageVoice">${esc(s.voice)}</div>
+        `;
+        wrap.appendChild(cell);
+      });
+    }
+
+    /***********************
+     * Render: Map lanes
+     ***********************/
+    function renderMap(){
+      const body = $("#mapBody");
+      body.innerHTML = "";
+
+      for(const lane of LANES){
+        const row = document.createElement("div");
+        row.className = "laneRow";
+
+        const label = document.createElement("div");
+        label.className = "laneLabel";
+        label.innerHTML = `
+          <div class="laneTitle">
+            <span>${esc(lane.label)}</span>
+            <span class="laneCode">${esc(lane.laneCode)}</span>
+          </div>
+          <div class="laneSub">${esc(lane.sub || "")}</div>
+        `;
+
+        const grid = document.createElement("div");
+        grid.className = "laneGrid";
+
+        // Inner grid to allow spans (grid-column)
+        const inner = document.createElement("div");
+        inner.className = "laneGridInner";
+
+        // Collect all L1 nodes from lane's L0 codes, in original JSON order.
+        const l1Items = [];
+        for(const l0Code of lane.l0Codes){
+          const l0Node = L0MAP.get(l0Code);
+          if(!l0Node) continue;
+
+          for(const l1 of safeChildren(l0Node)){
+            const i1 = parseInfo(l1.name);
+            l1Items.push({
+              l0Id: l0Code,
+              l0Node,
+              l1Id: i1.id,
+              l1Name: i1.name,
+              l1Node: l1
+            });
+          }
+        }
+
+        if(!l1Items.length){
+          inner.innerHTML = `<div class="empty" style="grid-column:1/-1;">No processes found for this lane in data.json.</div>`;
+        }else{
+          // Render each L1 as chevron positioned into columns (with optional spans)
+          for(const item of l1Items){
+            const span = getSpanFor(item.l0Id, item.l1Id);
+            const col = colForL1(item.l0Id, item.l1Node);
+            const colStart = span ? span.from : col;
+            const colEnd = span ? (span.to + 1) : (col + 1);
+
+            const tile = document.createElement("div");
+            tile.className = "tile" + (span ? " span" : "");
+            tile.style.gridColumn = `${colStart} / ${colEnd}`;
+
+            tile.dataset.l0 = item.l0Id;
+            tile.dataset.l1 = item.l1Id;
+
+            tile.innerHTML = `
+              <span class="tileId">${esc(item.l1Id)}</span>
+              <span class="tileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</span>
+            `;
+
+            tile.addEventListener("click", () => {
+              selectL1(item.l0Id, item.l1Node);
+              highlightActiveTile(item.l0Id, item.l1Id);
+            });
+
+            inner.appendChild(tile);
+          }
+        }
+
+        grid.appendChild(inner);
+        row.appendChild(label);
+        row.appendChild(grid);
+        body.appendChild(row);
+      }
+    }
+
+    function highlightActiveTile(l0Id, l1Id){
+      document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
+      const target = document.querySelector(`.tile[data-l0="${CSS.escape(l0Id)}"][data-l1="${CSS.escape(l1Id)}"]`);
+      if(target) target.classList.add("active");
+    }
+
+    /***********************
+     * Deck
+     ***********************/
+    const deck = $("#deck");
+    const deckHandle = $("#deckHandle");
+    const deckHandleTitle = $("#deckHandleTitle");
+    const deckHint = $("#deckHint");
+    const deckBody = $("#deckBody");
+    const mapWrap = $("#mapWrap");
+
+    function setDeckOpen(open){
+      if(open){
+        deck.classList.add("open");
+        mapWrap.classList.add("deckOpen");
+        deckBody.style.display = "flex";
+        deckHint.textContent = "▼ Collapse";
+      }else{
+        deck.classList.remove("open");
+        mapWrap.classList.remove("deckOpen");
+        deckBody.style.display = "none";
+        deckHint.textContent = "▲ Expand";
+      }
+    }
+
+    deckHandle.addEventListener("click", () => {
+      const open = deck.classList.contains("open");
+      setDeckOpen(!open);
+    });
+
+    function selectL1(l0Id, l1Node){
+      const l0Node = L0MAP.get(l0Id);
+      const l0Info = parseInfo(l0Node?.name);
+      const l1Info = parseInfo(l1Node?.name);
+
+      selected = { l0Id, l1Id: l1Info.id, l1Node };
+
+      // Handle title
+      deckHandleTitle.textContent = `${l1Info.id} — ${l1Info.name}`;
+
+      // Build deck content
+      const owner = (l1Node?.owner || l0Node?.owner || "Unassigned");
+      const desc = (l1Node?.description || "");
+
+      const l2s = safeChildren(l1Node).map(l2=>{
+        const i2 = parseInfo(l2.name);
+        const l3s = safeChildren(l2).map(l3=>{
+          const i3 = parseInfo(l3.name);
+          return { id: i3.id, name: i3.name, node: l3 };
+        });
+        return { id: i2.id, name: i2.name, node: l2, l3s };
+      });
+
+      deckBody.innerHTML = `
+        <div class="l1Meta">
+          <div class="l1Heading">
+            <p class="h1">${esc(l1Info.id)} · ${esc(l1Info.name)}</p>
+            <p class="desc">${esc(desc || "No description available.")}</p>
+          </div>
+          <div class="metaPills">
+            <span class="metaPill id">${esc(l0Info.id || l0Id)} · L0</span>
+            <span class="metaPill owner">Owner: ${esc(owner)}</span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="font-size:12px;font-weight:950;color:var(--ink);">L2 Sub-processes → L3 Activities</div>
+          <div style="font-size:11px;font-weight:850;color:var(--muted);white-space:nowrap;">No hover required — L3 is always visible</div>
+        </div>
+
+        <div class="l2Chain" id="l2Chain"></div>
+      `;
+
+      const chain = $("#l2Chain");
+      if(!l2s.length){
+        chain.innerHTML = `<div class="empty">No L2 sub-processes found for this L1.</div>`;
+      }else{
+        for(const l2 of l2s){
+          const block = document.createElement("div");
+          block.className = "l2Block";
+
+          const l2Owner = (l2.node?.owner || l1Node?.owner || l0Node?.owner || "Unassigned");
+
+          const l3Html = (l2.l3s.length)
+            ? l2.l3s.map(x => `
+                <div class="l3Item">
+                  <div class="l3Top">
+                    <span>${esc(x.id)}</span>
+                    <span>${esc(l2Owner)}</span>
+                  </div>
+                  <p class="l3Name">${esc(x.name)}</p>
+                </div>
+              `).join("")
+            : `<div class="empty">No L3 activities.</div>`;
+
+          block.innerHTML = `
+            <div class="l2Header">
+              <div class="l2HeaderLeft">
+                <div class="l2Id">${esc(l2.id)}</div>
+                <p class="l2Name" title="${esc(l2.name)}">${esc(l2.name)}</p>
+              </div>
+              <div style="text-align:right;">
+                <div class="metaPill" style="padding:5px 8px; font-size:10px; background:#FFF9E6; border-color: rgba(255,204,0,0.55); color:#7a5a00;">
+                  L2 Owner: ${esc(l2Owner)}
+                </div>
+              </div>
+            </div>
+            <div class="l3List">${l3Html}</div>
+          `;
+
+          chain.appendChild(block);
+        }
+      }
+
+      // Open deck automatically on selection
+      setDeckOpen(true);
+    }
+
+    /***********************
+     * Search (L0/L1/L2/L3)
+     ***********************/
+    function buildSearchIndex(root){
+      const out = [];
+      const l0s = safeChildren(root);
+
+      for(const l0 of l0s){
+        const i0 = parseInfo(l0.name);
+        out.push({
+          level: "L0",
+          id: i0.id,
+          name: i0.name,
+          path: [i0.id],
+          refs: { l0Id: i0.id, l0Node: l0 }
+        });
+
+        for(const l1 of safeChildren(l0)){
+          const i1 = parseInfo(l1.name);
+          out.push({
+            level: "L1",
+            id: i1.id,
+            name: i1.name,
+            path: [i0.id, i1.id],
+            refs: { l0Id: i0.id, l1Node: l1 }
+          });
+
+          for(const l2 of safeChildren(l1)){
+            const i2 = parseInfo(l2.name);
+            out.push({
+              level: "L2",
+              id: i2.id,
+              name: i2.name,
+              path: [i0.id, i1.id, i2.id],
+              refs: { l0Id: i0.id, l1Node: l1, l2Node: l2 }
+            });
+
+            for(const l3 of safeChildren(l2)){
+              const i3 = parseInfo(l3.name);
+              out.push({
+                level: "L3",
+                id: i3.id,
+                name: i3.name,
+                path: [i0.id, i1.id, i2.id, i3.id],
+                refs: { l0Id: i0.id, l1Node: l1, l2Node: l2, l3Node: l3 }
+              });
+            }
+          }
+        }
+      }
+      return out;
+    }
+
+    const searchInput = $("#searchInput");
+    const searchResults = $("#searchResults");
+    const srTitle = $("#srTitle");
+    const srList = $("#srList");
+
+    function openSearchBox(){
+      searchResults.style.display = "block";
+      searchResults.setAttribute("aria-hidden","false");
+    }
+    function closeSearchBox(){
+      searchResults.style.display = "none";
+      searchResults.setAttribute("aria-hidden","true");
+      srList.innerHTML = "";
+    }
+
+    function renderSearchResults(items, q){
+      srList.innerHTML = "";
+      srTitle.textContent = items.length ? `Results (${items.length})` : `No results`;
+
+      if(!items.length){
+        srList.innerHTML = `<div class="empty">No matches for “${esc(q)}”.</div>`;
+        openSearchBox();
+        return;
+      }
+
+      for(const it of items){
+        const row = document.createElement("div");
+        row.className = "srItem";
+
+        row.innerHTML = `
+          <span class="srBadge">${esc(it.level)}</span>
+          <div class="srMain">
+            <div class="srTitle">${esc(it.id)} — ${esc(it.name)}</div>
+            <div class="srPath">${esc(it.path.join(" › "))}</div>
+          </div>
+        `;
+
+        row.addEventListener("click", () => {
+          // Navigate: for L1 and deeper, open L1 in deck (per spec "click any element in map"; search is helper)
+          if(it.refs?.l1Node){
+            selectL1(it.refs.l0Id, it.refs.l1Node);
+            highlightActiveTile(it.refs.l0Id, parseInfo(it.refs.l1Node.name).id);
+          }
+          closeSearchBox();
+        });
+
+        srList.appendChild(row);
+      }
+      openSearchBox();
+    }
+
+    searchInput.addEventListener("input", () => {
+      const q = searchInput.value.trim();
+      if(SEARCH_TIMER) clearTimeout(SEARCH_TIMER);
+
+      SEARCH_TIMER = setTimeout(() => {
+        if(!q){
+          closeSearchBox();
+          return;
+        }
+        const needle = q.toLowerCase();
+        const hits = SEARCH_INDEX
+          .filter(x =>
+            String(x.id).toLowerCase().includes(needle) ||
+            String(x.name).toLowerCase().includes(needle)
+          )
+          .slice(0, 30);
+
+        renderSearchResults(hits, q);
+      }, 120);
+    });
+
+    document.addEventListener("click", (e) => {
+      const inSearch = e.target.closest(".search");
+      if(!inSearch) closeSearchBox();
+    });
+
+    /***********************
+     * Load data.json
+     ***********************/
+    function showError(msg){
+      const box = $("#errBox");
+      box.style.display = "block";
+      box.textContent = msg;
+    }
+
+    fetch("data.json")
+      .then(r => {
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(data => {
+        if(!data || !Array.isArray(data.children)){
+          showError("data.json loaded but is missing expected 'children' array at root.");
+          return;
+        }
+
+        ROOT = data;
+        L0MAP = getL0Map(ROOT);
+
+        // Render UI
+        renderStageHeader();
+        renderMap();
+
+        // Build search
+        SEARCH_INDEX = buildSearchIndex(ROOT);
+      })
+      .catch(err => {
+        showError("Cannot load data.json. Run via a local server (not file://) and ensure data.json is next to this HTML. " + err);
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
