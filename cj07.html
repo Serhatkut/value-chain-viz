@@ -13,6 +13,8 @@
     :root {
       --dhl-red: #D40511;
       --dhl-yellow: #FFCC00;
+      /* A slightly darker yellow for borders/accents */
+      --dhl-yellow-dark: #E6B800; 
       --dhl-black: #101828;
       
       --bg: #F2F4F7;
@@ -148,16 +150,42 @@
     }
     .tile.active { border-color: var(--dhl-red); background: #FFF7ED; }
 
-    /* Spanning Tiles (Continuous) */
+    /* ============================================
+       YELLOW CHEVRON SPANS (UPDATED SECTION)
+       ============================================ */
     .tile-span {
-      height: 36px; display: flex; align-items: center; justify-content: center; gap: 10px;
-      background: white; border: 1px solid #93C5FD; border-left: 5px solid #2563EB;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
+      height: 42px; /* Slightly taller for impact */
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      
+      /* NEW YELLOW STYLE */
+      background: var(--dhl-yellow);
+      border: none;
+      border-bottom: 2px solid var(--dhl-yellow-dark); /* Subtle depth */
+      
+      box-shadow: 0 4px 8px -2px rgba(0,0,0,0.15);
       width: 98%; margin: 0 auto;
-      clip-path: polygon(0% 0%, 98% 0%, 100% 50%, 98% 100%, 0% 100%);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      /* SHARPER CHEVRON SHAPE */
+      /* Points further right (96%) for a more distinct arrow look */
+      clip-path: polygon(0% 0%, 96% 0%, 100% 50%, 96% 100%, 0% 100%);
     }
-    .tile-span:hover { background: #EFF6FF; transform: scale(1.01); }
-    .tile-span .t-name { font-size: 11px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* Hover Effect */
+    .tile-span:hover { 
+      transform: translateX(3px) scale(1.01); /* Move right to show flow */
+      background: #FFD633; /* Slightly lighter yellow on hover */
+      z-index: 10;
+    }
+
+    /* Text inside the yellow chevron */
+    .tile-span .t-name { 
+      font-size: 12px; font-weight: 900; 
+      color: var(--dhl-black); /* Black text on yellow */
+      text-transform: uppercase; letter-spacing: 0.5px; 
+      text-shadow: 0 1px 0 rgba(255,255,255,0.2); /* Slight lift */
+    }
 
     /* Tile Content */
     .t-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
@@ -247,7 +275,7 @@
 <div id="deck">
   <div class="deck-header">
     <div>
-      <div style="font-size:10px; font-weight:700; color:#94A3B8; margin-bottom:2px">SELECTED PROCESS</div>
+      <div style="font-size:10px; font-weight:700; color:#94A3B8; margin-bottom:2px">SELECTED PROCESS DETAIL</div>
       <div class="deck-title" id="d_title">Select a Process</div>
     </div>
     <div class="deck-meta">
@@ -257,13 +285,41 @@
     <button class="close-btn" onclick="closeDeck()">CLOSE PANEL</button>
   </div>
   <div class="deck-body" id="d_body">
-    <div class="deck-empty">Click any chevron tile above to see Process IDs & details.</div>
+    <div class="deck-empty">Click any chevron tile above to see Process IDs (L2) & Activities (L3).</div>
   </div>
 </div>
 
 <script>
-  // 1. DATA CONFIGURATION
-  // Standard Logistics Flow
+  // ==========================================
+  // 1. DATA MODEL (Mock Data for Demo)
+  // ==========================================
+  const MOCK_DATA = [
+    { id: "L2C_01", name: "Market Analysis", owner: "Strategy", children: [
+        { id: "L2C_01_01", name: "Competitor Scan", children: [{id:"L3_01", name:"Data Collection"}, {id:"L3_02", name:"SWOT Analysis"}] }
+    ]},
+    { id: "L2C_02", name: "Pricing & Quote", owner: "Sales", children: [
+        { id: "L2C_02_01", name: "Rate Calculation", children: [{id:"L3_03", name:"Lookup Base Rate"}, {id:"L3_04", name:"Apply Surcharge"}] }
+    ]},
+    { id: "L2C_05", name: "Booking Entry", owner: "CS", children: [
+        { id: "L2C_05_01", name: "Validation", children: [{id:"L3_05", name:"Check Address"}, {id:"L3_06", name:"Verify Credit"}] }
+    ]},
+    { id: "L2C_08", name: "Track & Trace", owner: "IT/Ops", children: [
+        { id: "L2C_08_01", name: "Event Ingestion", children: [{id:"L3_09", name:"Receive Scan"}, {id:"L3_10", name:"Normalize Data"}] },
+        { id: "L2C_08_02", name: "Cust Notification", children: [{id:"L3_11", name:"Send Email"}, {id:"L3_12", name:"Push App Notif"}] }
+    ]},
+    { id: "O2D_04", name: "Linehaul Ops", owner: "Network", children: [
+        { id: "O2D_04_01", name: "Load Planning", children: [{id:"L3_13", name:"Check Volume"}, {id:"L3_14", name:"Assign Truck"}] },
+        { id: "O2D_04_02", name: "Dispatch", children: [{id:"L3_15", name:"Verify Seal"}, {id:"L3_16", name:"Gate Out"}] }
+    ]},
+    { id: "P2R_01", name: "Incident Mgmt", owner: "CS/Ops", children: [
+        { id: "P2R_01_01", name: "Detection", children: [{id:"L3_17", name:"Monitor Exception"}, {id:"L3_18", name:"Alert Team"}] },
+        { id: "P2R_01_02", name: "Resolution", children: [{id:"L3_19", name:"Re-route Parcel"}, {id:"L3_20", name:"Notify Sender"}] }
+    ]}
+  ];
+
+  // ==========================================
+  // 2. CONFIGURATION
+  // ==========================================
   const STAGES = [
     { id: "S1", name: "Plan & Prep",    num: "01" },
     { id: "S2", name: "Book & Collect", num: "02" },
@@ -273,16 +329,15 @@
     { id: "S6", name: "Post-Delivery",  num: "06" }
   ];
 
-  // 2. GRID ROWS (Ordered by Priority)
   const ROWS = [
     { id: "COMM", name: "Commercial", desc: "Sell & Book", class: "lane-comm" },
-    { id: "OPS", name: "Operations", desc: "Move & Sort", class: "lane-ops" }, // Moved UP
+    { id: "OPS", name: "Operations", desc: "Move & Sort", class: "lane-ops" },
     { id: "CONT_VIS", name: "Visibility", desc: "Track & Trace", class: "lane-cont" },
     { id: "CONT_RES", name: "Resolution", desc: "Incidents", class: "lane-cont" },
     { id: "FOUND", name: "Foundation", desc: "Enable", class: "lane-found" }
   ];
 
-  // 3. TILE MAPPING (L1s)
+  // MAPPING: Placing Tiles into the Grid
   const TILES = [
     // --- STAGE 1: PLAN ---
     { id: "S2E_01", stage: 1, row: "FOUND" },
@@ -291,35 +346,32 @@
     
     // --- STAGE 2: BOOK ---
     { id: "L2C_02", stage: 2, row: "COMM" },
-    { id: "L2C_05", stage: 2, row: "COMM" }, // Booking
-    { id: "O2D_02", stage: 2, row: "OPS" },  // Pickup
+    { id: "L2C_05", stage: 2, row: "COMM" },
+    { id: "O2D_02", stage: 2, row: "OPS" },
     
     // --- STAGE 3: EXPORT ---
-    { id: "O2D_03", stage: 3, row: "OPS" },  // Sort
-    { id: "O2D_04", stage: 3, row: "OPS" },  // Linehaul
-    { id: "O2D_07", stage: 3, row: "OPS" },  // Export Custom
+    { id: "O2D_03", stage: 3, row: "OPS" },
+    { id: "O2D_04", stage: 3, row: "OPS" },
+    { id: "O2D_07", stage: 3, row: "OPS" },
     
     // --- STAGE 4: IMPORT ---
-    { id: "O2D_08", stage: 4, row: "OPS" },  // Gateway
-    { id: "O2D_09", stage: 4, row: "OPS" },  // Deconsol
+    { id: "O2D_08", stage: 4, row: "OPS" },
+    { id: "O2D_09", stage: 4, row: "OPS" },
     { id: "GRC_02", stage: 4, row: "FOUND" },
     
     // --- STAGE 5: LAST MILE ---
-    { id: "O2D_10", stage: 5, row: "OPS" },  // Final Del
-    { id: "O2D_11", stage: 5, row: "OPS" },  // POD
+    { id: "O2D_10", stage: 5, row: "OPS" },
+    { id: "O2D_11", stage: 5, row: "OPS" },
     { id: "ITF_02", stage: 5, row: "FOUND" },
     
     // --- STAGE 6: POST ---
-    { id: "L2C_06", stage: 6, row: "COMM" }, // Bill
-    { id: "P2R_03", stage: 6, row: "COMM" }, // Claims
-    { id: "O2D_12", stage: 6, row: "OPS" },  // Returns
+    { id: "L2C_06", stage: 6, row: "COMM" },
+    { id: "P2R_03", stage: 6, row: "COMM" },
+    { id: "O2D_12", stage: 6, row: "OPS" },
 
-    // CONTINUOUS STREAMS (Spanning)
-    // Visibility: S2 -> S6 = Span 5
-    { id: "L2C_08", stage: 2, row: "CONT_VIS", span: 5, label: "L2C_08: Continuous Visibility" },
-    
-    // Resolution: S3 -> S6 = Span 4
-    { id: "P2R_01", stage: 3, row: "CONT_RES", span: 4, label: "P2R_01: Incident Resolution" },
+    // CONTINUOUS STREAMS (Spanning Yellow Chevrons)
+    { id: "L2C_08", stage: 2, row: "CONT_VIS", span: 5, label: "VISIBILITY STREAM (Track & Trace)" },
+    { id: "P2R_01", stage: 3, row: "CONT_RES", span: 4, label: "OMNICHANNEL CARE STREAM" },
   ];
 
   let INDEX = new Map();
@@ -328,15 +380,25 @@
     renderGrid();
     try {
       const res = await fetch("data.json");
-      const root = await res.json();
-      buildIndex(root);
-      hydrateTiles();
-    } catch(e) { console.error(e); }
+      if(res.ok) {
+        const root = await res.json();
+        buildIndex(root);
+      } else {
+        buildMockIndex();
+      }
+    } catch(e) { 
+      buildMockIndex();
+    }
+    hydrateTiles();
   }
 
   function buildIndex(node) {
     if(node.id) INDEX.set(node.id, node);
     if(node.children) node.children.forEach(buildIndex);
+  }
+  
+  function buildMockIndex() {
+    MOCK_DATA.forEach(node => INDEX.set(node.id, node));
   }
 
   function renderGrid() {
@@ -352,7 +414,7 @@
     STAGES.forEach(s => {
       const h = document.createElement('div');
       h.className = 'stage-head';
-      h.style.gridColumn = parseInt(s.num) + 1; // +1 for label col
+      h.style.gridColumn = parseInt(s.num) + 1;
       h.innerHTML = `
         <div class="stage-meta">Step ${s.num}</div>
         <div class="stage-title">${s.name}</div>
@@ -362,9 +424,7 @@
 
     // 3. Rows & Cells
     ROWS.forEach((r, rIdx) => {
-       const rowNum = rIdx + 2; // +2 offset
-
-       // Row Label
+       const rowNum = rIdx + 2;
        const lab = document.createElement('div');
        lab.className = `lane-label ${r.class}`;
        lab.style.gridRow = rowNum;
@@ -372,12 +432,10 @@
        lab.innerHTML = `<div class="lane-title">${r.name}</div><div class="lane-desc">${r.desc}</div>`;
        grid.appendChild(lab);
 
-       // Cells for each Stage
        STAGES.forEach((s, sIdx) => {
          const cell = document.createElement('div');
          cell.className = `cell ${r.id === 'FOUND' ? 'cell-found' : ''}`;
          if(r.id.startsWith('CONT')) cell.classList.add('cell-cont');
-         
          cell.style.gridRow = rowNum;
          cell.style.gridColumn = sIdx + 2; 
          cell.id = `cell_${r.id}_${sIdx+1}`; 
@@ -396,7 +454,7 @@
       el.onclick = () => openDeck(t.id, name);
       
       if(t.span) {
-        // Continuous Stream Item
+        // Continuous Stream Item (YELLOW CHEVRON)
         el.className = `tile-span c-${l0}`;
         el.innerHTML = `<span class="t-name">${name}</span>`;
         
@@ -414,7 +472,6 @@
       } else {
         // Standard Tile
         el.className = `tile c-${l0}`;
-        const owner = node ? (node.owner || "Ops") : "-";
         el.innerHTML = `
           <div class="t-head"><span class="t-id">${t.id}</span></div>
           <div class="t-name">${name}</div>
@@ -434,7 +491,7 @@
     body.innerHTML = "";
 
     if(!node || !node.children || node.children.length === 0) {
-      body.innerHTML = `<div class="deck-empty">No Level 2 sub-processes found.</div>`;
+      body.innerHTML = `<div class="deck-empty">No Level 2 sub-processes found in data for this item.</div>`;
     } else {
       // Render Columns
       node.children.forEach(l2 => {
