@@ -1314,4 +1314,593 @@
         deckHint.textContent = "▼ Collapse";
       } else {
         deck.classList.remove("open");
-        deck.style.height = getComputedStyle(document.documentElement).getPropertyV
+        deck.style.height = getComputedStyle(document.documentElement).getPropertyValue("--deck-collapsed-h");
+        mapWrap.classList.remove("deckOpen");
+        deckBody.style.display = "none";
+        deckHint.textContent = "▲ Expand";
+      }
+    }
+    deckHandle.addEventListener("click", () => setDeckOpen(!deck.classList.contains("open")));
+
+    function highlightActiveTile(l0Id, l1Id){
+      document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(`.tile[data-l0="${CSS.escape(l0Id)}"][data-l1="${CSS.escape(l1Id)}"]`).forEach(t => t.classList.add("active"));
+    }
+
+    function selectL1(l0Id, l1Node){
+      const l0Node = L0MAP.get(l0Id);
+      const l0Info = parseInfo(l0Node?.name);
+      const l1Info = parseInfo(l1Node?.name);
+
+      deckHandleTitle.textContent = `${l1Info.id} — ${l1Info.name}`;
+
+      const ownerRaw = (l1Node?.owner || l0Node?.owner || "Unassigned");
+      const cat = ownerCategory(ownerRaw);
+      const desc = (l1Node?.description || "");
+
+      const l2s = safeChildren(l1Node).map(l2=>{
+        const i2 = parseInfo(l2.name);
+        const l3s = safeChildren(l2).map(l3=>{
+          const i3 = parseInfo(l3.name);
+          return { id: i3.id, name: i3.name, node: l3 };
+        });
+        return { id: i2.id, name: i2.name, node: l2, l3s };
+      });
+
+      // Deck header + responsive L2 grid
+      deckBody.innerHTML = `
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;">
+          <div style="min-width:280px;flex:1 1 520px;">
+            <p style="font-size:16px;font-weight:980;margin:0 0 4px 0;line-height:1.15;">${esc(l1Info.id)} · ${esc(l1Info.name)}</p>
+            <p style="margin:0;font-size:12px;color:var(--muted);font-weight:750;line-height:1.4;max-width:1100px;">${esc(desc || "No description available.")}</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex:0 0 auto;">
+            <span style="font-size:11px;font-weight:900;border-radius:999px;padding:6px 10px;border:1px solid rgba(16,24,40,0.14);background:rgba(212,5,17,0.08);border-color:rgba(212,5,17,0.18);color:var(--dhl-red);white-space:nowrap;">${esc(l0Info.id || l0Id)} · L0</span>
+            <span style="font-size:11px;font-weight:950;border-radius:999px;padding:6px 10px;border:1px solid rgba(16,24,40,0.14);background:#111827;color:#fff;white-space:nowrap;">Owner: ${esc(cat)}</span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="font-size:12px;font-weight:950;color:var(--ink);">L2 Sub-processes → L3 Activities</div>
+          <div style="font-size:11px;font-weight:850;color:var(--muted);white-space:nowrap;">L3 is always visible</div>
+        </div>
+
+        <div id="l2Grid" class="deckL2Grid"></div>
+      `;
+
+      const grid = document.getElementById("l2Grid");
+      if(!l2s.length){
+        grid.innerHTML = `<div style="padding:14px 12px;color:var(--muted);font-weight:800;font-size:12px;">No L2 sub-processes found for this L1.</div>`;
+      } else {
+        for(const l2 of l2s){
+          const l2OwnerRaw = (l2.node?.owner || ownerRaw || "Unassigned");
+          const l2Cat = ownerCategory(l2OwnerRaw);
+
+          const block = document.createElement("div");
+          block.className = "l2Block";
+
+          block.innerHTML = `
+            <div class="l2Head">
+              <div style="min-width:0;">
+                <div class="l2Id">${esc(l2.id)}</div>
+                <p class="l2Title" title="${esc(l2.name)}">${esc(l2.name)}</p>
+              </div>
+              <div class="l2OwnerPill">L2 Owner: ${esc(l2Cat)}</div>
+            </div>
+            <div class="l3List" style="display:flex;flex-direction:column;gap:6px;"></div>
+          `;
+
+          const list = block.querySelector(".l3List");
+          if(!l2.l3s.length){
+            const empty = document.createElement("div");
+            empty.style.cssText = "padding:10px;color:var(--muted);font-weight:800;font-size:12px;";
+            empty.textContent = "No L3 activities.";
+            list.appendChild(empty);
+          } else {
+            for(const x of l2.l3s){
+              const item = document.createElement("div");
+              item.className = "l3Item";
+              item.innerHTML = `
+                <div class="l3Meta">
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${esc(x.id)}</span>
+                  <span style="opacity:.85;white-space:nowrap;">${esc(l2Cat)}</span>
+                </div>
+                <p class="l3Name" title="${esc(x.name)}">${esc(x.name)}</p>
+              `;
+              list.appendChild(item);
+            }
+          }
+
+          grid.appendChild(block);
+        }
+      }
+
+      setDeckOpen(true);
+    }
+
+    /***********************
+     * Tile builder
+     ***********************/
+    function buildTile(item, { showStageChip=false, showOwner=false, compact=false }){
+      const tile = document.createElement("div");
+      tile.className = "tile" + (compact ? " compact" : "");
+      tile.dataset.l0 = item.l0Id;
+      tile.dataset.l1 = item.l1Id;
+
+      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
+      const cat = ownerCategory(ownerRaw);
+      const ownColor = categoryColor(cat);
+      tile.style.setProperty("--own", ownColor);
+
+      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+
+      tile.innerHTML = `
+        <div class="tileMain">
+          <div class="tileTop">
+            <span class="tileId">${esc(item.l1Id)}</span>
+            ${showStageChip ? `<span class="tileStageChip">${esc(chip)}</span>` : ``}
+          </div>
+          <p class="tileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</p>
+          ${showOwner ? `<div class="tileMeta">Owner: ${esc(cat)}</div>` : ``}
+        </div>
+      `;
+
+      tile.addEventListener("click", () => {
+        selectL1(item.l0Id, item.l1Node);
+        highlightActiveTile(item.l0Id, item.l1Id);
+        closeDrawer();
+        hideTooltip();
+      });
+
+      tile.addEventListener("mouseenter", (e) => {
+        if(ttTimer) clearTimeout(ttTimer);
+        const { l2, l3 } = countL2L3(item.l1Node);
+        const desc = truncate(item.l1Node?.description || "");
+        const l0 = item.l0Id;
+        const l1 = item.l1Id;
+
+        ttTimer = setTimeout(() => {
+          const html = `
+            <div class="ttTop">
+              <p class="ttTitle">${esc(l1)} · ${esc(item.l1Name)}</p>
+              <span class="ttOwner">${esc(cat)}</span>
+            </div>
+            <p class="ttDesc">${esc(desc || "No description available.")}</p>
+            <div class="ttStats">
+              <span class="ttPill">L0: ${esc(l0)}</span>
+              <span class="ttPill">L2: ${esc(l2)}</span>
+              <span class="ttPill">L3: ${esc(l3)}</span>
+              <span class="ttPill">Stage: ${esc(chip)}</span>
+            </div>
+          `;
+          showTooltipNear(e.clientX, e.clientY, html);
+        }, 150);
+      });
+
+      tile.addEventListener("mousemove", (e) => {
+        if(!tooltip.classList.contains("show")) return;
+        showTooltipNear(e.clientX, e.clientY, tooltip.innerHTML);
+      });
+
+      tile.addEventListener("mouseleave", () => {
+        if(ttTimer) clearTimeout(ttTimer);
+        hideTooltip();
+      });
+
+      return tile;
+    }
+
+    /***********************
+     * Render map
+     ***********************/
+    function renderMap(){
+      const body = $("#mapBody");
+      body.innerHTML = "";
+      OWNER_COUNTS.clear();
+
+      for(const lane of LANES){
+        if(laneCollapsed[lane.key] == null) laneCollapsed[lane.key] = !!lane.defaultCollapsed;
+
+        const row = document.createElement("div");
+        row.className = "laneRow";
+        row.dataset.laneKey = lane.key;
+        if(laneCollapsed[lane.key]) row.classList.add("collapsed");
+
+        const label = document.createElement("div");
+        label.className = "laneLabel";
+
+        const isBelt = (lane.renderMode === "belt" || lane.renderMode === "beltGroup");
+
+        label.innerHTML = `
+          <div class="laneLabelTop">
+            <div class="laneTitle">${esc(lane.label)}</div>
+            <span class="laneCode">${esc(lane.laneCode)}</span>
+          </div>
+          <div class="laneSub">${esc(lane.sub || "")}</div>
+          <div class="laneControls">
+            <button class="btn" data-action="toggle" data-lane="${esc(lane.key)}">
+              ${laneCollapsed[lane.key] ? "Expand" : "Collapse"}
+            </button>
+            ${isBelt ? `
+              <button class="btn" data-action="home" data-lane="${esc(lane.key)}">⟸ Start</button>
+              <button class="btn" data-action="end" data-lane="${esc(lane.key)}">End ⟹</button>
+            ` : ""}
+          </div>
+        `;
+
+        const content = document.createElement("div");
+        content.className = "laneGrid";
+
+        if(lane.theme === "l2c") content.classList.add("theme-l2c");
+        if(lane.theme === "o2d") content.classList.add("theme-o2d");
+        if(lane.theme === "d2o") content.classList.add("theme-d2o");
+
+        const itemsByL0 = new Map();
+        const allItems = [];
+
+        for(const l0Code of lane.l0Codes){
+          const l0Node = L0MAP.get(l0Code);
+          if(!l0Node) continue;
+          const l0Owner = l0Node?.owner || "Unassigned";
+
+          const list = [];
+          for(const l1 of safeChildren(l0Node)){
+            const i1 = parseInfo(l1.name);
+            const ownerRaw = l1?.owner || l0Owner || "Unassigned";
+            const cat = ownerCategory(ownerRaw);
+
+            OWNER_COUNTS.set(cat, (OWNER_COUNTS.get(cat) || 0) + 1);
+
+            const it = {
+              l0Id: l0Code,
+              l0Owner,
+              l1Id: i1.id,
+              l1Name: i1.name,
+              l1Node: l1,
+              owner: ownerRaw
+            };
+            list.push(it);
+            allItems.push(it);
+          }
+          itemsByL0.set(l0Code, list);
+        }
+
+        if(laneCollapsed[lane.key]){
+          const note = document.createElement("div");
+          note.className = "collapsedNote";
+          note.textContent = allItems.length ? `${allItems.length} L1 processes hidden.` : "No processes found for this lane.";
+          content.appendChild(note);
+        } else {
+          if(!allItems.length){
+            content.innerHTML = `<div class="error" style="grid-column:1/-1;">No processes found for this lane in data.json.</div>`;
+          } else {
+            if(lane.renderMode === "belt"){
+              renderBeltLane(content, lane, allItems);
+            } else if(lane.renderMode === "beltGroup"){
+              renderBeltGroupLane(content, lane, itemsByL0);
+            } else if(lane.renderMode === "foundationCollapsed"){
+              renderFoundationCollapsed(content, lane, itemsByL0);
+            } else {
+              renderGridStoryLane(content, lane, allItems);
+            }
+          }
+        }
+
+        row.appendChild(label);
+        row.appendChild(content);
+        body.appendChild(row);
+      }
+
+      body.querySelectorAll(".btn[data-action]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          const laneKey = btn.dataset.lane;
+
+          if(action === "toggle"){
+            laneCollapsed[laneKey] = !laneCollapsed[laneKey];
+            renderMap();
+            return;
+          }
+
+          if(action === "home" || action === "end"){
+            // scroll first belt in lane (P2R) or first belt in group
+            const belt = body.querySelector(`.belt[data-belt-lane="${CSS.escape(laneKey)}"]`);
+            const beltAlt = body.querySelector(`.belt[data-belt-group="${CSS.escape(laneKey)}"]`);
+            const b = belt || beltAlt;
+            if(!b) return;
+
+            // if wrapAll, no scrolling needed
+            if(b.classList.contains("wrapAll")) return;
+
+            b.style.scrollBehavior = "smooth";
+            if(action === "home") b.scrollTo({ left: 0, behavior: "smooth" });
+            if(action === "end") b.scrollTo({ left: b.scrollWidth, behavior: "smooth" });
+          }
+        });
+      });
+
+      renderOwnerLegendFooter();
+    }
+
+    function renderBeltLane(content, lane, allItems){
+      // P2R: keep compact belt, but ensure tiles readable (compact tiles + 2-line clamp)
+      const visible = allItems.slice(0, BELT_VISIBLE);
+      const hidden = allItems.slice(BELT_VISIBLE);
+
+      const beltWrap = document.createElement("div");
+      beltWrap.className = "beltWrap";
+
+      const hint = document.createElement("div");
+      hint.className = "beltHint";
+      hint.textContent = "Compact belt";
+
+      const belt = document.createElement("div");
+      belt.className = "belt";
+      belt.dataset.beltLane = lane.key;
+
+      visible.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
+
+      if(hidden.length){
+        const more = document.createElement("div");
+        more.className = "moreChip show";
+        more.style.position = "static";
+        more.style.transform = "none";
+        more.textContent = `+${hidden.length} more`;
+        more.addEventListener("click", () => {
+          openDrawer({
+            title: `${lane.label} · Hidden Processes`,
+            subtitle: `Select a process to open details.`,
+            sections: [{
+              title: "Overflow list",
+              countText: `${hidden.length} items`,
+              items: hidden
+            }]
+          });
+        });
+        belt.appendChild(more);
+      }
+
+      beltWrap.appendChild(hint);
+      beltWrap.appendChild(belt);
+      content.appendChild(beltWrap);
+    }
+
+    function renderBeltGroupLane(content, lane, itemsByL0){
+      const group = document.createElement("div");
+      group.className = "beltGroup";
+
+      for(const b of (lane.belts || [])){
+        const list = itemsByL0.get(b.l0) || [];
+        if(!list.length) continue;
+
+        const beltWrap = document.createElement("div");
+        beltWrap.className = "beltWrap";
+
+        const hint = document.createElement("div");
+        hint.className = "beltHint";
+        hint.textContent = b.title;
+
+        const belt = document.createElement("div");
+        belt.className = "belt";
+        belt.dataset.beltGroup = lane.key;
+
+        if(b.showAll){
+          // show ALL items, wrapped, no "+ more"
+          belt.classList.add("wrapAll");
+          list.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
+        } else {
+          const visible = list.slice(0, BELT_VISIBLE);
+          const hidden = list.slice(BELT_VISIBLE);
+          visible.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
+          if(hidden.length){
+            const more = document.createElement("div");
+            more.className = "moreChip show";
+            more.style.position = "static";
+            more.style.transform = "none";
+            more.textContent = `+${hidden.length} more`;
+            more.addEventListener("click", () => {
+              openDrawer({
+                title: `${lane.label} · ${b.title}`,
+                subtitle: `Select a process to open details.`,
+                sections: [{
+                  title: b.title,
+                  countText: `${hidden.length} hidden`,
+                  items: hidden
+                }]
+              });
+            });
+            belt.appendChild(more);
+          }
+        }
+
+        beltWrap.appendChild(hint);
+        beltWrap.appendChild(belt);
+        group.appendChild(beltWrap);
+      }
+
+      content.appendChild(group);
+    }
+
+    function renderGridStoryLane(content, lane, allItems){
+      const perStage = Array.from({length:7}, () => []);
+      const continuous = [];
+
+      for(const it of allItems){
+        const span = getSpanFor(it.l0Id, it.l1Id);
+        if(span){
+          continuous.push({ ...it, span });
+          continue;
+        }
+        const col = colForL1(it.l0Id, it.l1Node);
+        const idx = Math.max(1, Math.min(7, col)) - 1;
+        perStage[idx].push(it);
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "gridLaneFixed";
+
+      perStage.forEach((list, i) => {
+        const col = document.createElement("div");
+        col.className = "stageCol";
+
+        const shown = list.slice(0, STORY_MAX_PER_STAGE);
+        const hidden = list.slice(STORY_MAX_PER_STAGE);
+
+        shown.forEach(it => col.appendChild(buildTile(it, { showStageChip:false, showOwner:false, compact:false })));
+
+        for(let k=shown.length; k<STORY_MAX_PER_STAGE; k++){
+          const spacer = document.createElement("div");
+          spacer.style.height = "56px";
+          spacer.style.borderRadius = "14px";
+          spacer.style.border = "1px dashed rgba(16,24,40,0.10)";
+          spacer.style.background = "rgba(255,255,255,0.55)";
+          col.appendChild(spacer);
+        }
+
+        const chip = document.createElement("div");
+        chip.className = "moreChip";
+        chip.textContent = `+${hidden.length}`;
+        if(hidden.length) chip.classList.add("show");
+        chip.addEventListener("click", () => {
+          openDrawer({
+            title: `${lane.label} · Stage ${i+1} Overflow`,
+            subtitle: `Stage: ${STAGES[i].name} · Select a process to open details.`,
+            sections: [{
+              title: `Stage ${i+1} — ${STAGES[i].name}`,
+              countText: `${hidden.length} hidden`,
+              items: hidden
+            }]
+          });
+        });
+
+        col.appendChild(chip);
+        wrapper.appendChild(col);
+      });
+
+      content.appendChild(wrapper);
+
+      if(continuous.length){
+        const contRow = document.createElement("div");
+        contRow.className = "continuousRow";
+
+        const lab = document.createElement("div");
+        lab.className = "continuousLabel";
+        lab.textContent = "Continuous";
+        contRow.appendChild(lab);
+
+        const shownC = continuous.slice(0, 1);
+        const hiddenC = continuous.slice(1);
+
+        shownC.forEach(it => contRow.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:false })));
+
+        if(hiddenC.length){
+          const more = document.createElement("div");
+          more.className = "moreChip show";
+          more.style.position = "static";
+          more.style.transform = "none";
+          more.textContent = `+${hiddenC.length} more`;
+          more.addEventListener("click", () => {
+            openDrawer({
+              title: `${lane.label} · Continuous Services`,
+              subtitle: `Select a continuous process to open details.`,
+              sections: [{
+                title: "Continuous overflow",
+                countText: `${hiddenC.length} hidden`,
+                items: hiddenC
+              }]
+            });
+          });
+          contRow.appendChild(more);
+        }
+
+        content.appendChild(contRow);
+      }
+    }
+
+    function renderFoundationCollapsed(content, lane, itemsByL0){
+      const grid = document.createElement("div");
+      grid.className = "foundationGrid";
+
+      for(const code of lane.l0Codes){
+        const list = itemsByL0.get(code) || [];
+        if(!list.length) continue;
+
+        const l0Node = L0MAP.get(code);
+        const l0NameFromJson = parseInfo(l0Node?.name || "").name;
+        const friendly = (l0NameFromJson && l0NameFromJson !== code) ? l0NameFromJson : (FOUNDATION_LABELS[code] || code);
+
+        const chip = document.createElement("div");
+        chip.className = "foundationChip";
+        chip.innerHTML = `
+          <div class="left">
+            <div class="code">${esc(code)}</div>
+            <div class="name" title="${esc(friendly)}">${esc(friendly)}</div>
+          </div>
+          <div class="cnt">${esc(list.length)}</div>
+        `;
+        chip.addEventListener("click", () => {
+          openDrawer({
+            title: `Foundation · ${code}`,
+            subtitle: `${friendly} · Select a process to open details.`,
+            sections: [{
+              title: `${code} — ${friendly}`,
+              countText: `${list.length} items`,
+              items: list
+            }]
+          });
+        });
+        grid.appendChild(chip);
+      }
+
+      content.appendChild(grid);
+    }
+
+    /***********************
+     * Search (Enter)
+     ***********************/
+    const searchInput = $("#searchInput");
+    searchInput.addEventListener("keydown", (e) => {
+      if(e.key !== "Enter") return;
+      const q = searchInput.value.trim().toLowerCase();
+      if(!q) return;
+      const tiles = Array.from(document.querySelectorAll(".tile"));
+      const hit = tiles.find(t => (t.dataset.l1 || "").toLowerCase().includes(q));
+      if(hit){
+        hit.scrollIntoView({ behavior:"smooth", block:"center" });
+        hit.click();
+      }
+    });
+
+    /***********************
+     * Init
+     ***********************/
+    function showError(msg){
+      const box = $("#errBox");
+      box.style.display = "block";
+      box.textContent = msg;
+    }
+
+    renderStageHeader();
+
+    fetch("data.json")
+      .then(r => {
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(data => {
+        if(!data || !Array.isArray(data.children)){
+          showError("data.json loaded but is missing expected 'children' array at root.");
+          return;
+        }
+        ROOT = data;
+        L0MAP = getL0Map(ROOT);
+        renderMap();
+      })
+      .catch(err => {
+        showError("Cannot load data.json. Run via a local server (not file://) and ensure data.json is next to this HTML. " + err);
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
