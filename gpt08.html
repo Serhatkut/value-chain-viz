@@ -18,14 +18,15 @@
 
       --header-h:56px;
 
-      /* Footer legend + deck */
-      --legend-h:36px;
-      --deck-collapsed-h: calc(48px + var(--legend-h));
+      /* footer + deck */
+      --legend-h:40px;
+      --footer-h:30px;
+      --deck-collapsed-h: calc(48px + var(--legend-h) + var(--footer-h));
       --deck-expanded-h: min(60vh, 720px); /* higher as requested */
 
-      --lane-label-w:280px;
+      --lane-label-w:300px;
 
-      --tile-h:58px;
+      --tile-h:60px;
       --tile-min-w:220px;
 
       --shadow: 0 10px 26px rgba(16,24,40,0.10);
@@ -33,14 +34,12 @@
 
       --radius:14px;
 
-      --belt-h: 74px;
+      --tooltipW: 460px;
 
       /* ZERO-SCROLL initial view for story lanes */
       --gridLaneRows: 2;
-      --gridLaneRowH: 58px;
-      --gridLaneH: calc(var(--gridLaneRows) * var(--gridLaneRowH) + 22px);
-
-      --tooltipW: 460px;
+      --gridLaneRowH: 60px;
+      --gridLaneH: calc(var(--gridLaneRows) * var(--gridLaneRowH) + 26px);
 
       /* Lane theme tints */
       --tint-l2c: rgba(212, 5, 17, 0.06);
@@ -241,6 +240,14 @@
       white-space:nowrap;
       flex:0 0 auto;
     }
+    .laneDesc{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      line-height:1.25;
+    }
+    .laneDesc .line1{ font-size:11px; font-weight:950; color:var(--ink); }
+    .laneDesc .line2{ font-size:11px; font-weight:850; color:var(--muted); }
     .laneSub{ font-size:11px; font-weight:800; color:var(--muted); line-height:1.25; }
 
     .laneControls{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
@@ -271,6 +278,7 @@
       align-content:start;
       border-left: 6px solid transparent;
       border-radius: 0 18px 18px 0;
+      min-width:0;
     }
 
     /* Lane themes */
@@ -287,6 +295,7 @@
       grid-template-columns: repeat(7, minmax(170px, 1fr));
       gap:10px;
       padding:2px 0 0 0;
+      min-width:0;
     }
 
     .stageCol{
@@ -328,8 +337,7 @@
       grid-column:1/-1;
       display:flex;
       gap:10px;
-      align-items:center;
-      height: 44px;
+      align-items:stretch;
       padding:0 6px;
       margin-top:8px;
       min-width:0;
@@ -344,6 +352,8 @@
       border:1px solid rgba(16,24,40,0.12);
       background:#fff;
       flex:0 0 auto;
+      align-self:flex-start;
+      margin-top:4px;
     }
 
     /* BELT lanes */
@@ -355,6 +365,7 @@
       min-width:0;
     }
     .beltWrap{
+      width:100%;
       display:flex;
       align-items:flex-start;
       gap:10px;
@@ -378,20 +389,26 @@
       margin-top:2px;
     }
 
-    /* Default belt: single row scroll (kept for P2R) */
     .belt{
       display:flex;
+      flex-direction:row;     /* enforce horizontal */
       gap:10px;
       align-items:stretch;
-      overflow-x:auto;
-      overflow-y:hidden;
       padding-bottom:2px;
       flex: 1 1 auto;
+      width:100%;             /* full width (fix P2R narrow) */
       min-width:0;
       scrollbar-width: thin;
     }
 
-    /* Wrapped belt: show ALL items without "+ more" (S2P/H2R) */
+    /* Default belt: horizontal scroll */
+    .belt.scrollX{
+      overflow-x:auto;
+      overflow-y:hidden;
+      flex-wrap:nowrap;
+    }
+
+    /* Wrapped belt: show ALL items without "+ more" */
     .belt.wrapAll{
       overflow:visible;
       flex-wrap:wrap;
@@ -413,7 +430,7 @@
       min-width:0;
     }
     .foundationChip{
-      height:44px;
+      height:48px;
       padding:0 10px;
       border-radius:14px;
       border:1px solid rgba(16,24,40,0.12);
@@ -467,14 +484,12 @@
       flex:0 0 auto;
     }
 
-    /* TILE: shipping-label card */
+    /* CARD: shipping-label card v2 (readable titles) */
     .tile{
       height: var(--tile-h);
-      min-width: var(--tile-min-w);
-      width: 100%;
       display:flex;
-      align-items:flex-start;
-      gap:12px;
+      align-items:stretch;
+      gap:10px;
       padding:10px 12px 10px 12px;
       cursor:pointer;
       user-select:none;
@@ -514,38 +529,42 @@
       gap:10px;
       min-width:0;
     }
+
+    /* smaller ID tag (fix "pill too big") */
     .tileId{
       flex:0 0 auto;
-      font-size:11px;
+      font-size:10px;
       font-weight:980;
       color: var(--dhl-red);
-      background: rgba(212,5,17,0.08);
-      border:1px solid rgba(212,5,17,0.18);
-      padding:4px 8px;
+      background: rgba(212,5,17,0.06);
+      border:1px solid rgba(212,5,17,0.16);
+      padding:3px 7px;
       border-radius:999px;
       white-space:nowrap;
-      max-width: 62%;
+      max-width: 58%;
       overflow:hidden;
       text-overflow:ellipsis;
+      line-height:1.1;
     }
     .tileStageChip{
       flex:0 0 auto;
       font-size:10px;
       font-weight:980;
       color: #1f2937;
-      background: rgba(16,24,40,0.05);
-      border: 1px solid rgba(16,24,40,0.12);
-      padding:4px 8px;
+      background: rgba(16,24,40,0.04);
+      border: 1px solid rgba(16,24,40,0.10);
+      padding:3px 7px;
       border-radius:999px;
       white-space:nowrap;
+      line-height:1.1;
     }
     .tileName{
-      font-size:12px;
+      font-size:12.5px;
       font-weight:950;
       line-height:1.2;
       margin:0;
       display:-webkit-box;
-      -webkit-line-clamp: 2; /* avoids "Problem De" truncation */
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow:hidden;
     }
@@ -558,13 +577,62 @@
       text-overflow:ellipsis;
     }
 
-    /* Compact tile for belts (smaller width = better fit + no stuck truncation) */
+    /* Context sizing */
+    .gridLaneFixed .tile{ width:100%; } /* story grid cells */
+    .belt .tile{ width:auto; flex:0 0 auto; } /* belts must be horizontal */
+
+    /* Compact tile for belts */
     .tile.compact{
-      min-width: 180px;
+      min-width: 220px;
       height: 56px;
       padding:10px 10px 10px 12px;
     }
     .tile.compact .tileId{ max-width: 55%; }
+
+    /* Continuous card: L2 micro chevrons row */
+    .tile.continuous{
+      height: auto;
+      min-height: 70px;
+      padding-bottom:12px;
+    }
+    .tile.continuous .tileName{ -webkit-line-clamp: 1; } /* keep top title clean */
+    .l2MicroRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:4px;
+    }
+    .l2Micro{
+      font-size:10px;
+      font-weight:900;
+      color:#1f2937;
+      border:1px solid rgba(16,24,40,0.12);
+      background: rgba(255,255,255,0.85);
+      border-radius:999px;
+      padding:3px 8px;
+      max-width: 240px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      cursor:pointer;
+      user-select:none;
+    }
+    .l2Micro:hover{
+      background:#FFF9E6;
+      border-color: rgba(255,204,0,0.65);
+      color:#7a5a00;
+    }
+    .l2Micro::after{
+      content:"";
+      display:inline-block;
+      margin-left:6px;
+      width:0;height:0;
+      border-top:4px solid transparent;
+      border-bottom:4px solid transparent;
+      border-left:6px solid rgba(16,24,40,0.45); /* tiny chevron feel */
+      transform: translateY(1px);
+      opacity:0.55;
+    }
 
     /* Collapsed lane */
     .laneRow.collapsed .laneGrid{ display:none !important; }
@@ -676,7 +744,7 @@
       position:fixed;
       z-index:2000;
       width:min(var(--tooltipW), 92vw);
-      background:#0B1220; /* black-ish */
+      background:#0B1220;
       border:1px solid rgba(255,255,255,0.12);
       border-radius:14px;
       box-shadow: var(--shadow-2);
@@ -698,7 +766,7 @@
       font-weight:980;
       line-height:1.2;
       margin:0;
-      color: var(--dhl-yellow); /* yellow title */
+      color: var(--dhl-yellow);
     }
     .ttOwner{
       font-size:11px;
@@ -745,7 +813,7 @@
       box-shadow: var(--shadow);
     }
 
-    /* Footer legend bar */
+    /* Legend bar */
     .legendBar{
       height: var(--legend-h);
       border-top:1px solid rgba(16,24,40,0.10);
@@ -793,6 +861,24 @@
       background: var(--dot,#999);
       border:1px solid rgba(0,0,0,0.12);
     }
+
+    /* Footer line */
+    .footerBar{
+      height: var(--footer-h);
+      background:#fff;
+      border-top:1px solid rgba(16,24,40,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:0 14px;
+      color: var(--muted);
+      font-size:11px;
+      font-weight:900;
+      overflow:hidden;
+    }
+    .footerBar .left{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+    .footerBar .right{ white-space:nowrap; flex:0 0 auto; }
 
     /* Deck content: L2 grid (fits screen width, no huge wide columns) */
     .deckL2Grid{
@@ -876,13 +962,13 @@
     }
 
     @media (max-width: 980px){
-      :root{ --lane-label-w: 240px; }
+      :root{ --lane-label-w: 260px; }
       .search{ width: 320px; }
       .foundationGrid{ grid-template-columns: repeat(2, minmax(180px, 1fr)); }
       .deckL2Grid{ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
     }
     @media (max-width: 720px){
-      :root{ --lane-label-w: 210px; }
+      :root{ --lane-label-w: 220px; }
       .search{ width: 240px; min-width: 200px; }
       .stepIcon{ display:none; }
       .foundationGrid{ grid-template-columns: 1fr; }
@@ -915,10 +1001,16 @@
 
       <!-- Deck -->
       <div id="deck" style="position:absolute;left:0;right:0;bottom:0;height:var(--deck-collapsed-h);background:#fff;border-top:3px solid var(--dhl-yellow);box-shadow:0 -12px 30px rgba(16,24,40,0.12);display:flex;flex-direction:column;min-height:0;transition:height 240ms ease;z-index:40;">
-        <!-- Footer ownership legend -->
+        <!-- Ownership legend -->
         <div class="legendBar">
           <div class="legendTitle">Ownership legend</div>
           <div id="ownerLegendFooter" class="legendItems"></div>
+        </div>
+
+        <!-- Footer line -->
+        <div class="footerBar">
+          <div class="left">DHL eCommerce · Customer Journey Blueprint · 2026</div>
+          <div class="right">Serhat Kut, PhD</div>
         </div>
 
         <div id="deckHandle" style="height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;cursor:pointer;user-select:none;">
@@ -964,34 +1056,64 @@
     ];
 
     /***********************
-     * Lane config
+     * Lane config (with richer descriptors)
      ***********************/
     const LANES = [
-      { key: "COMM", label: "Commercial", l0Codes: ["L2C"], sub: "Top Priority", laneCode: "L2C", renderMode:"gridStory", defaultCollapsed:false, theme:"l2c" },
-      { key: "OPS",  label: "Operations", l0Codes: ["O2D"], sub: "Core Logistics", laneCode: "O2D", renderMode:"gridStory", defaultCollapsed:false, theme:"o2d" },
-      { key: "DES",  label: "Design", l0Codes: ["D2O"], sub: "Network & Product Design", laneCode: "D2O", renderMode:"gridStory", defaultCollapsed:false, theme:"d2o" },
+      {
+        key: "COMM", label: "Commercial", l0Codes: ["L2C"], laneCode: "L2C",
+        desc1: "Lead-to-Cash",
+        desc2: "Lead → Offer → Contract → Billing",
+        sub: "Top Priority",
+        renderMode:"gridStory", defaultCollapsed:false, theme:"l2c"
+      },
+      {
+        key: "OPS",  label: "Operations", l0Codes: ["O2D"], laneCode: "O2D",
+        desc1: "Order-to-Delivery",
+        desc2: "Pickup → Sort → Transit → Last Mile",
+        sub: "Core Logistics",
+        renderMode:"gridStory", defaultCollapsed:false, theme:"o2d"
+      },
+      {
+        key: "DES",  label: "Design", l0Codes: ["D2O"], laneCode: "D2O",
+        desc1: "Design-to-Operate",
+        desc2: "Network → Product → Standards → Enablement",
+        sub: "Network & Product Design",
+        renderMode:"gridStory", defaultCollapsed:false, theme:"d2o"
+      },
 
-      { key: "RESO", label: "Resolution", l0Codes: ["P2R"], sub: "Issue Management", laneCode: "P2R", renderMode:"belt", defaultCollapsed:false },
+      // Resolution: full-width belt, readable, wrap (no narrow)
+      { key: "RESO", label: "Resolution", l0Codes: ["P2R"], laneCode: "P2R",
+        desc1:"Problem-to-Resolution", desc2:"Detect → Triage → Resolve → Recover",
+        sub: "Issue Management",
+        renderMode:"beltWrapAll", defaultCollapsed:false
+      },
 
+      // Resources: 2 belts stacked, both horizontal belts (wrap)
       {
         key: "RSRC",
         label: "Resources",
         l0Codes: ["S2P","H2R"],
-        sub: "Sourcing & HR",
         laneCode: "S2P & H2R",
-        renderMode:"beltGroup",
+        desc1:"Sourcing & People",
+        desc2:"Source-to-Pay + Hire-to-Retire",
+        sub: "Sourcing & HR",
+        renderMode:"beltGroupWrapAll",
         defaultCollapsed:false,
         belts: [
-          { l0:"S2P", title:"Source-to-Pay (S2P)", showAll:true },
-          { l0:"H2R", title:"Hire-to-Retire (H2R)", showAll:true }
+          { l0:"S2P", title:"Source-to-Pay (S2P)" },
+          { l0:"H2R", title:"Hire-to-Retire (H2R)" }
         ]
       },
 
-      { key: "FND",  label: "Foundation", l0Codes: ["S2E","GRC","ITF","EA_PM","DA","I2P","TRF","R2R"], sub: "Strategy & Enablers", laneCode: "S2E, GRC, IT, EA, DA", renderMode:"foundationCollapsed", defaultCollapsed:false },
+      { key: "FND",  label: "Foundation", l0Codes: ["S2E","GRC","ITF","EA_PM","DA","I2P","TRF","R2R"], laneCode: "S2E, GRC, IT, EA, DA",
+        desc1:"Strategy & Enablers",
+        desc2:"Governance · Platforms · Data · Architecture",
+        sub: "Strategy & Enablers",
+        renderMode:"foundationCollapsed", defaultCollapsed:false
+      },
     ];
 
     const STORY_MAX_PER_STAGE = 2;
-    const BELT_VISIBLE = 4;
 
     const FOUNDATION_LABELS = {
       "S2E": "Strategy & Execution",
@@ -1004,9 +1126,9 @@
       "R2R": "Record to Report"
     };
 
+    // Continuous rule: L2C_08 shown as continuous (and P2R also spans conceptually)
     const SPAN_RULES = [
-      { match: { l0: "L2C", l1: "L2C_08" }, span: { from: 4, to: 7 } },
-      { match: { l0: "P2R" }, span: { from: 4, to: 7 } }
+      { match: { l0: "L2C", l1: "L2C_08" }, span: { from: 4, to: 7 } }
     ];
 
     /***********************
@@ -1014,16 +1136,11 @@
      ***********************/
     const $ = (sel) => document.querySelector(sel);
     const esc = (s) => String(s ?? "")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-    const cssEsc = (v) => {
-      const str = String(v ?? "");
-      if(window.CSS && typeof CSS.escape === "function") return CSS.escape(str);
-      return str.replace(/["\\]/g, "\\$&");
-    };
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
 
     function parseInfo(name){
       if(!name) return { id:"", name:"" };
@@ -1072,8 +1189,7 @@
     function ownerCategory(ownerRaw){
       const o = normalizeOwner(ownerRaw).toLowerCase();
 
-      // explicit tokens
-      if(o.includes("commercial") || o.includes("sales") || o.includes("customer") || o.includes("crm")) return "Commercial & Sales";
+      if(o.includes("commercial") || o.includes("sales") || o.includes("customer")) return "Commercial & Sales";
       if(o.includes("operation") || o.includes("ops") || o.includes("network") || o.includes("transport") || o.includes("hub") || o.includes("last mile")) return "Operations";
       if(o.includes("finance") || o.includes("billing") || o.includes("accounting") || o.includes("controlling") || o.includes("treasury")) return "Finance";
       if(o.includes("procure") || o.includes("sourcing") || o.includes("vendor") || o.includes("supplier")) return "Procurement";
@@ -1089,23 +1205,24 @@
     }
 
     function categoryColor(cat){
+      const cs = getComputedStyle(document.documentElement);
       switch(cat){
-        case "Commercial & Sales":       return getComputedStyle(document.documentElement).getPropertyValue("--own-commercial").trim();
-        case "Operations":              return getComputedStyle(document.documentElement).getPropertyValue("--own-ops").trim();
-        case "Finance":                 return getComputedStyle(document.documentElement).getPropertyValue("--own-finance").trim();
-        case "IT":                      return getComputedStyle(document.documentElement).getPropertyValue("--own-it").trim();
-        case "Data":                    return getComputedStyle(document.documentElement).getPropertyValue("--own-data").trim();
-        case "Enterprise Architecture": return getComputedStyle(document.documentElement).getPropertyValue("--own-ea").trim();
-        case "GRC":                     return getComputedStyle(document.documentElement).getPropertyValue("--own-grc").trim();
-        case "HR":                      return getComputedStyle(document.documentElement).getPropertyValue("--own-hr").trim();
-        case "Procurement":             return getComputedStyle(document.documentElement).getPropertyValue("--own-proc").trim();
-        case "GMB / Leadership":        return getComputedStyle(document.documentElement).getPropertyValue("--own-gmb").trim();
-        default:                        return getComputedStyle(document.documentElement).getPropertyValue("--own-unassigned").trim();
+        case "Commercial & Sales":       return cs.getPropertyValue("--own-commercial").trim();
+        case "Operations":              return cs.getPropertyValue("--own-ops").trim();
+        case "Finance":                 return cs.getPropertyValue("--own-finance").trim();
+        case "IT":                      return cs.getPropertyValue("--own-it").trim();
+        case "Data":                    return cs.getPropertyValue("--own-data").trim();
+        case "Enterprise Architecture": return cs.getPropertyValue("--own-ea").trim();
+        case "GRC":                     return cs.getPropertyValue("--own-grc").trim();
+        case "HR":                      return cs.getPropertyValue("--own-hr").trim();
+        case "Procurement":             return cs.getPropertyValue("--own-proc").trim();
+        case "GMB / Leadership":        return cs.getPropertyValue("--own-gmb").trim();
+        default:                        return cs.getPropertyValue("--own-unassigned").trim();
       }
     }
 
     /***********************
-     * Stage mapping heuristics (unchanged)
+     * Stage mapping heuristics
      ***********************/
     function colForL1(l0Id, l1Node){
       const { id: l1Id, name: l1Name } = parseInfo(l1Node.name);
@@ -1212,6 +1329,21 @@
     /***********************
      * Render header
      ***********************/
+    function tryLoadStepIcons(){
+      // If you later add images like icons/step-1.png, they will auto-load.
+      const base = "icons";
+      document.querySelectorAll(".stepIcon").forEach(el=>{
+        const step = el.getAttribute("data-step");
+        const img = new Image();
+        img.onload = () => {
+          el.innerHTML = "";
+          el.appendChild(img);
+        };
+        img.onerror = () => {}; // keep placeholder
+        img.src = `${base}/step-${step}.png`;
+      });
+    }
+
     function renderStageHeader(){
       const wrap = $("#stageHeader");
       wrap.innerHTML = "";
@@ -1239,13 +1371,14 @@
         `;
         wrap.appendChild(cell);
       });
+
+      tryLoadStepIcons();
     }
 
     function renderOwnerLegendFooter(){
       const el = document.getElementById("ownerLegendFooter");
       if(!el) return;
       el.innerHTML = "";
-
       for(const cat of OWNER_ORDER){
         const cnt = OWNER_COUNTS.get(cat) || 0;
         if(cnt === 0) continue;
@@ -1329,10 +1462,10 @@
 
     function highlightActiveTile(l0Id, l1Id){
       document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll(`.tile[data-l0="${cssEsc(l0Id)}"][data-l1="${cssEsc(l1Id)}"]`).forEach(t => t.classList.add("active"));
+      document.querySelectorAll(`.tile[data-l0="${CSS.escape(l0Id)}"][data-l1="${CSS.escape(l1Id)}"]`).forEach(t => t.classList.add("active"));
     }
 
-    function selectL1(l0Id, l1Node){
+    function selectL1(l0Id, l1Node, focusL2Id=null){
       const l0Node = L0MAP.get(l0Id);
       const l0Info = parseInfo(l0Node?.name);
       const l1Info = parseInfo(l1Node?.name);
@@ -1352,7 +1485,6 @@
         return { id: i2.id, name: i2.name, node: l2, l3s };
       });
 
-      // Deck header + responsive L2 grid
       deckBody.innerHTML = `
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;">
           <div style="min-width:280px;flex:1 1 520px;">
@@ -1383,6 +1515,7 @@
 
           const block = document.createElement("div");
           block.className = "l2Block";
+          block.id = `l2-${cssSafeId(l2.id)}`;
 
           block.innerHTML = `
             <div class="l2Head">
@@ -1415,16 +1548,26 @@
               list.appendChild(item);
             }
           }
-
           grid.appendChild(block);
         }
       }
 
       setDeckOpen(true);
+
+      if(focusL2Id){
+        requestAnimationFrame(() => {
+          const el = document.getElementById(`l2-${cssSafeId(focusL2Id)}`);
+          if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+        });
+      }
+    }
+
+    function cssSafeId(s){
+      return String(s||"").replaceAll(/[^a-zA-Z0-9\-_:.]/g, "_");
     }
 
     /***********************
-     * Tile builder
+     * Tile builder (with hover tooltip)
      ***********************/
     function buildTile(item, { showStageChip=false, showOwner=false, compact=false }){
       const tile = document.createElement("div");
@@ -1495,6 +1638,140 @@
       return tile;
     }
 
+    function buildContinuousTile(item){
+      const tile = document.createElement("div");
+      tile.className = "tile continuous";
+      tile.dataset.l0 = item.l0Id;
+      tile.dataset.l1 = item.l1Id;
+
+      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
+      const cat = ownerCategory(ownerRaw);
+      const ownColor = categoryColor(cat);
+      tile.style.setProperty("--own", ownColor);
+
+      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+
+      const l2Nodes = safeChildren(item.l1Node);
+      const l2Infos = l2Nodes.map(n => parseInfo(n.name)).filter(x => x.id);
+
+      // show up to 8 micro chevrons, rest in drawer
+      const shown = l2Infos.slice(0, 8);
+      const hidden = l2Infos.slice(8);
+
+      tile.innerHTML = `
+        <div class="tileMain">
+          <div class="tileTop">
+            <span class="tileId">${esc(item.l1Id)}</span>
+            <span class="tileStageChip">${esc(chip)}</span>
+          </div>
+          <p class="tileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</p>
+          <div class="l2MicroRow"></div>
+        </div>
+      `;
+
+      const row = tile.querySelector(".l2MicroRow");
+      shown.forEach(l2 => {
+        const micro = document.createElement("div");
+        micro.className = "l2Micro";
+        micro.title = `${l2.id} · ${l2.name}`;
+        micro.textContent = `${l2.id}: ${l2.name}`;
+        micro.addEventListener("click", (e) => {
+          e.stopPropagation();
+          selectL1(item.l0Id, item.l1Node, l2.id);
+          highlightActiveTile(item.l0Id, item.l1Id);
+        });
+        row.appendChild(micro);
+      });
+
+      if(hidden.length){
+        const more = document.createElement("div");
+        more.className = "l2Micro";
+        more.textContent = `+${hidden.length} more`;
+        more.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openDrawer({
+            title: `${item.l1Id} · L2 overflow`,
+            subtitle: `Select an L2 to open the deck scrolled to that section.`,
+            sections: [{
+              title: "Hidden L2 items",
+              countText: `${hidden.length} items`,
+              items: hidden.map(h => ({
+                l0Id: item.l0Id,
+                l0Owner: item.l0Owner,
+                l1Id: item.l1Id,
+                l1Name: item.l1Name,
+                l1Node: item.l1Node,
+                owner: item.owner,
+                // special click handled below by drawing as tiles would open L1, but we want L2 focus:
+                __focusL2: h.id,
+                __displayOverride: `${h.id}: ${h.name}`
+              }))
+            }]
+          });
+
+          // Override drawer click behavior for these pseudo items:
+          requestAnimationFrame(() => {
+            drawerBody.querySelectorAll(".tile").forEach((t, idx) => {
+              // attach focus if present
+              const focus = (hidden[idx] && hidden[idx].id) ? hidden[idx].id : null;
+              if(!focus) return;
+              t.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                closeDrawer();
+                selectL1(item.l0Id, item.l1Node, focus);
+                highlightActiveTile(item.l0Id, item.l1Id);
+              }, { once:true });
+            });
+          });
+        });
+        row.appendChild(more);
+      }
+
+      tile.addEventListener("click", () => {
+        selectL1(item.l0Id, item.l1Node);
+        highlightActiveTile(item.l0Id, item.l1Id);
+        closeDrawer();
+        hideTooltip();
+      });
+
+      // reuse hover tooltip behavior
+      tile.addEventListener("mouseenter", (e) => {
+        if(ttTimer) clearTimeout(ttTimer);
+        const { l2, l3 } = countL2L3(item.l1Node);
+        const desc = truncate(item.l1Node?.description || "");
+        const l0 = item.l0Id;
+        const l1 = item.l1Id;
+
+        ttTimer = setTimeout(() => {
+          const html = `
+            <div class="ttTop">
+              <p class="ttTitle">${esc(l1)} · ${esc(item.l1Name)}</p>
+              <span class="ttOwner">${esc(cat)}</span>
+            </div>
+            <p class="ttDesc">${esc(desc || "No description available.")}</p>
+            <div class="ttStats">
+              <span class="ttPill">L0: ${esc(l0)}</span>
+              <span class="ttPill">L2: ${esc(l2)}</span>
+              <span class="ttPill">L3: ${esc(l3)}</span>
+              <span class="ttPill">Stage: ${esc(chip)}</span>
+            </div>
+          `;
+          showTooltipNear(e.clientX, e.clientY, html);
+        }, 150);
+      });
+      tile.addEventListener("mousemove", (e) => {
+        if(!tooltip.classList.contains("show")) return;
+        showTooltipNear(e.clientX, e.clientY, tooltip.innerHTML);
+      });
+      tile.addEventListener("mouseleave", () => {
+        if(ttTimer) clearTimeout(ttTimer);
+        hideTooltip();
+      });
+
+      return tile;
+    }
+
     /***********************
      * Render map
      ***********************/
@@ -1511,22 +1788,28 @@
         row.dataset.laneKey = lane.key;
         if(laneCollapsed[lane.key]) row.classList.add("collapsed");
 
+        const isBeltLane = lane.renderMode.startsWith("belt");
+
         const label = document.createElement("div");
         label.className = "laneLabel";
-
-        const isBelt = (lane.renderMode === "belt" || lane.renderMode === "beltGroup");
-
         label.innerHTML = `
           <div class="laneLabelTop">
             <div class="laneTitle">${esc(lane.label)}</div>
             <span class="laneCode">${esc(lane.laneCode)}</span>
           </div>
+
+          <div class="laneDesc">
+            <div class="line1">${esc(lane.desc1 || "")}</div>
+            <div class="line2">${esc(lane.desc2 || "")}</div>
+          </div>
+
           <div class="laneSub">${esc(lane.sub || "")}</div>
+
           <div class="laneControls">
             <button class="btn" data-action="toggle" data-lane="${esc(lane.key)}">
               ${laneCollapsed[lane.key] ? "Expand" : "Collapse"}
             </button>
-            ${isBelt ? `
+            ${isBeltLane ? `
               <button class="btn" data-action="home" data-lane="${esc(lane.key)}">⟸ Start</button>
               <button class="btn" data-action="end" data-lane="${esc(lane.key)}">End ⟹</button>
             ` : ""}
@@ -1535,7 +1818,6 @@
 
         const content = document.createElement("div");
         content.className = "laneGrid";
-
         if(lane.theme === "l2c") content.classList.add("theme-l2c");
         if(lane.theme === "o2d") content.classList.add("theme-o2d");
         if(lane.theme === "d2o") content.classList.add("theme-d2o");
@@ -1553,7 +1835,6 @@
             const i1 = parseInfo(l1.name);
             const ownerRaw = l1?.owner || l0Owner || "Unassigned";
             const cat = ownerCategory(ownerRaw);
-
             OWNER_COUNTS.set(cat, (OWNER_COUNTS.get(cat) || 0) + 1);
 
             const it = {
@@ -1579,14 +1860,14 @@
           if(!allItems.length){
             content.innerHTML = `<div class="error" style="grid-column:1/-1;">No processes found for this lane in data.json.</div>`;
           } else {
-            if(lane.renderMode === "belt"){
-              renderBeltLane(content, lane, allItems);
-            } else if(lane.renderMode === "beltGroup"){
-              renderBeltGroupLane(content, lane, itemsByL0);
+            if(lane.renderMode === "gridStory"){
+              renderGridStoryLane(content, lane, allItems);
+            } else if(lane.renderMode === "beltWrapAll"){
+              renderSingleBeltWrapAll(content, lane, allItems);
+            } else if(lane.renderMode === "beltGroupWrapAll"){
+              renderBeltGroupWrapAll(content, lane, itemsByL0);
             } else if(lane.renderMode === "foundationCollapsed"){
               renderFoundationCollapsed(content, lane, itemsByL0);
-            } else {
-              renderGridStoryLane(content, lane, allItems);
             }
           }
         }
@@ -1608,70 +1889,44 @@
             return;
           }
 
-          if(action === "home" || action === "end"){
-            // scroll first belt in lane (P2R) or first belt in group
-            const belt = body.querySelector(`.belt[data-belt-lane="${cssEsc(laneKey)}"]`);
-            const beltAlt = body.querySelector(`.belt[data-belt-group="${cssEsc(laneKey)}"]`);
-            const b = belt || beltAlt;
-            if(!b) return;
+          const belt = body.querySelector(`.belt[data-belt-lane="${CSS.escape(laneKey)}"]`);
+          const belt2 = body.querySelector(`.belt[data-belt-group="${CSS.escape(laneKey)}"]`);
+          const b = belt || belt2;
+          if(!b) return;
 
-            // if wrapAll, no scrolling needed
-            if(b.classList.contains("wrapAll")) return;
+          // If wrapAll, no scroll needed
+          if(b.classList.contains("wrapAll")) return;
 
-            b.style.scrollBehavior = "smooth";
-            if(action === "home") b.scrollTo({ left: 0, behavior: "smooth" });
-            if(action === "end") b.scrollTo({ left: b.scrollWidth, behavior: "smooth" });
-          }
+          b.style.scrollBehavior = "smooth";
+          if(action === "home") b.scrollTo({ left: 0, behavior: "smooth" });
+          if(action === "end") b.scrollTo({ left: b.scrollWidth, behavior: "smooth" });
         });
       });
 
       renderOwnerLegendFooter();
     }
 
-    function renderBeltLane(content, lane, allItems){
-      // P2R: keep compact belt, but ensure tiles readable (compact tiles + 2-line clamp)
-      const visible = allItems.slice(0, BELT_VISIBLE);
-      const hidden = allItems.slice(BELT_VISIBLE);
-
-      const beltWrap = document.createElement("div");
-      beltWrap.className = "beltWrap";
+    function renderSingleBeltWrapAll(content, lane, allItems){
+      const wrap = document.createElement("div");
+      wrap.className = "beltWrap";
 
       const hint = document.createElement("div");
       hint.className = "beltHint";
       hint.textContent = "Compact belt";
 
       const belt = document.createElement("div");
-      belt.className = "belt";
+      belt.className = "belt wrapAll";
       belt.dataset.beltLane = lane.key;
 
-      visible.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
+      // P2R: show all, readable tiles
+      allItems.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
 
-      if(hidden.length){
-        const more = document.createElement("div");
-        more.className = "moreChip show";
-        more.style.position = "static";
-        more.style.transform = "none";
-        more.textContent = `+${hidden.length} more`;
-        more.addEventListener("click", () => {
-          openDrawer({
-            title: `${lane.label} · Hidden Processes`,
-            subtitle: `Select a process to open details.`,
-            sections: [{
-              title: "Overflow list",
-              countText: `${hidden.length} items`,
-              items: hidden
-            }]
-          });
-        });
-        belt.appendChild(more);
-      }
-
-      beltWrap.appendChild(hint);
-      beltWrap.appendChild(belt);
-      content.appendChild(beltWrap);
+      wrap.appendChild(hint);
+      wrap.appendChild(belt);
+      content.appendChild(wrap);
     }
 
-    function renderBeltGroupLane(content, lane, itemsByL0){
+    function renderBeltGroupWrapAll(content, lane, itemsByL0){
       const group = document.createElement("div");
       group.className = "beltGroup";
 
@@ -1679,49 +1934,23 @@
         const list = itemsByL0.get(b.l0) || [];
         if(!list.length) continue;
 
-        const beltWrap = document.createElement("div");
-        beltWrap.className = "beltWrap";
+        const wrap = document.createElement("div");
+        wrap.className = "beltWrap";
 
         const hint = document.createElement("div");
         hint.className = "beltHint";
         hint.textContent = b.title;
 
         const belt = document.createElement("div");
-        belt.className = "belt";
+        belt.className = "belt wrapAll";
         belt.dataset.beltGroup = lane.key;
 
-        if(b.showAll){
-          // show ALL items, wrapped, no "+ more"
-          belt.classList.add("wrapAll");
-          list.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
-        } else {
-          const visible = list.slice(0, BELT_VISIBLE);
-          const hidden = list.slice(BELT_VISIBLE);
-          visible.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
-          if(hidden.length){
-            const more = document.createElement("div");
-            more.className = "moreChip show";
-            more.style.position = "static";
-            more.style.transform = "none";
-            more.textContent = `+${hidden.length} more`;
-            more.addEventListener("click", () => {
-              openDrawer({
-                title: `${lane.label} · ${b.title}`,
-                subtitle: `Select a process to open details.`,
-                sections: [{
-                  title: b.title,
-                  countText: `${hidden.length} hidden`,
-                  items: hidden
-                }]
-              });
-            });
-            belt.appendChild(more);
-          }
-        }
+        // Ensure horizontal belts (not vertical list)
+        list.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true })));
 
-        beltWrap.appendChild(hint);
-        beltWrap.appendChild(belt);
-        group.appendChild(beltWrap);
+        wrap.appendChild(hint);
+        wrap.appendChild(belt);
+        group.appendChild(wrap);
       }
 
       content.appendChild(group);
@@ -1794,25 +2023,26 @@
         lab.textContent = "Continuous";
         contRow.appendChild(lab);
 
-        const shownC = continuous.slice(0, 1);
-        const hiddenC = continuous.slice(1);
+        // For L2C_08: render one continuous card with L2 micro chevrons
+        const first = continuous[0];
+        contRow.appendChild(buildContinuousTile(first));
 
-        shownC.forEach(it => contRow.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:false })));
-
-        if(hiddenC.length){
+        // If more continuous items appear later, keep them accessible in drawer
+        const rest = continuous.slice(1);
+        if(rest.length){
           const more = document.createElement("div");
           more.className = "moreChip show";
           more.style.position = "static";
           more.style.transform = "none";
-          more.textContent = `+${hiddenC.length} more`;
+          more.textContent = `+${rest.length} more`;
           more.addEventListener("click", () => {
             openDrawer({
               title: `${lane.label} · Continuous Services`,
               subtitle: `Select a continuous process to open details.`,
               sections: [{
                 title: "Continuous overflow",
-                countText: `${hiddenC.length} hidden`,
-                items: hiddenC
+                countText: `${rest.length} hidden`,
+                items: rest
               }]
             });
           });
