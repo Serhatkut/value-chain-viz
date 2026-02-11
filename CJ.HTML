@@ -26,38 +26,38 @@
 
       --lane-label-w:300px;
 
-      --tile-h:60px;
-      --tile-min-w:220px;
-
+      /* Card sizing */
+      --tile-h:54px;          /* grid cards */
+      --tile-belt-h:52px;     /* belt cards */
       --shadow: 0 10px 26px rgba(16,24,40,0.10);
       --shadow-2: 0 18px 44px rgba(16,24,40,0.14);
-
       --radius:14px;
 
       --tooltipW: 460px;
 
-      /* ZERO-SCROLL initial view for story lanes */
-      --gridLaneRows: 2;
-      --gridLaneRowH: 60px;
-      --gridLaneH: calc(var(--gridLaneRows) * var(--gridLaneRowH) + 26px);
+      /* Story lane: show 3, then scroll */
+      --storyVisible: 3;
+      --storyGap: 8px;
+      --storyColPad: 2px;
+      --storyColMaxH: calc((var(--storyVisible) * var(--tile-h)) + ((var(--storyVisible) - 1) * var(--storyGap)) + (2 * var(--storyColPad)));
 
       /* Lane theme tints */
       --tint-l2c: rgba(212, 5, 17, 0.06);
       --tint-o2d: rgba(255, 204, 0, 0.18);
       --tint-d2o: rgba(164, 224, 176, 0.22);
 
-      /* Ownership fixed palette */
-      --own-commercial: #D40511; /* Sales/Commercial */
+      /* Ownership palette */
+      --own-commercial: #D40511; /* Commercial & Sales */
       --own-ops:       #FFCC00; /* Operations */
-      --own-finance:   #5B4B8A; /* Finance purple */
+      --own-finance:   #5B4B8A; /* Finance */
       --own-it:        #2457A7; /* IT */
       --own-data:      #00A3C7; /* Data */
       --own-ea:        #2F3A5A; /* Enterprise Architecture */
       --own-grc:       #2B2B2B; /* GRC */
       --own-hr:        #2E8B57; /* HR */
       --own-proc:      #6B8E23; /* Procurement */
-      --own-gmb:       #111827; /* Leadership */
-      --own-unassigned:#9AA4B2; /* Unknown */
+      --own-gmb:       #111827; /* GMB / Leadership */
+      --own-unassigned:#9AA4B2; /* Unassigned */
     }
 
     *{ box-sizing:border-box; }
@@ -136,10 +136,10 @@
       flex:0 0 auto;
     }
 
-    /* 6 stages */
+    /* 6 stages now */
     .stageGrid{
       display:grid;
-      grid-template-columns: var(--lane-label-w) repeat(6, minmax(170px, 1fr));
+      grid-template-columns: var(--lane-label-w) repeat(6, minmax(190px, 1fr));
       align-items:stretch;
       gap:0;
     }
@@ -271,10 +271,9 @@
     .btn:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.6); }
     .btn:active{ transform: translateY(1px); }
 
-    /* 6 stages */
     .laneGrid{
       display:grid;
-      grid-template-columns: repeat(6, minmax(170px, 1fr));
+      grid-template-columns: repeat(6, minmax(190px, 1fr));
       gap:10px;
       padding:10px 10px 12px 10px;
       align-content:start;
@@ -288,60 +287,42 @@
     .laneGrid.theme-o2d{ background: linear-gradient(180deg, var(--tint-o2d) 0%, rgba(255,255,255,0.45) 90%); border-left-color: rgba(255,204,0,0.55); }
     .laneGrid.theme-d2o{ background: linear-gradient(180deg, var(--tint-d2o) 0%, rgba(255,255,255,0.45) 90%); border-left-color: rgba(120,190,140,0.55); }
 
-    /* Story wrapper (6 stages) */
+    /* Story lane wrapper (6 columns) */
     .gridLaneFixed{
-      height: var(--gridLaneH);
+      height: calc(var(--storyColMaxH) + 16px);
       overflow:hidden;
       border-radius:14px;
       grid-column: 1 / -1;
       display:grid;
-      grid-template-columns: repeat(6, minmax(170px, 1fr));
+      grid-template-columns: repeat(6, minmax(190px, 1fr));
       gap:10px;
       padding:2px 0 0 0;
       min-width:0;
     }
+
+    /* Each stage column: scroll vertically if >3 items */
     .stageCol{
       position:relative;
-      height: calc(var(--gridLaneRows) * var(--gridLaneRowH));
-      padding:2px 0 2px 0;
-      display:grid;
-      grid-template-rows: repeat(var(--gridLaneRows), var(--gridLaneRowH));
-      gap:8px;
+      padding: var(--storyColPad);
+      display:flex;
+      flex-direction:column;
+      gap: var(--storyGap);
       align-content:start;
       min-width:0;
+      max-height: var(--storyColMaxH);
+      overflow-y:auto;
+      overflow-x:hidden;
+      scrollbar-width: thin;
     }
 
-    .moreChip{
-      position:absolute;
-      right:0;
-      bottom:-2px;
-      transform: translateY(100%);
-      height:28px;
-      padding:0 10px;
-      border-radius:999px;
-      background:#fff;
-      border:1px dashed rgba(16,24,40,0.22);
-      font-size:11px;
-      font-weight:950;
-      color:var(--muted);
-      cursor:pointer;
-      display:none;
-      align-items:center;
-      gap:6px;
-      box-shadow: 0 8px 16px rgba(16,24,40,0.08);
-      white-space:nowrap;
-      user-select:none;
-    }
-    .moreChip.show{ display:inline-flex; }
-    .moreChip:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.7); color:#7a5a00; }
-
+    /* Continuous row */
     .continuousRow{
       grid-column:1/-1;
       display:flex;
       gap:10px;
       align-items:stretch;
       padding:0 6px;
-      margin-top:8px;
+      margin-top:10px;
       min-width:0;
     }
     .continuousLabel{
@@ -358,6 +339,53 @@
       margin-top:4px;
     }
 
+    /* BELT lanes (L1 only, horizontal) */
+    .beltGroup{
+      grid-column: 1 / -1;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+    .beltWrap{
+      width:100%;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:10px;
+      border:1px solid rgba(16,24,40,0.10);
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(247,248,251,0.88) 100%);
+      overflow:visible;
+      min-width:0;
+    }
+    .beltHint{
+      flex:0 0 auto;
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+      white-space:nowrap;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(16,24,40,0.12);
+      background:#fff;
+      margin-top:2px;
+    }
+    .belt{
+      display:flex;
+      flex-direction:row;
+      gap:10px;
+      align-items:stretch;
+      flex: 1 1 auto;
+      width:100%;
+      min-width:0;
+      overflow-x:auto;
+      overflow-y:hidden;
+      flex-wrap:nowrap;
+      scrollbar-width: thin;
+      padding-bottom:2px;
+    }
+
     /* FOUNDATION summary */
     .foundationGrid{
       grid-column: 1 / -1;
@@ -372,7 +400,7 @@
       min-width:0;
     }
     .foundationChip{
-      height:48px;
+      height:52px;
       padding:0 10px;
       border-radius:14px;
       border:1px solid rgba(16,24,40,0.12);
@@ -426,18 +454,16 @@
       flex:0 0 auto;
     }
 
-    /* CARD (no pills). Use space: ID + Title on same row */
+    /* CARD: single-row header (ID + title) */
     .tile{
       height: var(--tile-h);
       display:flex;
-      align-items:stretch;
-      gap:10px;
+      align-items:center;
       padding:10px 12px 10px 14px;
       cursor:pointer;
       user-select:none;
       border-radius:14px;
-      background: #fff;
-      color:#111827;
+      background:#fff;
       border:1px solid rgba(16,24,40,0.12);
       box-shadow: 0 10px 22px rgba(16,24,40,0.08);
       transition: transform 120ms ease, box-shadow 120ms ease;
@@ -448,9 +474,7 @@
     .tile::before{
       content:"";
       position:absolute;
-      left:0;
-      top:0;
-      bottom:0;
+      left:0; top:0; bottom:0;
       width:8px;
       background: var(--own,#9aa4b2);
       opacity:0.95;
@@ -463,80 +487,65 @@
       border-color: rgba(255,204,0,0.85);
       box-shadow: 0 0 0 3px rgba(255,204,0,0.55), 0 16px 32px rgba(16,24,40,0.14);
     }
-    .tileMain{ flex: 1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; padding-left:4px; }
-    .tileTop{
+
+    .tileHeader{
       display:flex;
       align-items:center;
-      justify-content:flex-end;
       gap:10px;
       min-width:0;
-    }
-    .tileStageChip{
-      flex:0 0 auto;
-      font-size:10px;
-      font-weight:980;
-      color: #1f2937;
-      background: rgba(16,24,40,0.04);
-      border: 1px solid rgba(16,24,40,0.10);
-      padding:3px 7px;
-      border-radius:999px;
-      white-space:nowrap;
-      line-height:1.1;
-    }
-
-    .tileName{
-      margin:0;
-      line-height:1.2;
-      min-width:0;
-      display:flex;
-      gap:8px;
-      align-items:baseline;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:ellipsis;
+      width:100%;
+      padding-left:4px; /* allow for stripe */
     }
     .tileIdInline{
+      flex:0 0 auto;
       font-size:11px;
       font-weight:980;
-      color: var(--dhl-red);
-      flex:0 0 auto;
+      color:var(--dhl-red);
       white-space:nowrap;
     }
     .tileTitleInline{
+      flex:1 1 auto;
       font-size:12.5px;
       font-weight:950;
-      color:#111827;
+      line-height:1.15;
       min-width:0;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
-      flex:1 1 auto;
-    }
-    .tileMeta{
-      font-size:10px;
-      font-weight:850;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      color:#111827;
     }
 
-    /* Context sizing */
-    .gridLaneFixed .tile{ width:100%; }
+    /* Belt tiles slightly smaller */
+    .tile.beltTile{
+      height: var(--tile-belt-h);
+      padding:9px 12px 9px 14px;
+      flex: 0 0 auto;
+      min-width: 260px;
+    }
+    .tile.beltTile .tileTitleInline{ font-size:12px; }
 
-    /* Continuous card (L1 + L2 micro chevrons) */
+    /* Continuous tile with micro row */
     .tile.continuous{
-      height: auto;
+      height:auto;
       min-height: 72px;
-      padding-bottom:12px;
+      align-items:flex-start;
+      padding-top:10px;
+      padding-bottom:10px;
     }
-
+    .continuousBody{
+      width:100%;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding-left:4px;
+      min-width:0;
+    }
     .l2MicroRow{
       display:flex;
       flex-wrap:nowrap;
-      gap:6px;
-      margin-top:6px;
+      gap:8px;
       overflow-x:auto;
+      overflow-y:hidden;
       padding-bottom:2px;
       scrollbar-width: thin;
     }
@@ -547,8 +556,8 @@
       border:1px solid rgba(16,24,40,0.12);
       background: rgba(255,255,255,0.92);
       border-radius:999px;
-      padding:3px 8px;
-      max-width: 260px;
+      padding:4px 10px;
+      max-width: 320px;
       overflow:hidden;
       text-overflow:ellipsis;
       white-space:nowrap;
@@ -560,186 +569,6 @@
       background:#FFF9E6;
       border-color: rgba(255,204,0,0.65);
       color:#7a5a00;
-    }
-    .l2Micro::after{
-      content:"";
-      display:inline-block;
-      margin-left:6px;
-      width:0;height:0;
-      border-top:4px solid transparent;
-      border-bottom:4px solid transparent;
-      border-left:6px solid rgba(16,24,40,0.45);
-      transform: translateY(1px);
-      opacity:0.55;
-    }
-
-    /* NEW: Chain lanes (P2R, S2P, H2R) - readable, horizontal micro chain in same row */
-    .chainGroup{
-      grid-column: 1 / -1;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-width:0;
-    }
-    .chainSection{
-      border:1px solid rgba(16,24,40,0.10);
-      border-radius:14px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(247,248,251,0.88) 100%);
-      padding:10px;
-      min-width:0;
-    }
-    .chainSectionHead{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:10px;
-      min-width:0;
-    }
-    .chainSectionTitle{
-      font-size:11px;
-      font-weight:950;
-      color:var(--muted);
-      white-space:nowrap;
-      border:1px solid rgba(16,24,40,0.12);
-      background:#fff;
-      border-radius:999px;
-      padding:6px 10px;
-      flex:0 0 auto;
-    }
-
-    .chainList{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      min-width:0;
-    }
-
-    .chainTile{
-      height:56px;
-      border-radius:14px;
-      border:1px solid rgba(16,24,40,0.12);
-      background:#fff;
-      box-shadow: 0 10px 22px rgba(16,24,40,0.08);
-      display:flex;
-      align-items:center;
-      gap:12px;
-      padding:10px 12px 10px 14px;
-      position:relative;
-      overflow:hidden;
-      cursor:pointer;
-      user-select:none;
-      min-width:0;
-    }
-    .chainTile::before{
-      content:"";
-      position:absolute;
-      left:0;
-      top:0;
-      bottom:0;
-      width:8px;
-      background: var(--own,#9aa4b2);
-      opacity:0.95;
-    }
-    .chainTile:hover{
-      box-shadow: 0 14px 28px rgba(16,24,40,0.12);
-      transform: translateY(-1px);
-    }
-
-    .chainL1{
-      flex:0 0 320px;
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      padding-left:4px;
-    }
-    .chainL1Line{
-      display:flex;
-      gap:8px;
-      align-items:baseline;
-      min-width:0;
-      overflow:hidden;
-      white-space:nowrap;
-      text-overflow:ellipsis;
-    }
-    .chainId{
-      font-size:11px;
-      font-weight:980;
-      color:var(--dhl-red);
-      flex:0 0 auto;
-      white-space:nowrap;
-    }
-    .chainTitle{
-      font-size:12.5px;
-      font-weight:950;
-      color:#111827;
-      min-width:0;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      flex:1 1 auto;
-    }
-
-    .chainMicroWrap{
-      flex:1 1 auto;
-      min-width:0;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .chainMicroRow{
-      flex:1 1 auto;
-      min-width:0;
-      display:flex;
-      gap:6px;
-      align-items:center;
-      overflow-x:auto;
-      overflow-y:hidden;
-      padding-bottom:2px;
-      scrollbar-width: thin;
-    }
-    .chainMicro{
-      font-size:10px;
-      font-weight:900;
-      color:#1f2937;
-      border:1px solid rgba(16,24,40,0.12);
-      background: rgba(255,255,255,0.92);
-      border-radius:999px;
-      padding:3px 8px;
-      max-width: 300px;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      cursor:pointer;
-      user-select:none;
-      flex:0 0 auto;
-    }
-    .chainMicro:hover{
-      background:#FFF9E6;
-      border-color: rgba(255,204,0,0.65);
-      color:#7a5a00;
-    }
-    .chainMicroEmpty{
-      font-size:10px;
-      font-weight:850;
-      color:var(--muted);
-      white-space:nowrap;
-      flex:0 0 auto;
-      padding-right:6px;
-    }
-
-    .chainStage{
-      flex:0 0 auto;
-      font-size:10px;
-      font-weight:980;
-      color:#1f2937;
-      background: rgba(16,24,40,0.04);
-      border: 1px solid rgba(16,24,40,0.10);
-      padding:3px 7px;
-      border-radius:999px;
-      white-space:nowrap;
-      line-height:1.1;
     }
 
     /* Collapsed lane */
@@ -784,8 +613,9 @@
       padding:12px 12px;
       background:#F7F8FB;
       border-bottom:1px solid var(--line);
+      flex:0 0 auto;
     }
-    .drawerTitle{ font-size:13px; font-weight:950; margin:0; line-height:1.15; color:#111827; }
+    .drawerTitle{ font-size:13px; font-weight:950; margin:0; line-height:1.15; }
     .drawerSub{ font-size:11px; font-weight:850; color:var(--muted); margin-top:4px; }
     .drawerClose{
       height:30px;
@@ -800,13 +630,19 @@
     }
     .drawerClose:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.6); }
 
+    /* FIX: always scroll when >8 */
     .drawerBody{
       padding:10px;
-      overflow:auto;
+      overflow-y:auto;
+      overflow-x:hidden;
       display:flex;
       flex-direction:column;
       gap:10px;
+      min-height:0;
+      flex:1 1 auto;
+      scrollbar-width: thin;
     }
+
     .drawerSection{
       border:1px solid rgba(16,24,40,0.10);
       border-radius:14px;
@@ -825,7 +661,7 @@
     .drawerSectionTitle{
       font-size:12px;
       font-weight:950;
-      color:#111827;
+      color:var(--ink);
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -847,12 +683,12 @@
       gap:8px;
     }
 
+    /* Drawer tiles match new card header style */
     .drawerTile{
-      height: 72px;
+      height:60px;
       display:flex;
-      align-items:flex-start;
-      gap:10px;
-      padding:12px 12px 12px 14px;
+      align-items:center;
+      padding:10px 12px 10px 14px;
       cursor:pointer;
       user-select:none;
       border-radius:14px;
@@ -866,28 +702,12 @@
     .drawerTile::before{
       content:"";
       position:absolute;
-      left:0;
-      top:0;
-      bottom:0;
+      left:0; top:0; bottom:0;
       width:8px;
       background: var(--own,#9aa4b2);
       opacity:0.95;
     }
     .drawerTile:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.55); }
-    .drawerTileMain{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; padding-left:4px; }
-    .drawerTileTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-    .drawerTileId{ font-size:10px; font-weight:980; color:var(--dhl-red); }
-    .drawerTileName{
-      font-size:12.5px;
-      font-weight:950;
-      line-height:1.2;
-      margin:0;
-      color:#111827;
-      display:-webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow:hidden;
-    }
 
     /* Tooltip: black bg, yellow title */
     .tooltip{
@@ -1030,7 +850,7 @@
     .footerBar .left{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
     .footerBar .right{ white-space:nowrap; flex:0 0 auto; }
 
-    /* Deck content: L2 grid (fits screen width) */
+    /* Deck content: L2 grid */
     .deckL2Grid{
       display:grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -1065,7 +885,6 @@
       overflow:hidden;
       text-overflow:ellipsis;
       max-width: 100%;
-      color:#111827;
     }
     .l2OwnerPill{
       font-size:10px;
@@ -1078,7 +897,6 @@
       white-space:nowrap;
       flex:0 0 auto;
     }
-
     .l3Item{
       border-left: 3px solid rgba(16,24,40,0.18);
       background:#FBFCFE;
@@ -1117,7 +935,8 @@
       .search{ width: 320px; }
       .foundationGrid{ grid-template-columns: repeat(2, minmax(180px, 1fr)); }
       .deckL2Grid{ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-      .chainL1{ flex-basis: 260px; }
+      .stageGrid{ grid-template-columns: var(--lane-label-w) repeat(6, minmax(170px, 1fr)); }
+      .laneGrid, .gridLaneFixed{ grid-template-columns: repeat(6, minmax(170px, 1fr)); }
     }
     @media (max-width: 720px){
       :root{ --lane-label-w: 220px; }
@@ -1125,7 +944,6 @@
       .stepIcon{ display:none; }
       .foundationGrid{ grid-template-columns: 1fr; }
       .deckL2Grid{ grid-template-columns: 1fr; }
-      .chainL1{ flex-basis: 220px; }
     }
   </style>
 </head>
@@ -1199,12 +1017,12 @@
      * CUSTOMER JOURNEY (6 stages)
      ***********************/
     const STAGES = [
-      { no: 1, name: "Discover & Engage",              voice: "I explore DHL eCommerce services and evaluate options" },
-      { no: 2, name: "Offer, Contract & Setup",        voice: "I receive an offer, agree terms, and activate my account" },
-      { no: 3, name: "Book & Handover",                voice: "I create shipments and hand over parcels" },
-      { no: 4, name: "Network Transport & Processing", voice: "My shipment moves across the DHL network" },
-      { no: 5, name: "Last Mile Delivery",             voice: "My shipment is delivered to the final destination" },
-      { no: 6, name: "Post-Delivery & Settlement",     voice: "I reconcile invoices and resolve issues if needed" }
+      { no: 1, name: "Discover & Engage",     voice: "I explore DHL eCommerce services and delivery options" },
+      { no: 2, name: "Contract & Enable",     voice: "I qualify, agree terms, set up account, and enable shipping access" },
+      { no: 3, name: "Ship & Collect",        voice: "I create shipments and hand over parcels for pickup/drop-off" },
+      { no: 4, name: "Network Transit",       voice: "I track cross-border / hub transit (sorting, export, import, transfers)" },
+      { no: 5, name: "Last Mile Delivery",    voice: "I receive delivery (home/OOH) and confirm the outcome" },
+      { no: 6, name: "Post-Delivery & Settle",voice: "I pay, reconcile invoices, raise claims, or return if needed" }
     ];
 
     /***********************
@@ -1233,13 +1051,15 @@
         renderMode:"gridStory", defaultCollapsed:false, theme:"d2o"
       },
 
-      /* FIX: Resolution + Resources use unified CHAIN rendering (readable, no broken belts) */
-      {
-        key: "RESO", label: "Resolution", l0Codes: ["P2R"], laneCode: "P2R",
+      /* Resolution: L1-only horizontal belt */
+      { key: "RESO", label: "Resolution", l0Codes: ["P2R"], laneCode: "P2R",
         desc1:"Problem-to-Resolution", desc2:"Detect → Triage → Resolve → Recover",
         sub: "Issue Management",
-        renderMode:"chainSingle", defaultCollapsed:false
+        renderMode:"beltSingle", defaultCollapsed:false,
+        beltTitle: "Problem-to-Resolution"
       },
+
+      /* Resources: two L1-only belts */
       {
         key: "RSRC",
         label: "Resources",
@@ -1248,9 +1068,9 @@
         desc1:"Sourcing & People",
         desc2:"Source-to-Pay + Hire-to-Retire",
         sub: "Sourcing & HR",
-        renderMode:"chainGroup",
+        renderMode:"beltGroup",
         defaultCollapsed:false,
-        chains: [
+        belts: [
           { l0:"S2P", title:"Source-to-Pay (S2P)" },
           { l0:"H2R", title:"Hire-to-Retire (H2R)" }
         ]
@@ -1264,22 +1084,20 @@
       },
     ];
 
-    const STORY_MAX_PER_STAGE = 2;
-
     const FOUNDATION_LABELS = {
       "S2E": "Strategy & Execution",
       "GRC": "Governance, Risk & Compliance",
       "ITF": "IT Platform & Security",
-      "EA_PM": "Enterprise Architecture & Portfolio",
-      "DA": "Data & AI",
+      "EA_PM": "Enterprise Architecture & Performance Management",
+      "DA": "Data & AI Strategy",
       "I2P": "Innovation to Product",
-      "TRF": "Transformation",
+      "TRF": "Transformation & Capability Build",
       "R2R": "Record to Report"
     };
 
-    // Continuous rule: L2C_08 spans S3–S6 in new 6-step journey
+    /* Continuous rule */
     const SPAN_RULES = [
-      { match: { l0: "L2C", l1: "L2C_08" }, span: { from: 3, to: 6 } }
+      { match: { l0: "L2C", l1: "L2C_08" }, span: { from: 5, to: 6 } } // still shown as a continuous service, staged chip is informational
     ];
 
     /***********************
@@ -1325,7 +1143,7 @@
     }
 
     /***********************
-     * Ownership
+     * Ownership (legend + colors)
      ***********************/
     const OWNER_ORDER = [
       "Commercial & Sales","Operations","Finance","IT","Data","Enterprise Architecture","GRC","HR","Procurement","GMB / Leadership","Unassigned"
@@ -1379,38 +1197,54 @@
       const { id: l1Id, name: l1Name } = parseInfo(l1Node.name);
       const n = extractTrailingNumber(l1Id);
 
+      // 6-stage mapping:
+      // 1 Discover & Engage
+      // 2 Contract & Enable
+      // 3 Ship & Collect
+      // 4 Network Transit
+      // 5 Last Mile Delivery
+      // 6 Post-Delivery & Settle
+
       if(l0Id === "L2C"){
-        if(n === 1) return 1;         // marketing/lead
-        if(n === 2) return 2;         // lead qual
-        if(n === 3) return 2;         // quotation
-        if(n === 4) return 2;         // contract/customer onboarding
-        if(n === 5) return 3;         // order mgmt & SLA
-        if(n === 6) return 6;         // billing
-        if(n === 7) return 6;         // AR/collections
-        if(n === 8) return 6;         // customer service & claims (continuous will override)
-        return 2;
-      }
-      if(l0Id === "O2D"){
-        if([1,2,3].includes(n)) return 3;          // intake + pickup + origin ops => book/handover
-        if([4,5,6,7,8,9].includes(n)) return 4;    // export/transit/import/destination node => network transport & processing
-        if(n === 10) return 5;                     // last mile delivery
-        if(n === 11) return 6;                     // exceptions & re-delivery
-        if(n === 12) return 6;                     // returns
-        return 4;
-      }
-      if(l0Id === "D2O"){
-        if([1,2,3].includes(n)) return 2;          // setup/operating model
-        if([4,5].includes(n)) return 4;            // automation/tech/resources model -> enable network
-        if([6].includes(n)) return 4;              // performance & cost
-        if([7,8].includes(n)) return 6;            // standardization/continuous improvement
+        if(n === 1) return 1; // Marketing & Lead
+        if(n === 2) return 2; // Qualification/Credit
+        if(n === 3) return 1; // Opportunity/Quotation
+        if(n === 4) return 2; // Contract & Onboarding
+        if(n === 5) return 3; // Order Mgmt & SLA
+        if(n === 6) return 6; // Billing & Invoicing
+        if(n === 7) return 6; // AR & Collections
+        if(n === 8) return 6; // Customer Service & Claims
         return 2;
       }
 
+      if(l0Id === "O2D"){
+        // collapse export/import/sorting/transfers into stage 4 (Network Transit)
+        if(n === 1 || n === 2 || n === 3) return 3; // intake/release + pickup + first-mile
+        if(n === 4 || n === 5 || n === 6) return 4; // export gateway + customs + linehaul etc
+        if(n === 7 || n === 8 || n === 9 || n === 10 || n === 11) return 4; // import + hubs
+        if(n === 12) return 6; // returns/reverse -> post-delivery
+        return 4;
+      }
+
+      if(l0Id === "D2O"){
+        // Keep design mostly enabling stages 2–4 and improvement 6
+        if(n === 1 || n === 2) return 2; // network/product design enabling contract & enable
+        if(n === 3) return 2;            // process/operating model
+        if(n === 4 || n === 5) return 3; // automation/resource models enabling ship/collect
+        if(n === 6) return 4;            // performance & cost model for network transit
+        if(n === 7) return 4;            // standardization global templates
+        if(n === 8) return 6;            // continuous improvement
+        return 2;
+      }
+
+      // Fallback heuristics
       const nm = (l1Name || "").toLowerCase();
-      if(nm.includes("strategy") || nm.includes("governance")) return 1;
-      if(nm.includes("architecture") || nm.includes("portfolio")) return 2;
-      if(nm.includes("platform") || nm.includes("integration") || nm.includes("data")) return 2;
-      if(nm.includes("security") || nm.includes("risk") || nm.includes("compliance")) return 1;
+      if(nm.includes("market") || nm.includes("lead")) return 1;
+      if(nm.includes("contract") || nm.includes("account") || nm.includes("onboard")) return 2;
+      if(nm.includes("pickup") || nm.includes("book") || nm.includes("ship")) return 3;
+      if(nm.includes("sort") || nm.includes("transit") || nm.includes("export") || nm.includes("import") || nm.includes("gateway")) return 4;
+      if(nm.includes("last mile") || nm.includes("delivery")) return 5;
+      if(nm.includes("billing") || nm.includes("invoice") || nm.includes("claim") || nm.includes("return")) return 6;
       return 2;
     }
 
@@ -1475,7 +1309,10 @@
       document.querySelectorAll(".stepIcon").forEach(el=>{
         const step = el.getAttribute("data-step");
         const img = new Image();
-        img.onload = () => { el.innerHTML = ""; el.appendChild(img); };
+        img.onload = () => {
+          el.innerHTML = "";
+          el.appendChild(img);
+        };
         img.onerror = () => {};
         img.src = `${base}/step-${step}.png`;
       });
@@ -1598,8 +1435,8 @@
     deckHandle.addEventListener("click", () => setDeckOpen(!deck.classList.contains("open")));
 
     function highlightActiveTile(l0Id, l1Id){
-      document.querySelectorAll(".tile, .chainTile").forEach(t => t.classList.remove("active"));
-      document.querySelectorAll(`[data-l0="${CSS.escape(l0Id)}"][data-l1="${CSS.escape(l1Id)}"]`).forEach(t => t.classList.add("active"));
+      document.querySelectorAll(".tile").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(`.tile[data-l0="${CSS.escape(l0Id)}"][data-l1="${CSS.escape(l1Id)}"]`).forEach(t => t.classList.add("active"));
     }
 
     function cssSafeId(s){
@@ -1629,7 +1466,7 @@
       deckBody.innerHTML = `
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;">
           <div style="min-width:280px;flex:1 1 520px;">
-            <p style="font-size:16px;font-weight:980;margin:0 0 4px 0;line-height:1.15;color:#111827;">${esc(l1Info.id)} · ${esc(l1Info.name)}</p>
+            <p style="font-size:16px;font-weight:980;margin:0 0 4px 0;line-height:1.15;">${esc(l1Info.id)} · ${esc(l1Info.name)}</p>
             <p style="margin:0;font-size:12px;color:var(--muted);font-weight:750;line-height:1.4;max-width:1100px;">${esc(desc || "No description available.")}</p>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex:0 0 auto;">
@@ -1704,9 +1541,13 @@
     }
 
     /***********************
-     * Tiles + hover tooltip
+     * Tiles (new header layout)
      ***********************/
-    function bindHover(el, item, cat, chip){
+    function wireTooltipHandlers(el, item){
+      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
+      const cat = ownerCategory(ownerRaw);
+      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+
       el.addEventListener("mouseenter", (e) => {
         if(ttTimer) clearTimeout(ttTimer);
         const { l2, l3 } = countL2L3(item.l1Node);
@@ -1743,29 +1584,20 @@
       });
     }
 
-    function buildTile(item, { showStageChip=false, showOwner=false } = {}){
+    function buildTile(item, { belt=false } = {}){
       const tile = document.createElement("div");
-      tile.className = "tile";
+      tile.className = "tile" + (belt ? " beltTile" : "");
       tile.dataset.l0 = item.l0Id;
       tile.dataset.l1 = item.l1Id;
 
       const ownerRaw = item.owner || item.l0Owner || "Unassigned";
       const cat = ownerCategory(ownerRaw);
-      const ownColor = categoryColor(cat);
-      tile.style.setProperty("--own", ownColor);
-
-      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+      tile.style.setProperty("--own", categoryColor(cat));
 
       tile.innerHTML = `
-        <div class="tileMain">
-          <div class="tileTop">
-            ${showStageChip ? `<span class="tileStageChip">${esc(chip)}</span>` : ``}
-          </div>
-          <p class="tileName" title="${esc(item.l1Id)} · ${esc(item.l1Name)}">
-            <span class="tileIdInline">${esc(item.l1Id)}</span>
-            <span class="tileTitleInline">${esc(item.l1Name)}</span>
-          </p>
-          ${showOwner ? `<div class="tileMeta">Owner: ${esc(cat)}</div>` : ``}
+        <div class="tileHeader">
+          <span class="tileIdInline">${esc(item.l1Id)}</span>
+          <span class="tileTitleInline" title="${esc(item.l1Name)}">${esc(item.l1Name)}</span>
         </div>
       `;
 
@@ -1776,7 +1608,7 @@
         hideTooltip();
       });
 
-      bindHover(tile, item, cat, chip);
+      wireTooltipHandlers(tile, item);
       return tile;
     }
 
@@ -1786,21 +1618,12 @@
 
       const ownerRaw = item.owner || item.l0Owner || "Unassigned";
       const cat = ownerCategory(ownerRaw);
-      const ownColor = categoryColor(cat);
-      tile.style.setProperty("--own", ownColor);
-
-      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+      tile.style.setProperty("--own", categoryColor(cat));
 
       tile.innerHTML = `
-        <div class="drawerTileMain">
-          <div class="drawerTileTop">
-            <div style="min-width:0;">
-              <div class="drawerTileId">${esc(item.l1Id)}</div>
-              <p class="drawerTileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</p>
-            </div>
-            <span class="tileStageChip">${esc(chip)}</span>
-          </div>
-          <div class="tileMeta">Owner: ${esc(cat)}</div>
+        <div class="tileHeader" style="padding-left:4px;">
+          <span class="tileIdInline">${esc(item.l1Id)}</span>
+          <span class="tileTitleInline" title="${esc(item.l1Name)}">${esc(item.l1Name)}</span>
         </div>
       `;
 
@@ -1811,11 +1634,10 @@
         hideTooltip();
       });
 
-      bindHover(tile, item, cat, chip);
+      wireTooltipHandlers(tile, item);
       return tile;
     }
 
-    /* L2C_08 continuous tile (unchanged style, but ID+Title already inline) */
     function buildContinuousTile(item){
       const tile = document.createElement("div");
       tile.className = "tile continuous";
@@ -1824,26 +1646,19 @@
 
       const ownerRaw = item.owner || item.l0Owner || "Unassigned";
       const cat = ownerCategory(ownerRaw);
-      const ownColor = categoryColor(cat);
-      tile.style.setProperty("--own", ownColor);
-
-      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+      tile.style.setProperty("--own", categoryColor(cat));
 
       const l2Nodes = safeChildren(item.l1Node);
       const l2Infos = l2Nodes.map(n => parseInfo(n.name)).filter(x => x.id);
-
       const shown = l2Infos.slice(0, 10);
       const hidden = l2Infos.slice(10);
 
       tile.innerHTML = `
-        <div class="tileMain">
-          <div class="tileTop">
-            <span class="tileStageChip">${esc(chip)}</span>
-          </div>
-          <p class="tileName" title="${esc(item.l1Id)} · ${esc(item.l1Name)}">
+        <div class="continuousBody">
+          <div class="tileHeader">
             <span class="tileIdInline">${esc(item.l1Id)}</span>
-            <span class="tileTitleInline">${esc(item.l1Name)}</span>
-          </p>
+            <span class="tileTitleInline" title="${esc(item.l1Name)}">${esc(item.l1Name)}</span>
+          </div>
           <div class="l2MicroRow"></div>
         </div>
       `;
@@ -1875,17 +1690,20 @@
               title: "Hidden L2 items",
               countText: `${hidden.length} items`,
               items: hidden.map(h => ({
-                l0Id: item.l0Id, l0Owner: item.l0Owner,
-                l1Id: item.l1Id, l1Name: item.l1Name, l1Node: item.l1Node,
-                owner: item.owner, __focusL2: h.id
+                l0Id: item.l0Id,
+                l0Owner: item.l0Owner,
+                l1Id: item.l1Id,
+                l1Name: item.l1Name,
+                l1Node: item.l1Node,
+                owner: item.owner,
+                __focusL2: h.id
               }))
             }]
           });
 
           requestAnimationFrame(() => {
-            const tiles = drawerBody.querySelectorAll(".drawerTile");
-            tiles.forEach((t, idx) => {
-              const focus = hidden[idx]?.id;
+            drawerBody.querySelectorAll(".drawerTile").forEach((t, idx) => {
+              const focus = (hidden[idx] && hidden[idx].id) ? hidden[idx].id : null;
               if(!focus) return;
               t.addEventListener("click", (ev) => {
                 ev.preventDefault();
@@ -1907,112 +1725,8 @@
         hideTooltip();
       });
 
-      bindHover(tile, item, cat, chip);
+      wireTooltipHandlers(tile, item);
       return tile;
-    }
-
-    /* NEW: chain tile (P2R, S2P, H2R) with L2 micro chain on same row */
-    function buildChainTile(item){
-      const el = document.createElement("div");
-      el.className = "chainTile";
-      el.dataset.l0 = item.l0Id;
-      el.dataset.l1 = item.l1Id;
-
-      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
-      const cat = ownerCategory(ownerRaw);
-      const ownColor = categoryColor(cat);
-      el.style.setProperty("--own", ownColor);
-
-      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
-
-      el.innerHTML = `
-        <div class="chainL1">
-          <div class="chainL1Line" title="${esc(item.l1Id)} · ${esc(item.l1Name)}">
-            <span class="chainId">${esc(item.l1Id)}</span>
-            <span class="chainTitle">${esc(item.l1Name)}</span>
-          </div>
-        </div>
-
-        <div class="chainMicroWrap">
-          <div class="chainMicroRow"></div>
-          <span class="chainStage">${esc(chip)}</span>
-        </div>
-      `;
-
-      const row = el.querySelector(".chainMicroRow");
-      const l2Nodes = safeChildren(item.l1Node);
-      const l2Infos = l2Nodes.map(n => parseInfo(n.name)).filter(x => x.id);
-
-      if(!l2Infos.length){
-        const empty = document.createElement("div");
-        empty.className = "chainMicroEmpty";
-        empty.textContent = "No L2";
-        row.appendChild(empty);
-      } else {
-        const shown = l2Infos.slice(0, 12);
-        const hidden = l2Infos.slice(12);
-
-        shown.forEach(l2 => {
-          const m = document.createElement("div");
-          m.className = "chainMicro";
-          m.title = `${l2.id} · ${l2.name}`;
-          m.textContent = `${l2.id}: ${l2.name}`;
-          m.addEventListener("click", (e) => {
-            e.stopPropagation();
-            selectL1(item.l0Id, item.l1Node, l2.id);
-            highlightActiveTile(item.l0Id, item.l1Id);
-          });
-          row.appendChild(m);
-        });
-
-        if(hidden.length){
-          const more = document.createElement("div");
-          more.className = "chainMicro";
-          more.textContent = `+${hidden.length} more`;
-          more.addEventListener("click", (e) => {
-            e.stopPropagation();
-            openDrawer({
-              title: `${item.l1Id} · L2 overflow`,
-              subtitle: `Select an L2 to open the deck scrolled to that section.`,
-              sections: [{
-                title: "Hidden L2 items",
-                countText: `${hidden.length} items`,
-                items: hidden.map(h => ({
-                  l0Id: item.l0Id, l0Owner: item.l0Owner,
-                  l1Id: item.l1Id, l1Name: item.l1Name, l1Node: item.l1Node,
-                  owner: item.owner, __focusL2: h.id
-                }))
-              }]
-            });
-
-            requestAnimationFrame(() => {
-              const tiles = drawerBody.querySelectorAll(".drawerTile");
-              tiles.forEach((t, idx) => {
-                const focus = hidden[idx]?.id;
-                if(!focus) return;
-                t.addEventListener("click", (ev) => {
-                  ev.preventDefault();
-                  ev.stopPropagation();
-                  closeDrawer();
-                  selectL1(item.l0Id, item.l1Node, focus);
-                  highlightActiveTile(item.l0Id, item.l1Id);
-                }, { once:true });
-              });
-            });
-          });
-          row.appendChild(more);
-        }
-      }
-
-      el.addEventListener("click", () => {
-        selectL1(item.l0Id, item.l1Node);
-        highlightActiveTile(item.l0Id, item.l1Id);
-        closeDrawer();
-        hideTooltip();
-      });
-
-      bindHover(el, item, cat, chip);
-      return el;
     }
 
     /***********************
@@ -2030,6 +1744,8 @@
         row.className = "laneRow";
         row.dataset.laneKey = lane.key;
         if(laneCollapsed[lane.key]) row.classList.add("collapsed");
+
+        const isBeltLane = (lane.renderMode === "beltSingle" || lane.renderMode === "beltGroup");
 
         const label = document.createElement("div");
         label.className = "laneLabel";
@@ -2050,6 +1766,10 @@
             <button class="btn" data-action="toggle" data-lane="${esc(lane.key)}">
               ${laneCollapsed[lane.key] ? "Expand" : "Collapse"}
             </button>
+            ${isBeltLane ? `
+              <button class="btn" data-action="home" data-lane="${esc(lane.key)}">⟸ Start</button>
+              <button class="btn" data-action="end" data-lane="${esc(lane.key)}">End ⟹</button>
+            ` : ""}
           </div>
         `;
 
@@ -2074,14 +1794,7 @@
             const cat = ownerCategory(ownerRaw);
             OWNER_COUNTS.set(cat, (OWNER_COUNTS.get(cat) || 0) + 1);
 
-            const it = {
-              l0Id: l0Code,
-              l0Owner,
-              l1Id: i1.id,
-              l1Name: i1.name,
-              l1Node: l1,
-              owner: ownerRaw
-            };
+            const it = { l0Id:l0Code, l0Owner, l1Id:i1.id, l1Name:i1.name, l1Node:l1, owner:ownerRaw };
             list.push(it);
             allItems.push(it);
           }
@@ -2099,10 +1812,10 @@
           } else {
             if(lane.renderMode === "gridStory"){
               renderGridStoryLane(content, lane, allItems);
-            } else if(lane.renderMode === "chainSingle"){
-              renderChainSingle(content, lane, allItems);
-            } else if(lane.renderMode === "chainGroup"){
-              renderChainGroup(content, lane, itemsByL0);
+            } else if(lane.renderMode === "beltSingle"){
+              renderSingleBelt(content, lane, allItems, lane.beltTitle || "Processes");
+            } else if(lane.renderMode === "beltGroup"){
+              renderBeltGroup(content, lane, itemsByL0);
             } else if(lane.renderMode === "foundationCollapsed"){
               renderFoundationCollapsed(content, lane, itemsByL0);
             }
@@ -2114,71 +1827,36 @@
         body.appendChild(row);
       }
 
+      // Controls for belts
       body.querySelectorAll(".btn[data-action]").forEach(btn => {
         btn.addEventListener("click", (e) => {
           e.stopPropagation();
           const action = btn.dataset.action;
           const laneKey = btn.dataset.lane;
+
           if(action === "toggle"){
             laneCollapsed[laneKey] = !laneCollapsed[laneKey];
             renderMap();
+            return;
           }
+
+          const belts = Array.from(body.querySelectorAll(`.belt[data-belt-lane="${CSS.escape(laneKey)}"], .belt[data-belt-group="${CSS.escape(laneKey)}"]`));
+          if(!belts.length) return;
+
+          belts.forEach(b => {
+            b.style.scrollBehavior = "smooth";
+            if(action === "home") b.scrollTo({ left: 0, behavior: "smooth" });
+            if(action === "end")  b.scrollTo({ left: b.scrollWidth, behavior: "smooth" });
+          });
         });
       });
 
       renderOwnerLegendFooter();
     }
 
-    function renderChainSingle(content, lane, allItems){
-      const group = document.createElement("div");
-      group.className = "chainGroup";
-
-      const section = document.createElement("div");
-      section.className = "chainSection";
-
-      const head = document.createElement("div");
-      head.className = "chainSectionHead";
-      head.innerHTML = `<div class="chainSectionTitle">${esc(lane.desc1 || lane.label)}</div>`;
-
-      const list = document.createElement("div");
-      list.className = "chainList";
-
-      allItems.forEach(it => list.appendChild(buildChainTile(it)));
-
-      section.appendChild(head);
-      section.appendChild(list);
-      group.appendChild(section);
-
-      content.appendChild(group);
-    }
-
-    function renderChainGroup(content, lane, itemsByL0){
-      const group = document.createElement("div");
-      group.className = "chainGroup";
-
-      for(const c of (lane.chains || [])){
-        const listItems = itemsByL0.get(c.l0) || [];
-        if(!listItems.length) continue;
-
-        const section = document.createElement("div");
-        section.className = "chainSection";
-
-        const head = document.createElement("div");
-        head.className = "chainSectionHead";
-        head.innerHTML = `<div class="chainSectionTitle">${esc(c.title)}</div>`;
-
-        const list = document.createElement("div");
-        list.className = "chainList";
-        listItems.forEach(it => list.appendChild(buildChainTile(it)));
-
-        section.appendChild(head);
-        section.appendChild(list);
-        group.appendChild(section);
-      }
-
-      content.appendChild(group);
-    }
-
+    /***********************
+     * Story lanes: 3 visible, vertical scroll inside each stage column
+     ***********************/
     function renderGridStoryLane(content, lane, allItems){
       const perStage = Array.from({length:6}, () => []);
       const continuous = [];
@@ -2197,46 +1875,29 @@
       const wrapper = document.createElement("div");
       wrapper.className = "gridLaneFixed";
 
-      perStage.forEach((list, i) => {
+      perStage.forEach((list) => {
         const col = document.createElement("div");
         col.className = "stageCol";
 
-        const shown = list.slice(0, STORY_MAX_PER_STAGE);
-        const hidden = list.slice(STORY_MAX_PER_STAGE);
+        // Put ALL items in the column; the column scroll will show 3 then scroll.
+        list.forEach(it => col.appendChild(buildTile(it, { belt:false })));
 
-        shown.forEach(it => col.appendChild(buildTile(it, { showStageChip:false, showOwner:false })));
-
-        for(let k=shown.length; k<STORY_MAX_PER_STAGE; k++){
+        // If empty, show a subtle placeholder
+        if(!list.length){
           const spacer = document.createElement("div");
-          spacer.style.height = "56px";
+          spacer.style.height = "48px";
           spacer.style.borderRadius = "14px";
           spacer.style.border = "1px dashed rgba(16,24,40,0.10)";
           spacer.style.background = "rgba(255,255,255,0.55)";
           col.appendChild(spacer);
         }
 
-        const chip = document.createElement("div");
-        chip.className = "moreChip";
-        chip.textContent = `+${hidden.length}`;
-        if(hidden.length) chip.classList.add("show");
-        chip.addEventListener("click", () => {
-          openDrawer({
-            title: `${lane.label} · Stage ${i+1} Overflow`,
-            subtitle: `Stage: ${STAGES[i].name} · Select a process to open details.`,
-            sections: [{
-              title: `Stage ${i+1} — ${STAGES[i].name}`,
-              countText: `${hidden.length} hidden`,
-              items: hidden
-            }]
-          });
-        });
-
-        col.appendChild(chip);
         wrapper.appendChild(col);
       });
 
       content.appendChild(wrapper);
 
+      // Continuous row
       if(continuous.length){
         const contRow = document.createElement("div");
         contRow.className = "continuousRow";
@@ -2246,23 +1907,22 @@
         lab.textContent = "Continuous";
         contRow.appendChild(lab);
 
+        // Show only one continuous tile (as before), rest via drawer
         const first = continuous[0];
         contRow.appendChild(buildContinuousTile(first));
 
         const rest = continuous.slice(1);
         if(rest.length){
           const more = document.createElement("div");
-          more.className = "moreChip show";
-          more.style.position = "static";
-          more.style.transform = "none";
+          more.className = "l2Micro";
           more.textContent = `+${rest.length} more`;
           more.addEventListener("click", () => {
             openDrawer({
               title: `${lane.label} · Continuous Services`,
               subtitle: `Select a continuous process to open details.`,
               sections: [{
-                title: "Continuous overflow",
-                countText: `${rest.length} hidden`,
+                title: "Continuous services",
+                countText: `${rest.length} items`,
                 items: rest
               }]
             });
@@ -2274,6 +1934,60 @@
       }
     }
 
+    /***********************
+     * Belt lanes: L1-only horizontal
+     ***********************/
+    function renderSingleBelt(content, lane, allItems, title){
+      const wrap = document.createElement("div");
+      wrap.className = "beltWrap";
+
+      const hint = document.createElement("div");
+      hint.className = "beltHint";
+      hint.textContent = title;
+
+      const belt = document.createElement("div");
+      belt.className = "belt";
+      belt.dataset.beltLane = lane.key;
+
+      allItems.forEach(it => belt.appendChild(buildTile(it, { belt:true })));
+
+      wrap.appendChild(hint);
+      wrap.appendChild(belt);
+      content.appendChild(wrap);
+    }
+
+    function renderBeltGroup(content, lane, itemsByL0){
+      const group = document.createElement("div");
+      group.className = "beltGroup";
+
+      for(const b of (lane.belts || [])){
+        const list = itemsByL0.get(b.l0) || [];
+        if(!list.length) continue;
+
+        const wrap = document.createElement("div");
+        wrap.className = "beltWrap";
+
+        const hint = document.createElement("div");
+        hint.className = "beltHint";
+        hint.textContent = b.title;
+
+        const belt = document.createElement("div");
+        belt.className = "belt";
+        belt.dataset.beltGroup = lane.key;
+
+        list.forEach(it => belt.appendChild(buildTile(it, { belt:true })));
+
+        wrap.appendChild(hint);
+        wrap.appendChild(belt);
+        group.appendChild(wrap);
+      }
+
+      content.appendChild(group);
+    }
+
+    /***********************
+     * Foundation collapsed (chips -> drawer)
+     ***********************/
     function renderFoundationCollapsed(content, lane, itemsByL0){
       const grid = document.createElement("div");
       grid.className = "foundationGrid";
@@ -2320,9 +2034,8 @@
       if(e.key !== "Enter") return;
       const q = searchInput.value.trim().toLowerCase();
       if(!q) return;
-
-      const hits = Array.from(document.querySelectorAll("[data-l1]"));
-      const hit = hits.find(t => (t.getAttribute("data-l1") || "").toLowerCase().includes(q));
+      const tiles = Array.from(document.querySelectorAll(".tile"));
+      const hit = tiles.find(t => (t.dataset.l1 || "").toLowerCase().includes(q));
       if(hit){
         hit.scrollIntoView({ behavior:"smooth", block:"center" });
         hit.click();
