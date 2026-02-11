@@ -1,536 +1,2363 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>DHL eCommerce · Value Chain Blueprint</title>
-  <link href="https://fonts.googleapis.com/css2?family=Delivery:wght@400;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DHL eCommerce · Customer Journey Map</title>
 
   <style>
-    /* =========================
-       DHL THEME VARIABLES
-       ========================= */
-    :root {
-      --dhl-red: #D40511;
-      --dhl-yellow: #FFCC00;
-      --dhl-black: #101828;
-      
-      --bg: #F2F4F7;
-      --surface: #FFFFFF;
-      --border: #E4E7EC;
-      
-      --head-h: 64px;
-      --lane-w: 240px;
-      --col-min: 200px;
-      
-      /* Bottom Deck Height */
-      --deck-h: 340px;
+    :root{
+      --dhl-red:#D40511;
+      --dhl-yellow:#FFCC00;
+
+      --ink:#101828;
+      --muted:#667085;
+      --bg:#F5F7FA;
+      --panel:#FFFFFF;
+      --line:rgba(16,24,40,0.12);
+
+      --header-h:56px;
+
+      /* footer + deck */
+      --legend-h:40px;
+      --footer-h:30px;
+      --deck-collapsed-h: calc(48px + var(--legend-h) + var(--footer-h));
+      --deck-expanded-h: min(60vh, 720px);
+
+      --lane-label-w:300px;
+
+      --tile-h:60px;
+      --tile-min-w:220px;
+
+      --shadow: 0 10px 26px rgba(16,24,40,0.10);
+      --shadow-2: 0 18px 44px rgba(16,24,40,0.14);
+
+      --radius:14px;
+
+      --tooltipW: 460px;
+
+      /* ZERO-SCROLL initial view for story lanes */
+      --gridLaneRows: 2;
+      --gridLaneRowH: 60px;
+      --gridLaneH: calc(var(--gridLaneRows) * var(--gridLaneRowH) + 26px);
+
+      /* Lane theme tints */
+      --tint-l2c: rgba(212, 5, 17, 0.06);
+      --tint-o2d: rgba(255, 204, 0, 0.18);
+      --tint-d2o: rgba(164, 224, 176, 0.22);
+
+      /* Ownership fixed palette */
+      --own-commercial: #D40511; /* Sales/Commercial */
+      --own-ops:       #FFCC00; /* Operations */
+      --own-finance:   #5B4B8A; /* Finance purple */
+      --own-it:        #2457A7; /* IT */
+      --own-data:      #00A3C7; /* Data */
+      --own-ea:        #2F3A5A; /* Enterprise Architecture */
+      --own-grc:       #2B2B2B; /* GRC */
+      --own-hr:        #2E8B57; /* HR */
+      --own-proc:      #6B8E23; /* Procurement */
+      --own-gmb:       #111827; /* Leadership */
+      --own-unassigned:#9AA4B2; /* Unknown */
     }
 
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--dhl-black);
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      color:var(--ink);
+      background:var(--bg);
+      overflow:hidden;
     }
 
-    /* =========================
-       HEADER
-       ========================= */
-    header {
-      height: var(--head-h);
-      background: var(--dhl-red);
-      color: white;
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
-      justify-content: space-between;
-      flex-shrink: 0;
-      z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    .brand { font-family: 'Delivery', sans-serif; font-weight: 900; font-size: 22px; display: flex; align-items: center; gap: 12px; }
-    .brand span { background: var(--dhl-yellow); color: var(--dhl-red); padding: 2px 8px; border-radius: 4px; font-size: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-    
-    .legend { display: flex; gap: 20px; font-size: 11px; font-weight: 600; }
-    .legend-item { display: flex; align-items: center; gap: 6px; color: white; }
-    .dot { width: 10px; height: 10px; border-radius: 2px; background: white; }
+    .app{ height:100%; display:flex; flex-direction:column; }
 
-    /* =========================
-       MAIN GRID (TOP HALF)
-       ========================= */
-    .grid-wrapper {
-      flex: 1;
-      overflow: auto;
-      display: grid;
-      /* Lane Header + 7 Stages */
-      grid-template-columns: var(--lane-w) repeat(7, minmax(var(--col-min), 1fr)); 
-      /* Explicit Rows */
-      grid-template-rows: auto auto auto auto auto auto auto auto;
-      background: var(--bg);
-      padding-bottom: var(--deck-h); 
+    .topbar{
+      height:var(--header-h);
+      background:var(--dhl-red);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 18px;
+      gap:12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+      z-index:50;
+      flex:0 0 auto;
+    }
+    .topbar .title{
+      font-weight:900;
+      letter-spacing:0.2px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      white-space:nowrap;
+      min-width:0;
     }
 
-    /* Sticky Corner */
-    .corner-plate {
-      position: sticky; top: 0; left: 0; z-index: 60;
-      background: var(--surface); 
-      border-right: 1px solid var(--border);
-      border-bottom: 4px solid var(--dhl-red);
-      display: flex; align-items: center; justify-content: center;
-      padding: 10px; grid-row: 1; grid-column: 1;
-    }
-    .cp-title { font-weight: 900; font-size: 13px; color: var(--dhl-red); text-transform: uppercase; text-align: center; }
+    .right{ display:flex; align-items:center; gap:10px; min-width:0; }
 
-    /* Stage Headers */
-    .stage-head {
-      position: sticky; top: 0; z-index: 50;
-      background: var(--surface); 
-      border-right: 1px solid var(--border);
-      border-bottom: 4px solid var(--dhl-red);
-      padding: 12px 16px; display: flex; flex-direction: column; gap: 4px;
-      grid-row: 1;
+    .search{ position:relative; width: 420px; max-width: 42vw; min-width: 260px; }
+    .search input{
+      width:100%;
+      height:36px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.25);
+      outline:none;
+      padding:0 12px;
+      font-size:12px;
+      font-weight:750;
+      background: rgba(255,255,255,0.12);
+      color:#fff;
     }
-    .stage-voice { font-family: 'Delivery', sans-serif; font-size: 13px; font-weight: 900; color: var(--dhl-black); font-style: italic; }
-    .stage-meta { font-size: 10px; font-weight: 700; color: #94A3B8; text-transform: uppercase; }
-
-    /* Lane Labels */
-    .lane-label {
-      position: sticky; left: 0; z-index: 40;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 20px; display: flex; flex-direction: column; justify-content: center;
-    }
-    .lane-title { font-size: 14px; font-weight: 800; color: var(--dhl-black); margin-bottom: 4px; }
-    .lane-desc { font-size: 10px; color: #64748B; line-height: 1.3; }
-    
-    /* Row Backgrounds */
-    .lane-comm { border-left: 6px solid var(--dhl-yellow); background:#FFFBEB; }
-    .lane-ops { border-left: 6px solid var(--dhl-red); background:#FEF2F2; }
-    .lane-cont { border-left: 6px solid #2563EB; background:#EFF6FF; }
-    .lane-found { border-left: 6px solid #475569; background:#F8FAFC; }
-
-    /* Cells */
-    .cell {
-      border-right: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 10px; display: flex; flex-direction: column; gap: 8px;
-      min-height: 140px; background: white;
-    }
-    .cell-cont { background: #EFF6FF; min-height: 80px; justify-content: center; }
-    .cell-found { background: #F8FAFC; }
-
-    /* =========================
-       PROCESS TILES (CHEVRON STYLE)
-       ========================= */
-    .tile {
-      background: white;
-      border: 1px solid #CBD5E1;
-      border-left: 4px solid #ccc;
-      /* Chevron Shape */
-      clip-path: polygon(0% 0%, 95% 0%, 100% 50%, 95% 100%, 0% 100%);
-      padding: 8px 16px 8px 10px; 
-      cursor: pointer;
-      position: relative;
-      transition: all 0.15s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      margin-right: -5px; /* Overlap flow */
-    }
-    .tile:hover {
-      transform: translateX(3px);
-      background: #FFF7ED;
-      border-color: var(--dhl-red);
-      z-index: 10;
-    }
-    
-    /* Spanning Tiles (Continuous) */
-    .tile-span {
-      height: 36px; display: flex; align-items: center; justify-content: center; gap: 10px;
-      background: white; border: 1px solid #93C5FD; border-left: 5px solid #2563EB;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.1);
-      width: 98%; margin: 0 auto;
-      /* Flat arrow */
-      clip-path: polygon(0% 0%, 98% 0%, 100% 50%, 98% 100%, 0% 100%);
-    }
-    .tile-span:hover { background: #EFF6FF; transform: scale(1.01); border-color: #2563EB; }
-    .tile-span .t-name { font-size: 11px; font-weight: 800; color: #1E40AF; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    /* Tile Content */
-    .t-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-    .t-id { font-size: 10px; font-weight: 800; color: #64748B; }
-    .t-name { font-size: 11px; font-weight: 700; color: #0F172A; line-height: 1.2; }
-
-    /* L0 Specific Colors */
-    .c-L2C { border-left-color: var(--dhl-yellow); }
-    .c-O2D { border-left-color: var(--dhl-red); }
-    .c-P2R { border-left-color: #F97316; }
-    .c-ITF { border-left-color: #7C3AED; }
-    .c-D2O { border-left-color: #475569; }
-
-    /* =========================
-       BOTTOM DECK (DETAIL VIEW)
-       ========================= */
-    #deck {
-      position: fixed; bottom: 0; left: 0; width: 100%; height: var(--deck-h);
-      background: white; border-top: 4px solid var(--dhl-red);
-      z-index: 200; box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
-      display: flex; flex-direction: column;
-      transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    #deck.open { transform: translateY(0); }
-
-    .deck-header {
-      padding: 10px 24px; background: #F8FAFC; border-bottom: 1px solid #E2E8F0;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .deck-title { font-size: 16px; font-weight: 800; color: var(--dhl-black); text-transform: uppercase; }
-    .deck-meta { font-size: 11px; color: #64748B; display: flex; gap: 16px; }
-    
-    .deck-body {
-      flex: 1; padding: 20px 24px; overflow-x: auto; 
-      display: flex; gap: 16px; align-items: flex-start;
-      background: #FFFFFF;
+    .search input::placeholder{ color: rgba(255,255,255,0.78); font-weight:700; }
+    .search input:focus{
+      box-shadow:0 0 0 3px rgba(255,204,0,0.35);
+      border-color: rgba(255,204,0,0.8);
     }
 
-    /* L2/L3 Cards */
-    .l2-col {
-      min-width: 240px; max-width: 260px;
-      background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px;
-      display: flex; flex-direction: column;
-      flex-shrink: 0;
-    }
-    .l2-head {
-      padding: 8px 10px; background: #FFF; border-bottom: 2px solid var(--dhl-yellow);
-      display: flex; justify-content: space-between; align-items: center;
-      border-radius: 6px 6px 0 0;
-    }
-    .l2-id { font-size: 9px; font-weight: 800; color: #94A3B8; }
-    .l2-name { font-size: 11px; font-weight: 700; color: #0F172A; }
+    .split{ position:relative; flex:1 1 auto; min-height:0; }
 
-    .l3-list { padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .l3-item {
-      font-size: 10px; padding: 4px 6px; background: white; border: 1px solid #E2E8F0; border-radius: 4px;
-      color: #334155; display: flex; flex-direction: column; gap: 2px;
+    .mapWrap{
+      position:absolute;
+      inset:0 0 var(--deck-collapsed-h) 0;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+      transition: inset 240ms ease;
     }
-    .l3-row { display: flex; justify-content: space-between; }
-    .l3-id { font-weight: 800; color: var(--dhl-red); font-size: 9px; }
+    .mapWrap.deckOpen{ inset:0 0 var(--deck-expanded-h) 0; }
 
-    .close-btn { 
-      background: #E2E8F0; border: none; padding: 6px 12px; border-radius: 4px; 
-      font-size: 11px; font-weight: 700; cursor: pointer; color: #475569;
+    .mapHeader{
+      background:var(--panel);
+      border-bottom:1px solid var(--line);
+      box-shadow: 0 4px 14px rgba(16,24,40,0.06);
+      z-index:20;
+      flex:0 0 auto;
     }
-    .close-btn:hover { background: #CBD5E1; color: #0F172A; }
 
-    .deck-empty { padding: 40px; text-align: center; color: #94A3B8; font-style: italic; width: 100%; }
+    /* 6 stages */
+    .stageGrid{
+      display:grid;
+      grid-template-columns: var(--lane-label-w) repeat(6, minmax(170px, 1fr));
+      align-items:stretch;
+      gap:0;
+    }
 
+    .stageCorner{
+      padding:10px 12px;
+      border-right:1px solid var(--line);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .stageCorner .hint{
+      font-size:11px;
+      font-weight:900;
+      color:var(--muted);
+      line-height:1.25;
+    }
+
+    .stageCell{
+      padding:10px 10px 12px 10px;
+      border-right:1px solid var(--line);
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      min-width:0;
+    }
+    .stageCell:last-child{ border-right:none; }
+
+    /* icon slot reserved */
+    .stepIcon{
+      width:40px;
+      height:40px;
+      border-radius:14px;
+      border:1px dashed rgba(16,24,40,0.18);
+      background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(247,248,251,0.85) 100%);
+      box-shadow: 0 10px 22px rgba(16,24,40,0.06);
+      flex: 0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:rgba(16,24,40,0.35);
+      font-weight:950;
+      font-size:11px;
+      user-select:none;
+      overflow:hidden;
+    }
+    .stepIcon img{ width:100%; height:100%; object-fit:cover; display:block; }
+
+    .stepTxt{ min-width:0; }
+    .stageNo{ font-size:11px; font-weight:950; color:var(--dhl-red); margin-bottom:4px; }
+    .stageName{ font-size:13px; font-weight:950; line-height:1.15; margin-bottom:6px; }
+    .stageVoice{ font-size:11px; font-weight:850; color:var(--muted); line-height:1.25; }
+
+    .mapBody{
+      flex:1 1 auto;
+      min-height:0;
+      overflow:auto;
+      padding:8px 0;
+    }
+
+    .laneRow{
+      display:grid;
+      grid-template-columns: var(--lane-label-w) 1fr;
+      gap:0;
+      align-items:stretch;
+      border-bottom:1px solid rgba(16,24,40,0.08);
+      background: rgba(255,255,255,0.35);
+    }
+
+    .laneLabel{
+      position:sticky;
+      left:0;
+      z-index:10;
+      background: linear-gradient(180deg, #fff 0%, #F6F8FC 100%);
+      border-right:1px solid var(--line);
+      padding:10px 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .laneLabelTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .laneTitle{
+      font-size:13px;
+      font-weight:950;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .laneCode{
+      font-size:11px;
+      font-weight:950;
+      color:var(--dhl-red);
+      background: rgba(212,5,17,0.08);
+      border:1px solid rgba(212,5,17,0.18);
+      border-radius:999px;
+      padding:3px 8px;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .laneDesc{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      line-height:1.25;
+    }
+    .laneDesc .line1{ font-size:11px; font-weight:950; color:var(--ink); }
+    .laneDesc .line2{ font-size:11px; font-weight:850; color:var(--muted); }
+    .laneSub{ font-size:11px; font-weight:800; color:var(--muted); line-height:1.25; }
+
+    .laneControls{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+    .btn{
+      height:28px;
+      border-radius:10px;
+      padding:0 10px;
+      border:1px solid rgba(16,24,40,0.14);
+      background:#fff;
+      color:#1f2937;
+      font-size:11px;
+      font-weight:900;
+      cursor:pointer;
+      user-select:none;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      white-space:nowrap;
+    }
+    .btn:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.6); }
+    .btn:active{ transform: translateY(1px); }
+
+    /* 6 stages */
+    .laneGrid{
+      display:grid;
+      grid-template-columns: repeat(6, minmax(170px, 1fr));
+      gap:10px;
+      padding:10px 10px 12px 10px;
+      align-content:start;
+      border-left: 6px solid transparent;
+      border-radius: 0 18px 18px 0;
+      min-width:0;
+    }
+
+    /* Lane themes */
+    .laneGrid.theme-l2c{ background: linear-gradient(180deg, var(--tint-l2c) 0%, rgba(255,255,255,0.45) 90%); border-left-color: rgba(212,5,17,0.22); }
+    .laneGrid.theme-o2d{ background: linear-gradient(180deg, var(--tint-o2d) 0%, rgba(255,255,255,0.45) 90%); border-left-color: rgba(255,204,0,0.55); }
+    .laneGrid.theme-d2o{ background: linear-gradient(180deg, var(--tint-d2o) 0%, rgba(255,255,255,0.45) 90%); border-left-color: rgba(120,190,140,0.55); }
+
+    /* Story wrapper (6 stages) */
+    .gridLaneFixed{
+      height: var(--gridLaneH);
+      overflow:hidden;
+      border-radius:14px;
+      grid-column: 1 / -1;
+      display:grid;
+      grid-template-columns: repeat(6, minmax(170px, 1fr));
+      gap:10px;
+      padding:2px 0 0 0;
+      min-width:0;
+    }
+    .stageCol{
+      position:relative;
+      height: calc(var(--gridLaneRows) * var(--gridLaneRowH));
+      padding:2px 0 2px 0;
+      display:grid;
+      grid-template-rows: repeat(var(--gridLaneRows), var(--gridLaneRowH));
+      gap:8px;
+      align-content:start;
+      min-width:0;
+    }
+
+    .moreChip{
+      position:absolute;
+      right:0;
+      bottom:-2px;
+      transform: translateY(100%);
+      height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      background:#fff;
+      border:1px dashed rgba(16,24,40,0.22);
+      font-size:11px;
+      font-weight:950;
+      color:var(--muted);
+      cursor:pointer;
+      display:none;
+      align-items:center;
+      gap:6px;
+      box-shadow: 0 8px 16px rgba(16,24,40,0.08);
+      white-space:nowrap;
+      user-select:none;
+    }
+    .moreChip.show{ display:inline-flex; }
+    .moreChip:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.7); color:#7a5a00; }
+
+    .continuousRow{
+      grid-column:1/-1;
+      display:flex;
+      gap:10px;
+      align-items:stretch;
+      padding:0 6px;
+      margin-top:8px;
+      min-width:0;
+    }
+    .continuousLabel{
+      font-size:11px;
+      font-weight:950;
+      color:var(--muted);
+      white-space:nowrap;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(16,24,40,0.12);
+      background:#fff;
+      flex:0 0 auto;
+      align-self:flex-start;
+      margin-top:4px;
+    }
+
+    /* FOUNDATION summary */
+    .foundationGrid{
+      grid-column: 1 / -1;
+      display:grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap:10px;
+      padding:10px;
+      border:1px solid rgba(16,24,40,0.10);
+      border-radius:14px;
+      background:#fff;
+      overflow:hidden;
+      min-width:0;
+    }
+    .foundationChip{
+      height:48px;
+      padding:0 10px;
+      border-radius:14px;
+      border:1px solid rgba(16,24,40,0.12);
+      background:#F7F8FB;
+      font-size:11px;
+      font-weight:950;
+      color:#1f2937;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      user-select:none;
+      box-shadow: 0 10px 20px rgba(16,24,40,0.05);
+      min-width:0;
+    }
+    .foundationChip:hover{
+      background:#FFF9E6;
+      border-color: rgba(255,204,0,0.55);
+    }
+    .foundationChip .left{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .foundationChip .code{
+      font-size:10px;
+      font-weight:980;
+      color:var(--dhl-red);
+      letter-spacing:0.2px;
+    }
+    .foundationChip .name{
+      font-size:11px;
+      font-weight:950;
+      color:#111827;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 260px;
+    }
+    .foundationChip .cnt{
+      font-size:11px;
+      font-weight:980;
+      color:var(--muted);
+      border:1px solid rgba(16,24,40,0.12);
+      background:#fff;
+      padding:4px 10px;
+      border-radius:999px;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    /* CARD (no pills). Use space: ID + Title on same row */
+    .tile{
+      height: var(--tile-h);
+      display:flex;
+      align-items:stretch;
+      gap:10px;
+      padding:10px 12px 10px 14px;
+      cursor:pointer;
+      user-select:none;
+      border-radius:14px;
+      background: #fff;
+      color:#111827;
+      border:1px solid rgba(16,24,40,0.12);
+      box-shadow: 0 10px 22px rgba(16,24,40,0.08);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      overflow:hidden;
+      position:relative;
+      min-width:0;
+    }
+    .tile::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:8px;
+      background: var(--own,#9aa4b2);
+      opacity:0.95;
+    }
+    .tile:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(16,24,40,0.12);
+    }
+    .tile.active{
+      border-color: rgba(255,204,0,0.85);
+      box-shadow: 0 0 0 3px rgba(255,204,0,0.55), 0 16px 32px rgba(16,24,40,0.14);
+    }
+    .tileMain{ flex: 1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; padding-left:4px; }
+    .tileTop{
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      gap:10px;
+      min-width:0;
+    }
+    .tileStageChip{
+      flex:0 0 auto;
+      font-size:10px;
+      font-weight:980;
+      color: #1f2937;
+      background: rgba(16,24,40,0.04);
+      border: 1px solid rgba(16,24,40,0.10);
+      padding:3px 7px;
+      border-radius:999px;
+      white-space:nowrap;
+      line-height:1.1;
+    }
+
+    .tileName{
+      margin:0;
+      line-height:1.2;
+      min-width:0;
+      display:flex;
+      gap:8px;
+      align-items:baseline;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    .tileIdInline{
+      font-size:11px;
+      font-weight:980;
+      color: var(--dhl-red);
+      flex:0 0 auto;
+      white-space:nowrap;
+    }
+    .tileTitleInline{
+      font-size:12.5px;
+      font-weight:950;
+      color:#111827;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      flex:1 1 auto;
+    }
+    .tileMeta{
+      font-size:10px;
+      font-weight:850;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    /* Context sizing */
+    .gridLaneFixed .tile{ width:100%; }
+
+    /* Continuous card (L1 + L2 micro chevrons) */
+    .tile.continuous{
+      height: auto;
+      min-height: 72px;
+      padding-bottom:12px;
+    }
+
+    .l2MicroRow{
+      display:flex;
+      flex-wrap:nowrap;
+      gap:6px;
+      margin-top:6px;
+      overflow-x:auto;
+      padding-bottom:2px;
+      scrollbar-width: thin;
+    }
+    .l2Micro{
+      font-size:10px;
+      font-weight:900;
+      color:#1f2937;
+      border:1px solid rgba(16,24,40,0.12);
+      background: rgba(255,255,255,0.92);
+      border-radius:999px;
+      padding:3px 8px;
+      max-width: 260px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      cursor:pointer;
+      user-select:none;
+      flex:0 0 auto;
+    }
+    .l2Micro:hover{
+      background:#FFF9E6;
+      border-color: rgba(255,204,0,0.65);
+      color:#7a5a00;
+    }
+    .l2Micro::after{
+      content:"";
+      display:inline-block;
+      margin-left:6px;
+      width:0;height:0;
+      border-top:4px solid transparent;
+      border-bottom:4px solid transparent;
+      border-left:6px solid rgba(16,24,40,0.45);
+      transform: translateY(1px);
+      opacity:0.55;
+    }
+
+    /* NEW: Chain lanes (P2R, S2P, H2R) - readable, horizontal micro chain in same row */
+    .chainGroup{
+      grid-column: 1 / -1;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+    .chainSection{
+      border:1px solid rgba(16,24,40,0.10);
+      border-radius:14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(247,248,251,0.88) 100%);
+      padding:10px;
+      min-width:0;
+    }
+    .chainSectionHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+      min-width:0;
+    }
+    .chainSectionTitle{
+      font-size:11px;
+      font-weight:950;
+      color:var(--muted);
+      white-space:nowrap;
+      border:1px solid rgba(16,24,40,0.12);
+      background:#fff;
+      border-radius:999px;
+      padding:6px 10px;
+      flex:0 0 auto;
+    }
+
+    .chainList{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-width:0;
+    }
+
+    .chainTile{
+      height:56px;
+      border-radius:14px;
+      border:1px solid rgba(16,24,40,0.12);
+      background:#fff;
+      box-shadow: 0 10px 22px rgba(16,24,40,0.08);
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:10px 12px 10px 14px;
+      position:relative;
+      overflow:hidden;
+      cursor:pointer;
+      user-select:none;
+      min-width:0;
+    }
+    .chainTile::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:8px;
+      background: var(--own,#9aa4b2);
+      opacity:0.95;
+    }
+    .chainTile:hover{
+      box-shadow: 0 14px 28px rgba(16,24,40,0.12);
+      transform: translateY(-1px);
+    }
+
+    .chainL1{
+      flex:0 0 320px;
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      padding-left:4px;
+    }
+    .chainL1Line{
+      display:flex;
+      gap:8px;
+      align-items:baseline;
+      min-width:0;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+    }
+    .chainId{
+      font-size:11px;
+      font-weight:980;
+      color:var(--dhl-red);
+      flex:0 0 auto;
+      white-space:nowrap;
+    }
+    .chainTitle{
+      font-size:12.5px;
+      font-weight:950;
+      color:#111827;
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      flex:1 1 auto;
+    }
+
+    .chainMicroWrap{
+      flex:1 1 auto;
+      min-width:0;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .chainMicroRow{
+      flex:1 1 auto;
+      min-width:0;
+      display:flex;
+      gap:6px;
+      align-items:center;
+      overflow-x:auto;
+      overflow-y:hidden;
+      padding-bottom:2px;
+      scrollbar-width: thin;
+    }
+    .chainMicro{
+      font-size:10px;
+      font-weight:900;
+      color:#1f2937;
+      border:1px solid rgba(16,24,40,0.12);
+      background: rgba(255,255,255,0.92);
+      border-radius:999px;
+      padding:3px 8px;
+      max-width: 300px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      cursor:pointer;
+      user-select:none;
+      flex:0 0 auto;
+    }
+    .chainMicro:hover{
+      background:#FFF9E6;
+      border-color: rgba(255,204,0,0.65);
+      color:#7a5a00;
+    }
+    .chainMicroEmpty{
+      font-size:10px;
+      font-weight:850;
+      color:var(--muted);
+      white-space:nowrap;
+      flex:0 0 auto;
+      padding-right:6px;
+    }
+
+    .chainStage{
+      flex:0 0 auto;
+      font-size:10px;
+      font-weight:980;
+      color:#1f2937;
+      background: rgba(16,24,40,0.04);
+      border: 1px solid rgba(16,24,40,0.10);
+      padding:3px 7px;
+      border-radius:999px;
+      white-space:nowrap;
+      line-height:1.1;
+    }
+
+    /* Collapsed lane */
+    .laneRow.collapsed .laneGrid{ display:none !important; }
+    .collapsedNote{
+      padding:10px 10px 12px 10px;
+      color:var(--muted);
+      font-weight:850;
+      font-size:12px;
+    }
+
+    /* Drawer */
+    .drawerBackdrop{
+      position:fixed;
+      inset:0;
+      background: rgba(16,24,40,0.42);
+      display:none;
+      z-index:999;
+    }
+    .drawerBackdrop.show{ display:block; }
+
+    .drawer{
+      position:fixed;
+      top: calc(var(--header-h) + 12px);
+      right: 12px;
+      width: min(560px, 92vw);
+      height: min(72vh, 760px);
+      background:#fff;
+      border:1px solid rgba(16,24,40,0.14);
+      border-radius:16px;
+      box-shadow: var(--shadow-2);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      z-index:1000;
+    }
+    .drawerHead{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding:12px 12px;
+      background:#F7F8FB;
+      border-bottom:1px solid var(--line);
+    }
+    .drawerTitle{ font-size:13px; font-weight:950; margin:0; line-height:1.15; color:#111827; }
+    .drawerSub{ font-size:11px; font-weight:850; color:var(--muted); margin-top:4px; }
+    .drawerClose{
+      height:30px;
+      padding:0 10px;
+      border-radius:10px;
+      border:1px solid rgba(16,24,40,0.14);
+      background:#fff;
+      font-size:11px;
+      font-weight:950;
+      cursor:pointer;
+      user-select:none;
+    }
+    .drawerClose:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.6); }
+
+    .drawerBody{
+      padding:10px;
+      overflow:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .drawerSection{
+      border:1px solid rgba(16,24,40,0.10);
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+    .drawerSectionHead{
+      padding:10px 10px;
+      background:#fff;
+      border-bottom:1px solid rgba(16,24,40,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .drawerSectionTitle{
+      font-size:12px;
+      font-weight:950;
+      color:#111827;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .drawerSectionCount{
+      font-size:11px;
+      font-weight:950;
+      color:var(--muted);
+      border:1px solid rgba(16,24,40,0.12);
+      background:#F7F8FB;
+      padding:4px 8px;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .drawerList{
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .drawerTile{
+      height: 72px;
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:12px 12px 12px 14px;
+      cursor:pointer;
+      user-select:none;
+      border-radius:14px;
+      background:#fff;
+      border:1px solid rgba(16,24,40,0.12);
+      box-shadow: 0 10px 20px rgba(16,24,40,0.06);
+      overflow:hidden;
+      position:relative;
+      min-width:0;
+    }
+    .drawerTile::before{
+      content:"";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:8px;
+      background: var(--own,#9aa4b2);
+      opacity:0.95;
+    }
+    .drawerTile:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.55); }
+    .drawerTileMain{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; padding-left:4px; }
+    .drawerTileTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+    .drawerTileId{ font-size:10px; font-weight:980; color:var(--dhl-red); }
+    .drawerTileName{
+      font-size:12.5px;
+      font-weight:950;
+      line-height:1.2;
+      margin:0;
+      color:#111827;
+      display:-webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+    }
+
+    /* Tooltip: black bg, yellow title */
+    .tooltip{
+      position:fixed;
+      z-index:2000;
+      width:min(var(--tooltipW), 92vw);
+      background:#0B1220;
+      border:1px solid rgba(255,255,255,0.12);
+      border-radius:14px;
+      box-shadow: var(--shadow-2);
+      padding:10px 10px;
+      display:none;
+      pointer-events:none;
+      color: rgba(255,255,255,0.92);
+    }
+    .tooltip.show{ display:block; }
+    .ttTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .ttTitle{
+      font-size:12px;
+      font-weight:980;
+      line-height:1.2;
+      margin:0;
+      color: var(--dhl-yellow);
+    }
+    .ttOwner{
+      font-size:11px;
+      font-weight:950;
+      border-radius:999px;
+      padding:4px 8px;
+      color:#0B1220;
+      background: var(--dhl-yellow);
+      white-space:nowrap;
+      border:1px solid rgba(255,255,255,0.10);
+    }
+    .ttDesc{
+      font-size:11px;
+      font-weight:800;
+      color: rgba(255,255,255,0.78);
+      line-height:1.35;
+      margin:0 0 8px 0;
+    }
+    .ttStats{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .ttPill{
+      font-size:10px;
+      font-weight:950;
+      border-radius:999px;
+      padding:4px 8px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.90);
+      white-space:nowrap;
+    }
+
+    .error{
+      margin:12px 14px;
+      padding:12px 12px;
+      border-radius:14px;
+      background:#fff;
+      border:1px solid rgba(180,35,24,0.22);
+      color:#b42318;
+      font-weight:900;
+      box-shadow: var(--shadow);
+    }
+
+    /* Legend bar */
+    .legendBar{
+      height: var(--legend-h);
+      border-top:1px solid rgba(16,24,40,0.10);
+      background: #fff;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:0 14px;
+      overflow:hidden;
+    }
+    .legendTitle{
+      font-size:11px;
+      font-weight:950;
+      color:var(--muted);
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .legendItems{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      overflow:auto;
+      padding-bottom:2px;
+      flex:1 1 auto;
+      min-width:0;
+      scrollbar-width: thin;
+    }
+    .ownerChip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      height:24px;
+      padding:0 10px;
+      border-radius:999px;
+      border:1px solid rgba(16,24,40,0.12);
+      background:#F7F8FB;
+      font-size:10px;
+      font-weight:950;
+      color:#1f2937;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: var(--dot,#999);
+      border:1px solid rgba(0,0,0,0.12);
+    }
+
+    /* Footer line */
+    .footerBar{
+      height: var(--footer-h);
+      background:#fff;
+      border-top:1px solid rgba(16,24,40,0.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:0 14px;
+      color: var(--muted);
+      font-size:11px;
+      font-weight:900;
+      overflow:hidden;
+    }
+    .footerBar .left{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
+    .footerBar .right{ white-space:nowrap; flex:0 0 auto; }
+
+    /* Deck content: L2 grid (fits screen width) */
+    .deckL2Grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap:10px;
+      align-items:start;
+      width:100%;
+    }
+    .l2Block{
+      background:#fff;
+      border:1px solid rgba(16,24,40,0.12);
+      border-radius:14px;
+      box-shadow: 0 10px 20px rgba(16,24,40,0.06);
+      padding:10px;
+      min-width:0;
+    }
+    .l2Head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      padding-bottom:8px;
+      border-bottom:1px solid rgba(16,24,40,0.08);
+      margin-bottom:8px;
+    }
+    .l2Id{ font-size:11px; font-weight:980; color:var(--dhl-red); }
+    .l2Title{
+      font-size:13px;
+      font-weight:980;
+      margin:0;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 100%;
+      color:#111827;
+    }
+    .l2OwnerPill{
+      font-size:10px;
+      font-weight:980;
+      border-radius:999px;
+      padding:5px 8px;
+      border:1px solid rgba(255,204,0,0.55);
+      background:#FFF9E6;
+      color:#7a5a00;
+      white-space:nowrap;
+      flex:0 0 auto;
+    }
+
+    .l3Item{
+      border-left: 3px solid rgba(16,24,40,0.18);
+      background:#FBFCFE;
+      border-radius:10px;
+      padding:8px 10px;
+      border:1px solid rgba(16,24,40,0.06);
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+      min-width:0;
+    }
+    .l3Meta{
+      font-size:10px;
+      font-weight:950;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:0.3px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      min-width:0;
+    }
+    .l3Name{
+      font-size:12px;
+      font-weight:850;
+      margin:0;
+      line-height:1.25;
+      color:#111827;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    @media (max-width: 980px){
+      :root{ --lane-label-w: 260px; }
+      .search{ width: 320px; }
+      .foundationGrid{ grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+      .deckL2Grid{ grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+      .chainL1{ flex-basis: 260px; }
+    }
+    @media (max-width: 720px){
+      :root{ --lane-label-w: 220px; }
+      .search{ width: 240px; min-width: 200px; }
+      .stepIcon{ display:none; }
+      .foundationGrid{ grid-template-columns: 1fr; }
+      .deckL2Grid{ grid-template-columns: 1fr; }
+      .chainL1{ flex-basis: 220px; }
+    }
   </style>
 </head>
+
 <body>
-
-<header>
-  <div class="brand"><span>DHL</span> eCommerce Blueprint</div>
-  <div class="legend">
-    <div class="legend-item"><div class="dot" style="background:var(--dhl-yellow)"></div> Commercial</div>
-    <div class="legend-item"><div class="dot" style="background:var(--dhl-red)"></div> Operations</div>
-    <div class="legend-item"><div class="dot" style="background:#2563EB"></div> Visibility</div>
-    <div class="legend-item"><div class="dot" style="background:#475569"></div> Foundation</div>
-  </div>
-</header>
-
-<div class="grid-wrapper" id="grid">
-  </div>
-
-<div id="deck">
-  <div class="deck-header">
-    <div>
-      <div style="font-size:10px; font-weight:700; color:#94A3B8; margin-bottom:2px">SELECTED PROCESS DETAIL</div>
-      <div class="deck-title" id="d_title">Select a Process</div>
+  <div class="app">
+    <div class="topbar">
+      <div class="title">
+        <span>DHL eCommerce · Customer Journey Map</span>
+      </div>
+      <div class="right">
+        <div class="search">
+          <input id="searchInput" placeholder="Search ID (Enter)… e.g., O2D_04" autocomplete="off" />
+        </div>
+      </div>
     </div>
-    <div class="deck-meta">
-      <span id="d_id">ID: -</span>
-      <span id="d_owner">Owner: -</span>
-    </div>
-    <button class="close-btn" onclick="closeDeck()">CLOSE PANEL</button>
-  </div>
-  <div class="deck-body" id="d_body">
-    <div class="deck-empty">Click any chevron tile above to see Process IDs (L2) & Activities (L3).</div>
-  </div>
-</div>
 
-<script>
-  // ==========================================
-  // 1. DATA MODEL (Mock Data for Demo)
-  // ==========================================
-  // In production, this would be replaced by fetch('data.json')
-  const MOCK_DATA = [
-    { id: "L2C_01", name: "Market Analysis", owner: "Strategy", children: [
-        { id: "L2C_01_01", name: "Competitor Scan", children: [{id:"L3_01", name:"Data Collection"}, {id:"L3_02", name:"SWOT Analysis"}] }
-    ]},
-    { id: "L2C_02", name: "Pricing & Quote", owner: "Sales", children: [
-        { id: "L2C_02_01", name: "Rate Calculation", children: [{id:"L3_03", name:"Lookup Base Rate"}, {id:"L3_04", name:"Apply Surcharge"}] }
-    ]},
-    { id: "L2C_04", name: "Customer Onboarding", owner: "CS", children: [
-        { id: "L2C_04_01", name: "Account Setup", children: [{id:"L3_05", name:"Create SAP ID"}, {id:"L3_06", name:"Config Web Portal"}] },
-        { id: "L2C_04_02", name: "IT Integration", children: [{id:"L3_07", name:"API Keys Gen"}, {id:"L3_08", name:"Label Test"}] }
-    ]},
-    { id: "L2C_08", name: "Track & Trace", owner: "IT/Ops", children: [
-        { id: "L2C_08_01", name: "Event Ingestion", children: [{id:"L3_09", name:"Receive Scan"}, {id:"L3_10", name:"Normalize Data"}] },
-        { id: "L2C_08_02", name: "Cust Notification", children: [{id:"L3_11", name:"Send Email"}, {id:"L3_12", name:"Push App Notif"}] }
-    ]},
-    { id: "O2D_04", name: "Linehaul Ops", owner: "Network", children: [
-        { id: "O2D_04_01", name: "Load Planning", children: [{id:"L3_13", name:"Check Volume"}, {id:"L3_14", name:"Assign Truck"}] },
-        { id: "O2D_04_02", name: "Dispatch", children: [{id:"L3_15", name:"Verify Seal"}, {id:"L3_16", name:"Gate Out"}] }
-    ]},
-    { id: "P2R_01", name: "Incident Mgmt", owner: "CS/Ops", children: [
-        { id: "P2R_01_01", name: "Detection", children: [{id:"L3_17", name:"Monitor Exception"}, {id:"L3_18", name:"Alert Team"}] },
-        { id: "P2R_01_02", name: "Resolution", children: [{id:"L3_19", name:"Re-route Parcel"}, {id:"L3_20", name:"Notify Sender"}] }
-    ]}
-  ];
+    <div class="split">
+      <div id="mapWrap" class="mapWrap">
+        <div class="mapHeader">
+          <div class="stageGrid" id="stageHeader"></div>
+        </div>
+        <div class="mapBody" id="mapBody"></div>
+        <div id="errBox" class="error" style="display:none;"></div>
+      </div>
 
-  // ==========================================
-  // 2. CONFIGURATION
-  // ==========================================
-  const STAGES = [
-    { id: "S1", name: "Awareness & Plan", num: "01", voice: "I discover" },
-    { id: "S2", name: "Offer & Account",  num: "02", voice: "I agree" },
-    { id: "S3", name: "Onboarding",       num: "03", voice: "I integrate" }, // Highlighted
-    { id: "S4", name: "Booking & Collect",num: "04", voice: "I ship" },
-    { id: "S5", name: "Export & Transit", num: "05", voice: "It moves" },
-    { id: "S6", name: "Delivery",         num: "06", voice: "I receive" },
-    { id: "S7", name: "Post-Shipment",    num: "07", voice: "I pay/return" }
-  ];
+      <!-- Deck -->
+      <div id="deck" style="position:absolute;left:0;right:0;bottom:0;height:var(--deck-collapsed-h);background:#fff;border-top:3px solid var(--dhl-yellow);box-shadow:0 -12px 30px rgba(16,24,40,0.12);display:flex;flex-direction:column;min-height:0;transition:height 240ms ease;z-index:40;">
+        <!-- Ownership legend -->
+        <div class="legendBar">
+          <div class="legendTitle">Ownership legend</div>
+          <div id="ownerLegendFooter" class="legendItems"></div>
+        </div>
 
-  const ROWS = [
-    { id: "COMM", name: "Commercial", desc: "L2C (Lead to Cash)", class: "lane-comm" },
-    { id: "OPS", name: "Operations", desc: "O2D (Order to Del)", class: "lane-ops" },
-    { id: "CONT_VIS", name: "Visibility", desc: "Track & Trace", class: "lane-cont" },
-    { id: "CONT_RES", name: "Resolution", desc: "P2R (Issue Mgmt)", class: "lane-cont" },
-    { id: "DESIGN", name: "Design", desc: "D2O (Design)", class: "lane-found" },
-    { id: "RES", name: "Resources", desc: "S2P & H2R", class: "lane-found" },
-    { id: "FOUND", name: "Foundation", desc: "Strategy & IT", class: "lane-found" }
-  ];
+        <!-- Footer line -->
+        <div class="footerBar">
+          <div class="left">DHL eCommerce · Customer Journey Blueprint · 2026</div>
+          <div class="right">Serhat Kut, PhD</div>
+        </div>
 
-  // MAPPING: Placing Tiles into the Grid
-  const TILES = [
-    // --- STAGE 1: PLAN ---
-    { id: "S2E_01", stage: 1, row: "FOUND", label: "Strategy" },
-    { id: "L2C_01", stage: 1, row: "COMM", label: "Marketing" },
-    { id: "D2O_01", stage: 1, row: "DESIGN", label: "Market Analysis" },
-
-    // --- STAGE 2: OFFER ---
-    { id: "L2C_02", stage: 2, row: "COMM", label: "Pricing" },
-    { id: "L2C_03", stage: 2, row: "COMM", label: "Contract" },
-    { id: "R2R_04", stage: 2, row: "FOUND", label: "Credit Check" },
-
-    // --- STAGE 3: ONBOARDING ---
-    { id: "L2C_04", stage: 3, row: "COMM", label: "Account Setup" },
-    { id: "ITF_04", stage: 3, row: "FOUND", label: "API Integration" },
-    { id: "D2O_02", stage: 3, row: "DESIGN", label: "Product Config" },
-
-    // --- STAGE 4: BOOKING ---
-    { id: "L2C_05", stage: 4, row: "COMM", label: "Booking" },
-    { id: "O2D_01", stage: 4, row: "OPS", label: "Data Entry" },
-    { id: "O2D_02", stage: 4, row: "OPS", label: "Pickup" },
-
-    // --- STAGE 5: TRANSIT ---
-    { id: "O2D_03", stage: 5, row: "OPS", label: "Sort Origin" },
-    { id: "O2D_04", stage: 5, row: "OPS", label: "Linehaul" },
-    { id: "O2D_07", stage: 5, row: "OPS", label: "Export" },
-
-    // --- STAGE 6: DELIVERY ---
-    { id: "O2D_08", stage: 6, row: "OPS", label: "Import" },
-    { id: "O2D_10", stage: 6, row: "OPS", label: "Last Mile" },
-    { id: "ITF_02", stage: 6, row: "FOUND", label: "Driver App" },
-
-    // --- STAGE 7: POST ---
-    { id: "L2C_06", stage: 7, row: "COMM", label: "Invoice" },
-    { id: "O2D_12", stage: 7, row: "OPS", label: "Returns" },
-    { id: "P2R_03", stage: 7, row: "COMM", label: "Claims" },
-
-    // CONTINUOUS STREAMS (Spanning)
-    { id: "L2C_08", stage: 3, row: "CONT_VIS", span: 5, label: "L2C_08: End-to-End Visibility (Tracking)" },
-    { id: "P2R_01", stage: 4, row: "CONT_RES", span: 4, label: "P2R_01: Network Issue Resolution" },
-    
-    // RESOURCES ROW (Example Chevrons)
-    { id: "S2P_01", stage: 1, row: "RES", label: "Sourcing" },
-    { id: "H2R_01", stage: 2, row: "RES", label: "Hiring" },
-    { id: "H2R_02", stage: 5, row: "RES", label: "Workforce" }
-  ];
-
-  let INDEX = new Map();
-
-  async function init() {
-    renderGrid();
-    try {
-      // Try to fetch real data, fall back to mock if fails
-      const res = await fetch("data.json");
-      if(res.ok) {
-        const root = await res.json();
-        buildIndex(root);
-      } else {
-        console.warn("data.json not found, using mock data");
-        buildMockIndex();
-      }
-    } catch(e) { 
-      console.warn("Fetch failed, using mock data", e);
-      buildMockIndex();
-    }
-    hydrateTiles();
-  }
-
-  function buildIndex(node) {
-    if(node.id) INDEX.set(node.id, node);
-    if(node.children) node.children.forEach(buildIndex);
-  }
-  
-  function buildMockIndex() {
-    // Flatten the mock array into the map for easy lookup
-    MOCK_DATA.forEach(node => INDEX.set(node.id, node));
-  }
-
-  function renderGrid() {
-    const grid = document.getElementById('grid');
-    
-    // 1. Corner
-    const corner = document.createElement('div');
-    corner.className = 'corner-plate';
-    corner.innerHTML = `<div class="cp-title">Value Chain<br>Map</div>`;
-    grid.appendChild(corner);
-
-    // 2. Stage Headers
-    STAGES.forEach(s => {
-      const h = document.createElement('div');
-      h.className = 'stage-head';
-      h.style.gridColumn = parseInt(s.num) + 1; // +1 for label col
-      h.innerHTML = `
-        <div class="stage-meta">Step ${s.num}</div>
-        <div class="stage-voice">"${s.voice}"</div>
-        <div style="font-size:12px; font-weight:800; color:#111; margin-top:2px">${s.name}</div>
-      `;
-      grid.appendChild(h);
-    });
-
-    // 3. Rows & Cells
-    ROWS.forEach((r, rIdx) => {
-       const rowNum = rIdx + 2; // +2 offset
-
-       // Row Label
-       const lab = document.createElement('div');
-       lab.className = `lane-label ${r.class}`;
-       lab.style.gridRow = rowNum;
-       lab.style.gridColumn = 1;
-       lab.innerHTML = `<div class="lane-title">${r.name}</div><div class="lane-desc">${r.desc}</div>`;
-       grid.appendChild(lab);
-
-       // Cells for each Stage
-       STAGES.forEach((s, sIdx) => {
-         const cell = document.createElement('div');
-         cell.className = `cell ${r.id === 'FOUND' ? 'cell-found' : ''}`;
-         if(r.id.startsWith('CONT')) cell.classList.add('cell-cont');
-         
-         cell.style.gridRow = rowNum;
-         cell.style.gridColumn = sIdx + 2; 
-         cell.id = `cell_${r.id}_${sIdx+1}`; 
-         grid.appendChild(cell);
-       });
-    });
-  }
-
-  function hydrateTiles() {
-    TILES.forEach(t => {
-      const node = INDEX.get(t.id);
-      const name = t.label || (node ? (node.name.includes(':') ? node.name.split(':')[1].trim() : node.name) : t.id);
-      const l0 = t.id.split('_')[0];
-      
-      const el = document.createElement('div');
-      el.onclick = () => openDeck(t.id, name);
-      
-      if(t.span) {
-        // Continuous Stream Item
-        el.className = `tile-span c-${l0}`;
-        el.innerHTML = `<span class="t-name">${name}</span>`;
-        
-        const rIdx = ROWS.findIndex(r => r.id === t.row) + 2;
-        const cStart = t.stage + 1;
-        const cEnd = cStart + t.span;
-        
-        el.style.gridRow = rIdx;
-        el.style.gridColumn = `${cStart} / ${cEnd}`;
-        el.style.alignSelf = "center";
-        el.style.zIndex = 10;
-        
-        document.getElementById('grid').appendChild(el); 
-        
-      } else {
-        // Standard Tile
-        el.className = `tile c-${l0}`;
-        el.innerHTML = `
-          <div class="t-head"><span class="t-id">${t.id}</span></div>
-          <div class="t-name">${name}</div>
-        `;
-        document.getElementById(`cell_${t.row}_${t.stage}`).appendChild(el);
-      }
-    });
-  }
-
-  function openDeck(id, name) {
-    const node = INDEX.get(id);
-    document.getElementById('d_title').textContent = name;
-    document.getElementById('d_id').textContent = "ID: " + id;
-    document.getElementById('d_owner').textContent = "Owner: " + (node ? (node.owner || "TBD") : "TBD");
-    
-    const body = document.getElementById('d_body');
-    body.innerHTML = "";
-
-    if(!node || !node.children || node.children.length === 0) {
-      body.innerHTML = `<div class="deck-empty">No sub-processes found in data.json for this item.</div>`;
-    } else {
-      // Render Columns
-      node.children.forEach(l2 => {
-        const col = document.createElement('div');
-        col.className = 'l2-col';
-        const l2Name = l2.name.includes(':') ? l2.name.split(':')[1].trim() : l2.name;
-        
-        let l3HTML = "";
-        if(l2.children && l2.children.length > 0) {
-           l2.children.forEach(l3 => {
-             const l3Name = l3.name.includes(':') ? l3.name.split(':')[1].trim() : l3.name;
-             l3HTML += `
-               <div class="l3-item">
-                 <div class="l3-row"><span class="l3-id">${l3.id}</span></div>
-                 <div>${l3Name}</div>
-               </div>`;
-           });
-        } else {
-           l3HTML = `<div class="l3-item" style="color:#ccc; font-style:italic">No L3 activities</div>`;
-        }
-
-        col.innerHTML = `
-          <div class="l2-head">
-            <span class="l2-name">${l2Name}</span>
-            <span class="l2-id">${l2.id}</span>
+        <div id="deckHandle" style="height:48px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 14px;cursor:pointer;user-select:none;">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+            <div style="width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(212,5,17,0.10);border:1px solid rgba(212,5,17,0.18);font-weight:950;color:var(--dhl-red);flex:0 0 auto;">≡</div>
+            <div id="deckHandleTitle" style="font-size:12px;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62vw;">Select an L1 card to view details</div>
           </div>
-          <div class="l3-list">${l3HTML}</div>
-        `;
-        body.appendChild(col);
+          <div id="deckHint" style="font-size:11px;font-weight:850;color:var(--muted);white-space:nowrap;flex:0 0 auto;">▲ Expand</div>
+        </div>
+        <div id="deckBody" style="display:none;border-top:1px solid var(--line);padding:12px 14px 14px 14px;overflow:auto;min-height:0;flex-direction:column;gap:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer -->
+  <div id="drawerBackdrop" class="drawerBackdrop" aria-hidden="true"></div>
+  <div id="drawer" class="drawer" style="display:none;" role="dialog" aria-modal="true" aria-label="Lane Drawer">
+    <div class="drawerHead">
+      <div>
+        <div id="drawerTitle" class="drawerTitle">More items</div>
+        <div id="drawerSub" class="drawerSub"></div>
+      </div>
+      <button id="drawerClose" class="drawerClose">Close</button>
+    </div>
+    <div id="drawerBody" class="drawerBody"></div>
+  </div>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip" aria-hidden="true"></div>
+
+  <script>
+    /***********************
+     * CUSTOMER JOURNEY (6 stages)
+     ***********************/
+    const STAGES = [
+      { no: 1, name: "Discover & Engage",              voice: "I explore DHL eCommerce services and evaluate options" },
+      { no: 2, name: "Offer, Contract & Setup",        voice: "I receive an offer, agree terms, and activate my account" },
+      { no: 3, name: "Book & Handover",                voice: "I create shipments and hand over parcels" },
+      { no: 4, name: "Network Transport & Processing", voice: "My shipment moves across the DHL network" },
+      { no: 5, name: "Last Mile Delivery",             voice: "My shipment is delivered to the final destination" },
+      { no: 6, name: "Post-Delivery & Settlement",     voice: "I reconcile invoices and resolve issues if needed" }
+    ];
+
+    /***********************
+     * Lane config
+     ***********************/
+    const LANES = [
+      {
+        key: "COMM", label: "Commercial", l0Codes: ["L2C"], laneCode: "L2C",
+        desc1: "Lead-to-Cash",
+        desc2: "Lead → Offer → Contract → Billing",
+        sub: "Top Priority",
+        renderMode:"gridStory", defaultCollapsed:false, theme:"l2c"
+      },
+      {
+        key: "OPS",  label: "Operations", l0Codes: ["O2D"], laneCode: "O2D",
+        desc1: "Order-to-Delivery",
+        desc2: "Pickup → Sort → Transit → Last Mile",
+        sub: "Core Logistics",
+        renderMode:"gridStory", defaultCollapsed:false, theme:"o2d"
+      },
+      {
+        key: "DES",  label: "Design", l0Codes: ["D2O"], laneCode: "D2O",
+        desc1: "Design-to-Operate",
+        desc2: "Network → Product → Standards → Enablement",
+        sub: "Network & Product Design",
+        renderMode:"gridStory", defaultCollapsed:false, theme:"d2o"
+      },
+
+      /* FIX: Resolution + Resources use unified CHAIN rendering (readable, no broken belts) */
+      {
+        key: "RESO", label: "Resolution", l0Codes: ["P2R"], laneCode: "P2R",
+        desc1:"Problem-to-Resolution", desc2:"Detect → Triage → Resolve → Recover",
+        sub: "Issue Management",
+        renderMode:"chainSingle", defaultCollapsed:false
+      },
+      {
+        key: "RSRC",
+        label: "Resources",
+        l0Codes: ["S2P","H2R"],
+        laneCode: "S2P & H2R",
+        desc1:"Sourcing & People",
+        desc2:"Source-to-Pay + Hire-to-Retire",
+        sub: "Sourcing & HR",
+        renderMode:"chainGroup",
+        defaultCollapsed:false,
+        chains: [
+          { l0:"S2P", title:"Source-to-Pay (S2P)" },
+          { l0:"H2R", title:"Hire-to-Retire (H2R)" }
+        ]
+      },
+
+      { key: "FND",  label: "Foundation", l0Codes: ["S2E","GRC","ITF","EA_PM","DA","I2P","TRF","R2R"], laneCode: "S2E, GRC, IT, EA, DA",
+        desc1:"Strategy & Enablers",
+        desc2:"Governance · Platforms · Data · Architecture",
+        sub: "Strategy & Enablers",
+        renderMode:"foundationCollapsed", defaultCollapsed:false
+      },
+    ];
+
+    const STORY_MAX_PER_STAGE = 2;
+
+    const FOUNDATION_LABELS = {
+      "S2E": "Strategy & Execution",
+      "GRC": "Governance, Risk & Compliance",
+      "ITF": "IT Platform & Security",
+      "EA_PM": "Enterprise Architecture & Portfolio",
+      "DA": "Data & AI",
+      "I2P": "Innovation to Product",
+      "TRF": "Transformation",
+      "R2R": "Record to Report"
+    };
+
+    // Continuous rule: L2C_08 spans S3–S6 in new 6-step journey
+    const SPAN_RULES = [
+      { match: { l0: "L2C", l1: "L2C_08" }, span: { from: 3, to: 6 } }
+    ];
+
+    /***********************
+     * Utils
+     ***********************/
+    const $ = (sel) => document.querySelector(sel);
+    const esc = (s) => String(s ?? "")
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+
+    function parseInfo(name){
+      if(!name) return { id:"", name:"" };
+      const parts = String(name).split(":");
+      const id = parts[0].trim();
+      const nm = parts.slice(1).join(":").trim() || id;
+      return { id, name: nm };
+    }
+    function safeChildren(n){ return (n && Array.isArray(n.children)) ? n.children : []; }
+
+    function getL0Map(root){
+      const m = new Map();
+      safeChildren(root).forEach(l0=>{
+        const inf = parseInfo(l0.name);
+        if(inf.id) m.set(inf.id, l0);
+      });
+      return m;
+    }
+    function extractTrailingNumber(id){
+      const m = String(id || "").match(/_(\d+)\s*$/);
+      return m ? Number(m[1]) : null;
+    }
+    function getSpanFor(l0Id, l1Id){
+      for(const r of SPAN_RULES){
+        const m = r.match || {};
+        const okL0 = (m.l0 == null) || (m.l0 === l0Id);
+        const okL1 = (m.l1 == null) || (m.l1 === l1Id);
+        if(okL0 && okL1) return r.span;
+      }
+      return null;
+    }
+
+    /***********************
+     * Ownership
+     ***********************/
+    const OWNER_ORDER = [
+      "Commercial & Sales","Operations","Finance","IT","Data","Enterprise Architecture","GRC","HR","Procurement","GMB / Leadership","Unassigned"
+    ];
+
+    function normalizeOwner(owner){
+      const o = String(owner || "").trim();
+      if(!o) return "Unassigned";
+      return o;
+    }
+
+    function ownerCategory(ownerRaw){
+      const o = normalizeOwner(ownerRaw).toLowerCase();
+
+      if(o.includes("commercial") || o.includes("sales") || o.includes("customer")) return "Commercial & Sales";
+      if(o.includes("operation") || o.includes("ops") || o.includes("network") || o.includes("transport") || o.includes("hub") || o.includes("last mile")) return "Operations";
+      if(o.includes("finance") || o.includes("billing") || o.includes("accounting") || o.includes("controlling") || o.includes("treasury")) return "Finance";
+      if(o.includes("procure") || o.includes("sourcing") || o.includes("vendor") || o.includes("supplier")) return "Procurement";
+      if(o.includes("human") || o.includes("people") || o.includes("hr") || o.includes("talent")) return "HR";
+      if(o.includes("grc") || o.includes("risk") || o.includes("compliance") || o.includes("audit") || o.includes("privacy") || o.includes("security")) return "GRC";
+      if(o.includes("enterprise architecture") || o.includes("architecture") || o.includes("ea_") || o.includes("portfolio")) return "Enterprise Architecture";
+      if(o.includes("data") || o.includes("ai") || o.includes("analytics") || o.includes("bi")) return "Data";
+      if(o === "it" || o.includes("it ") || o.includes(" platform") || o.includes("application") || o.includes("integration") || o.includes("infra")) return "IT";
+      if(o.includes("gmb") || o.includes("ceo") || o.includes("cio") || o.includes("cfo") || o.includes("leadership") || o.includes("board")) return "GMB / Leadership";
+
+      if(!o || o === "unassigned") return "Unassigned";
+      return "Unassigned";
+    }
+
+    function categoryColor(cat){
+      const cs = getComputedStyle(document.documentElement);
+      switch(cat){
+        case "Commercial & Sales":       return cs.getPropertyValue("--own-commercial").trim();
+        case "Operations":              return cs.getPropertyValue("--own-ops").trim();
+        case "Finance":                 return cs.getPropertyValue("--own-finance").trim();
+        case "IT":                      return cs.getPropertyValue("--own-it").trim();
+        case "Data":                    return cs.getPropertyValue("--own-data").trim();
+        case "Enterprise Architecture": return cs.getPropertyValue("--own-ea").trim();
+        case "GRC":                     return cs.getPropertyValue("--own-grc").trim();
+        case "HR":                      return cs.getPropertyValue("--own-hr").trim();
+        case "Procurement":             return cs.getPropertyValue("--own-proc").trim();
+        case "GMB / Leadership":        return cs.getPropertyValue("--own-gmb").trim();
+        default:                        return cs.getPropertyValue("--own-unassigned").trim();
+      }
+    }
+
+    /***********************
+     * Stage mapping (6 stages)
+     ***********************/
+    function colForL1(l0Id, l1Node){
+      const { id: l1Id, name: l1Name } = parseInfo(l1Node.name);
+      const n = extractTrailingNumber(l1Id);
+
+      if(l0Id === "L2C"){
+        if(n === 1) return 1;         // marketing/lead
+        if(n === 2) return 2;         // lead qual
+        if(n === 3) return 2;         // quotation
+        if(n === 4) return 2;         // contract/customer onboarding
+        if(n === 5) return 3;         // order mgmt & SLA
+        if(n === 6) return 6;         // billing
+        if(n === 7) return 6;         // AR/collections
+        if(n === 8) return 6;         // customer service & claims (continuous will override)
+        return 2;
+      }
+      if(l0Id === "O2D"){
+        if([1,2,3].includes(n)) return 3;          // intake + pickup + origin ops => book/handover
+        if([4,5,6,7,8,9].includes(n)) return 4;    // export/transit/import/destination node => network transport & processing
+        if(n === 10) return 5;                     // last mile delivery
+        if(n === 11) return 6;                     // exceptions & re-delivery
+        if(n === 12) return 6;                     // returns
+        return 4;
+      }
+      if(l0Id === "D2O"){
+        if([1,2,3].includes(n)) return 2;          // setup/operating model
+        if([4,5].includes(n)) return 4;            // automation/tech/resources model -> enable network
+        if([6].includes(n)) return 4;              // performance & cost
+        if([7,8].includes(n)) return 6;            // standardization/continuous improvement
+        return 2;
+      }
+
+      const nm = (l1Name || "").toLowerCase();
+      if(nm.includes("strategy") || nm.includes("governance")) return 1;
+      if(nm.includes("architecture") || nm.includes("portfolio")) return 2;
+      if(nm.includes("platform") || nm.includes("integration") || nm.includes("data")) return 2;
+      if(nm.includes("security") || nm.includes("risk") || nm.includes("compliance")) return 1;
+      return 2;
+    }
+
+    function stageChipText(l0Id, l1Id, l1Node){
+      const span = getSpanFor(l0Id, l1Id);
+      if(span) return `S${span.from}–S${span.to}`;
+      const c = colForL1(l0Id, l1Node);
+      return `S${c}`;
+    }
+
+    /***********************
+     * Tooltip
+     ***********************/
+    const tooltip = $("#tooltip");
+    let ttTimer = null;
+
+    function truncate(s, n=260){
+      const t = String(s||"").trim();
+      if(!t) return "";
+      return t.length > n ? t.slice(0,n-1) + "…" : t;
+    }
+    function countL2L3(l1Node){
+      const l2s = safeChildren(l1Node);
+      let l3Count = 0;
+      for(const l2 of l2s) l3Count += safeChildren(l2).length;
+      return { l2: l2s.length, l3: l3Count };
+    }
+    function showTooltipNear(x,y, html){
+      tooltip.innerHTML = html;
+      tooltip.classList.add("show");
+      tooltip.setAttribute("aria-hidden","false");
+
+      const pad = 14;
+      const rect = tooltip.getBoundingClientRect();
+      let left = x + 14;
+      let top = y + 14;
+
+      if(left + rect.width + pad > window.innerWidth) left = x - rect.width - 14;
+      if(top + rect.height + pad > window.innerHeight) top = y - rect.height - 14;
+
+      tooltip.style.left = Math.max(pad, left) + "px";
+      tooltip.style.top = Math.max(pad, top) + "px";
+    }
+    function hideTooltip(){
+      tooltip.classList.remove("show");
+      tooltip.setAttribute("aria-hidden","true");
+    }
+
+    /***********************
+     * State
+     ***********************/
+    let ROOT = null;
+    let L0MAP = null;
+    const laneCollapsed = {};
+    const OWNER_COUNTS = new Map();
+
+    /***********************
+     * Render header
+     ***********************/
+    function tryLoadStepIcons(){
+      const base = "icons";
+      document.querySelectorAll(".stepIcon").forEach(el=>{
+        const step = el.getAttribute("data-step");
+        const img = new Image();
+        img.onload = () => { el.innerHTML = ""; el.appendChild(img); };
+        img.onerror = () => {};
+        img.src = `${base}/step-${step}.png`;
       });
     }
 
-    document.getElementById('deck').classList.add('open');
-  }
+    function renderStageHeader(){
+      const wrap = $("#stageHeader");
+      wrap.innerHTML = "";
 
-  function closeDeck() {
-    document.getElementById('deck').classList.remove('open');
-  }
+      const corner = document.createElement("div");
+      corner.className = "stageCorner";
+      corner.innerHTML = `
+        <div class="hint">
+          <div style="font-weight:950;color:var(--ink);">Swimlanes</div>
+          <div>Hover for quick details · Click for deck</div>
+        </div>
+      `;
+      wrap.appendChild(corner);
 
-  init();
-</script>
+      STAGES.forEach(s=>{
+        const cell = document.createElement("div");
+        cell.className = "stageCell";
+        cell.innerHTML = `
+          <div class="stepIcon" data-step="${esc(s.no)}">ICON</div>
+          <div class="stepTxt">
+            <div class="stageNo">Step ${esc(s.no)}</div>
+            <div class="stageName">${esc(s.name)}</div>
+            <div class="stageVoice">${esc(s.voice)}</div>
+          </div>
+        `;
+        wrap.appendChild(cell);
+      });
+
+      tryLoadStepIcons();
+    }
+
+    function renderOwnerLegendFooter(){
+      const el = document.getElementById("ownerLegendFooter");
+      if(!el) return;
+      el.innerHTML = "";
+      for(const cat of OWNER_ORDER){
+        const cnt = OWNER_COUNTS.get(cat) || 0;
+        if(cnt === 0) continue;
+        const chip = document.createElement("div");
+        chip.className = "ownerChip";
+        const color = categoryColor(cat);
+        chip.innerHTML = `<span class="dot" style="--dot:${esc(color)}"></span>${esc(cat)} <span style="opacity:.7;">(${cnt})</span>`;
+        el.appendChild(chip);
+      }
+    }
+
+    /***********************
+     * Drawer
+     ***********************/
+    const drawer = $("#drawer");
+    const drawerBackdrop = $("#drawerBackdrop");
+    const drawerTitle = $("#drawerTitle");
+    const drawerSub = $("#drawerSub");
+    const drawerBody = $("#drawerBody");
+    const drawerClose = $("#drawerClose");
+
+    function openDrawer(ctx){
+      drawerTitle.textContent = ctx.title || "More items";
+      drawerSub.textContent = ctx.subtitle || "";
+      drawerBody.innerHTML = "";
+
+      (ctx.sections || []).forEach(sec => {
+        const section = document.createElement("div");
+        section.className = "drawerSection";
+        section.innerHTML = `
+          <div class="drawerSectionHead">
+            <div class="drawerSectionTitle">${esc(sec.title || "")}</div>
+            <div class="drawerSectionCount">${esc(sec.countText || "")}</div>
+          </div>
+          <div class="drawerList"></div>
+        `;
+        const list = section.querySelector(".drawerList");
+        (sec.items || []).forEach(it => list.appendChild(buildDrawerTile(it)));
+        drawerBody.appendChild(section);
+      });
+
+      drawer.style.display = "flex";
+      drawerBackdrop.classList.add("show");
+      drawerBackdrop.setAttribute("aria-hidden","false");
+    }
+    function closeDrawer(){
+      drawer.style.display = "none";
+      drawerBackdrop.classList.remove("show");
+      drawerBackdrop.setAttribute("aria-hidden","true");
+    }
+    drawerClose.addEventListener("click", closeDrawer);
+    drawerBackdrop.addEventListener("click", closeDrawer);
+    document.addEventListener("keydown", (e) => { if(e.key === "Escape") closeDrawer(); });
+
+    /***********************
+     * Deck
+     ***********************/
+    const deck = $("#deck");
+    const deckHandle = $("#deckHandle");
+    const deckHandleTitle = $("#deckHandleTitle");
+    const deckHint = $("#deckHint");
+    const deckBody = $("#deckBody");
+    const mapWrap = $("#mapWrap");
+
+    function setDeckOpen(open){
+      if(open){
+        deck.classList.add("open");
+        deck.style.height = getComputedStyle(document.documentElement).getPropertyValue("--deck-expanded-h");
+        mapWrap.classList.add("deckOpen");
+        deckBody.style.display = "flex";
+        deckHint.textContent = "▼ Collapse";
+      } else {
+        deck.classList.remove("open");
+        deck.style.height = getComputedStyle(document.documentElement).getPropertyValue("--deck-collapsed-h");
+        mapWrap.classList.remove("deckOpen");
+        deckBody.style.display = "none";
+        deckHint.textContent = "▲ Expand";
+      }
+    }
+    deckHandle.addEventListener("click", () => setDeckOpen(!deck.classList.contains("open")));
+
+    function highlightActiveTile(l0Id, l1Id){
+      document.querySelectorAll(".tile, .chainTile").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(`[data-l0="${CSS.escape(l0Id)}"][data-l1="${CSS.escape(l1Id)}"]`).forEach(t => t.classList.add("active"));
+    }
+
+    function cssSafeId(s){
+      return String(s||"").replaceAll(/[^a-zA-Z0-9\-_:.]/g, "_");
+    }
+
+    function selectL1(l0Id, l1Node, focusL2Id=null){
+      const l0Node = L0MAP.get(l0Id);
+      const l0Info = parseInfo(l0Node?.name);
+      const l1Info = parseInfo(l1Node?.name);
+
+      deckHandleTitle.textContent = `${l1Info.id} — ${l1Info.name}`;
+
+      const ownerRaw = (l1Node?.owner || l0Node?.owner || "Unassigned");
+      const cat = ownerCategory(ownerRaw);
+      const desc = (l1Node?.description || "");
+
+      const l2s = safeChildren(l1Node).map(l2=>{
+        const i2 = parseInfo(l2.name);
+        const l3s = safeChildren(l2).map(l3=>{
+          const i3 = parseInfo(l3.name);
+          return { id: i3.id, name: i3.name, node: l3 };
+        });
+        return { id: i2.id, name: i2.name, node: l2, l3s };
+      });
+
+      deckBody.innerHTML = `
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;justify-content:space-between;">
+          <div style="min-width:280px;flex:1 1 520px;">
+            <p style="font-size:16px;font-weight:980;margin:0 0 4px 0;line-height:1.15;color:#111827;">${esc(l1Info.id)} · ${esc(l1Info.name)}</p>
+            <p style="margin:0;font-size:12px;color:var(--muted);font-weight:750;line-height:1.4;max-width:1100px;">${esc(desc || "No description available.")}</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;align-items:center;flex:0 0 auto;">
+            <span style="font-size:11px;font-weight:900;border-radius:999px;padding:6px 10px;border:1px solid rgba(16,24,40,0.14);background:rgba(212,5,17,0.08);border-color:rgba(212,5,17,0.18);color:var(--dhl-red);white-space:nowrap;">${esc(l0Info.id || l0Id)} · L0</span>
+            <span style="font-size:11px;font-weight:950;border-radius:999px;padding:6px 10px;border:1px solid rgba(16,24,40,0.14);background:#111827;color:#fff;white-space:nowrap;">Owner: ${esc(cat)}</span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <div style="font-size:12px;font-weight:950;color:var(--ink);">L2 Sub-processes → L3 Activities</div>
+          <div style="font-size:11px;font-weight:850;color:var(--muted);white-space:nowrap;">L3 is always visible</div>
+        </div>
+
+        <div id="l2Grid" class="deckL2Grid"></div>
+      `;
+
+      const grid = document.getElementById("l2Grid");
+      if(!l2s.length){
+        grid.innerHTML = `<div style="padding:14px 12px;color:var(--muted);font-weight:800;font-size:12px;">No L2 sub-processes found for this L1.</div>`;
+      } else {
+        for(const l2 of l2s){
+          const l2OwnerRaw = (l2.node?.owner || ownerRaw || "Unassigned");
+          const l2Cat = ownerCategory(l2OwnerRaw);
+
+          const block = document.createElement("div");
+          block.className = "l2Block";
+          block.id = `l2-${cssSafeId(l2.id)}`;
+
+          block.innerHTML = `
+            <div class="l2Head">
+              <div style="min-width:0;">
+                <div class="l2Id">${esc(l2.id)}</div>
+                <p class="l2Title" title="${esc(l2.name)}">${esc(l2.name)}</p>
+              </div>
+              <div class="l2OwnerPill">L2 Owner: ${esc(l2Cat)}</div>
+            </div>
+            <div class="l3List" style="display:flex;flex-direction:column;gap:6px;"></div>
+          `;
+
+          const list = block.querySelector(".l3List");
+          if(!l2.l3s.length){
+            const empty = document.createElement("div");
+            empty.style.cssText = "padding:10px;color:var(--muted);font-weight:800;font-size:12px;";
+            empty.textContent = "No L3 activities.";
+            list.appendChild(empty);
+          } else {
+            for(const x of l2.l3s){
+              const item = document.createElement("div");
+              item.className = "l3Item";
+              item.innerHTML = `
+                <div class="l3Meta">
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${esc(x.id)}</span>
+                  <span style="opacity:.85;white-space:nowrap;">${esc(l2Cat)}</span>
+                </div>
+                <p class="l3Name" title="${esc(x.name)}">${esc(x.name)}</p>
+              `;
+              list.appendChild(item);
+            }
+          }
+          grid.appendChild(block);
+        }
+      }
+
+      setDeckOpen(true);
+
+      if(focusL2Id){
+        requestAnimationFrame(() => {
+          const el = document.getElementById(`l2-${cssSafeId(focusL2Id)}`);
+          if(el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+        });
+      }
+    }
+
+    /***********************
+     * Tiles + hover tooltip
+     ***********************/
+    function bindHover(el, item, cat, chip){
+      el.addEventListener("mouseenter", (e) => {
+        if(ttTimer) clearTimeout(ttTimer);
+        const { l2, l3 } = countL2L3(item.l1Node);
+        const desc = truncate(item.l1Node?.description || "");
+        const l0 = item.l0Id;
+        const l1 = item.l1Id;
+
+        ttTimer = setTimeout(() => {
+          const html = `
+            <div class="ttTop">
+              <p class="ttTitle">${esc(l1)} · ${esc(item.l1Name)}</p>
+              <span class="ttOwner">${esc(cat)}</span>
+            </div>
+            <p class="ttDesc">${esc(desc || "No description available.")}</p>
+            <div class="ttStats">
+              <span class="ttPill">L0: ${esc(l0)}</span>
+              <span class="ttPill">L2: ${esc(l2)}</span>
+              <span class="ttPill">L3: ${esc(l3)}</span>
+              <span class="ttPill">Stage: ${esc(chip)}</span>
+            </div>
+          `;
+          showTooltipNear(e.clientX, e.clientY, html);
+        }, 150);
+      });
+
+      el.addEventListener("mousemove", (e) => {
+        if(!tooltip.classList.contains("show")) return;
+        showTooltipNear(e.clientX, e.clientY, tooltip.innerHTML);
+      });
+
+      el.addEventListener("mouseleave", () => {
+        if(ttTimer) clearTimeout(ttTimer);
+        hideTooltip();
+      });
+    }
+
+    function buildTile(item, { showStageChip=false, showOwner=false } = {}){
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.dataset.l0 = item.l0Id;
+      tile.dataset.l1 = item.l1Id;
+
+      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
+      const cat = ownerCategory(ownerRaw);
+      const ownColor = categoryColor(cat);
+      tile.style.setProperty("--own", ownColor);
+
+      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+
+      tile.innerHTML = `
+        <div class="tileMain">
+          <div class="tileTop">
+            ${showStageChip ? `<span class="tileStageChip">${esc(chip)}</span>` : ``}
+          </div>
+          <p class="tileName" title="${esc(item.l1Id)} · ${esc(item.l1Name)}">
+            <span class="tileIdInline">${esc(item.l1Id)}</span>
+            <span class="tileTitleInline">${esc(item.l1Name)}</span>
+          </p>
+          ${showOwner ? `<div class="tileMeta">Owner: ${esc(cat)}</div>` : ``}
+        </div>
+      `;
+
+      tile.addEventListener("click", () => {
+        selectL1(item.l0Id, item.l1Node);
+        highlightActiveTile(item.l0Id, item.l1Id);
+        closeDrawer();
+        hideTooltip();
+      });
+
+      bindHover(tile, item, cat, chip);
+      return tile;
+    }
+
+    function buildDrawerTile(item){
+      const tile = document.createElement("div");
+      tile.className = "drawerTile";
+
+      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
+      const cat = ownerCategory(ownerRaw);
+      const ownColor = categoryColor(cat);
+      tile.style.setProperty("--own", ownColor);
+
+      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+
+      tile.innerHTML = `
+        <div class="drawerTileMain">
+          <div class="drawerTileTop">
+            <div style="min-width:0;">
+              <div class="drawerTileId">${esc(item.l1Id)}</div>
+              <p class="drawerTileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</p>
+            </div>
+            <span class="tileStageChip">${esc(chip)}</span>
+          </div>
+          <div class="tileMeta">Owner: ${esc(cat)}</div>
+        </div>
+      `;
+
+      tile.addEventListener("click", () => {
+        selectL1(item.l0Id, item.l1Node);
+        highlightActiveTile(item.l0Id, item.l1Id);
+        closeDrawer();
+        hideTooltip();
+      });
+
+      bindHover(tile, item, cat, chip);
+      return tile;
+    }
+
+    /* L2C_08 continuous tile (unchanged style, but ID+Title already inline) */
+    function buildContinuousTile(item){
+      const tile = document.createElement("div");
+      tile.className = "tile continuous";
+      tile.dataset.l0 = item.l0Id;
+      tile.dataset.l1 = item.l1Id;
+
+      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
+      const cat = ownerCategory(ownerRaw);
+      const ownColor = categoryColor(cat);
+      tile.style.setProperty("--own", ownColor);
+
+      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+
+      const l2Nodes = safeChildren(item.l1Node);
+      const l2Infos = l2Nodes.map(n => parseInfo(n.name)).filter(x => x.id);
+
+      const shown = l2Infos.slice(0, 10);
+      const hidden = l2Infos.slice(10);
+
+      tile.innerHTML = `
+        <div class="tileMain">
+          <div class="tileTop">
+            <span class="tileStageChip">${esc(chip)}</span>
+          </div>
+          <p class="tileName" title="${esc(item.l1Id)} · ${esc(item.l1Name)}">
+            <span class="tileIdInline">${esc(item.l1Id)}</span>
+            <span class="tileTitleInline">${esc(item.l1Name)}</span>
+          </p>
+          <div class="l2MicroRow"></div>
+        </div>
+      `;
+
+      const row = tile.querySelector(".l2MicroRow");
+      shown.forEach(l2 => {
+        const micro = document.createElement("div");
+        micro.className = "l2Micro";
+        micro.title = `${l2.id} · ${l2.name}`;
+        micro.textContent = `${l2.id}: ${l2.name}`;
+        micro.addEventListener("click", (e) => {
+          e.stopPropagation();
+          selectL1(item.l0Id, item.l1Node, l2.id);
+          highlightActiveTile(item.l0Id, item.l1Id);
+        });
+        row.appendChild(micro);
+      });
+
+      if(hidden.length){
+        const more = document.createElement("div");
+        more.className = "l2Micro";
+        more.textContent = `+${hidden.length} more`;
+        more.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openDrawer({
+            title: `${item.l1Id} · L2 overflow`,
+            subtitle: `Select an L2 to open the deck scrolled to that section.`,
+            sections: [{
+              title: "Hidden L2 items",
+              countText: `${hidden.length} items`,
+              items: hidden.map(h => ({
+                l0Id: item.l0Id, l0Owner: item.l0Owner,
+                l1Id: item.l1Id, l1Name: item.l1Name, l1Node: item.l1Node,
+                owner: item.owner, __focusL2: h.id
+              }))
+            }]
+          });
+
+          requestAnimationFrame(() => {
+            const tiles = drawerBody.querySelectorAll(".drawerTile");
+            tiles.forEach((t, idx) => {
+              const focus = hidden[idx]?.id;
+              if(!focus) return;
+              t.addEventListener("click", (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                closeDrawer();
+                selectL1(item.l0Id, item.l1Node, focus);
+                highlightActiveTile(item.l0Id, item.l1Id);
+              }, { once:true });
+            });
+          });
+        });
+        row.appendChild(more);
+      }
+
+      tile.addEventListener("click", () => {
+        selectL1(item.l0Id, item.l1Node);
+        highlightActiveTile(item.l0Id, item.l1Id);
+        closeDrawer();
+        hideTooltip();
+      });
+
+      bindHover(tile, item, cat, chip);
+      return tile;
+    }
+
+    /* NEW: chain tile (P2R, S2P, H2R) with L2 micro chain on same row */
+    function buildChainTile(item){
+      const el = document.createElement("div");
+      el.className = "chainTile";
+      el.dataset.l0 = item.l0Id;
+      el.dataset.l1 = item.l1Id;
+
+      const ownerRaw = item.owner || item.l0Owner || "Unassigned";
+      const cat = ownerCategory(ownerRaw);
+      const ownColor = categoryColor(cat);
+      el.style.setProperty("--own", ownColor);
+
+      const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
+
+      el.innerHTML = `
+        <div class="chainL1">
+          <div class="chainL1Line" title="${esc(item.l1Id)} · ${esc(item.l1Name)}">
+            <span class="chainId">${esc(item.l1Id)}</span>
+            <span class="chainTitle">${esc(item.l1Name)}</span>
+          </div>
+        </div>
+
+        <div class="chainMicroWrap">
+          <div class="chainMicroRow"></div>
+          <span class="chainStage">${esc(chip)}</span>
+        </div>
+      `;
+
+      const row = el.querySelector(".chainMicroRow");
+      const l2Nodes = safeChildren(item.l1Node);
+      const l2Infos = l2Nodes.map(n => parseInfo(n.name)).filter(x => x.id);
+
+      if(!l2Infos.length){
+        const empty = document.createElement("div");
+        empty.className = "chainMicroEmpty";
+        empty.textContent = "No L2";
+        row.appendChild(empty);
+      } else {
+        const shown = l2Infos.slice(0, 12);
+        const hidden = l2Infos.slice(12);
+
+        shown.forEach(l2 => {
+          const m = document.createElement("div");
+          m.className = "chainMicro";
+          m.title = `${l2.id} · ${l2.name}`;
+          m.textContent = `${l2.id}: ${l2.name}`;
+          m.addEventListener("click", (e) => {
+            e.stopPropagation();
+            selectL1(item.l0Id, item.l1Node, l2.id);
+            highlightActiveTile(item.l0Id, item.l1Id);
+          });
+          row.appendChild(m);
+        });
+
+        if(hidden.length){
+          const more = document.createElement("div");
+          more.className = "chainMicro";
+          more.textContent = `+${hidden.length} more`;
+          more.addEventListener("click", (e) => {
+            e.stopPropagation();
+            openDrawer({
+              title: `${item.l1Id} · L2 overflow`,
+              subtitle: `Select an L2 to open the deck scrolled to that section.`,
+              sections: [{
+                title: "Hidden L2 items",
+                countText: `${hidden.length} items`,
+                items: hidden.map(h => ({
+                  l0Id: item.l0Id, l0Owner: item.l0Owner,
+                  l1Id: item.l1Id, l1Name: item.l1Name, l1Node: item.l1Node,
+                  owner: item.owner, __focusL2: h.id
+                }))
+              }]
+            });
+
+            requestAnimationFrame(() => {
+              const tiles = drawerBody.querySelectorAll(".drawerTile");
+              tiles.forEach((t, idx) => {
+                const focus = hidden[idx]?.id;
+                if(!focus) return;
+                t.addEventListener("click", (ev) => {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  closeDrawer();
+                  selectL1(item.l0Id, item.l1Node, focus);
+                  highlightActiveTile(item.l0Id, item.l1Id);
+                }, { once:true });
+              });
+            });
+          });
+          row.appendChild(more);
+        }
+      }
+
+      el.addEventListener("click", () => {
+        selectL1(item.l0Id, item.l1Node);
+        highlightActiveTile(item.l0Id, item.l1Id);
+        closeDrawer();
+        hideTooltip();
+      });
+
+      bindHover(el, item, cat, chip);
+      return el;
+    }
+
+    /***********************
+     * Render map
+     ***********************/
+    function renderMap(){
+      const body = $("#mapBody");
+      body.innerHTML = "";
+      OWNER_COUNTS.clear();
+
+      for(const lane of LANES){
+        if(laneCollapsed[lane.key] == null) laneCollapsed[lane.key] = !!lane.defaultCollapsed;
+
+        const row = document.createElement("div");
+        row.className = "laneRow";
+        row.dataset.laneKey = lane.key;
+        if(laneCollapsed[lane.key]) row.classList.add("collapsed");
+
+        const label = document.createElement("div");
+        label.className = "laneLabel";
+        label.innerHTML = `
+          <div class="laneLabelTop">
+            <div class="laneTitle">${esc(lane.label)}</div>
+            <span class="laneCode">${esc(lane.laneCode)}</span>
+          </div>
+
+          <div class="laneDesc">
+            <div class="line1">${esc(lane.desc1 || "")}</div>
+            <div class="line2">${esc(lane.desc2 || "")}</div>
+          </div>
+
+          <div class="laneSub">${esc(lane.sub || "")}</div>
+
+          <div class="laneControls">
+            <button class="btn" data-action="toggle" data-lane="${esc(lane.key)}">
+              ${laneCollapsed[lane.key] ? "Expand" : "Collapse"}
+            </button>
+          </div>
+        `;
+
+        const content = document.createElement("div");
+        content.className = "laneGrid";
+        if(lane.theme === "l2c") content.classList.add("theme-l2c");
+        if(lane.theme === "o2d") content.classList.add("theme-o2d");
+        if(lane.theme === "d2o") content.classList.add("theme-d2o");
+
+        const itemsByL0 = new Map();
+        const allItems = [];
+
+        for(const l0Code of lane.l0Codes){
+          const l0Node = L0MAP.get(l0Code);
+          if(!l0Node) continue;
+          const l0Owner = l0Node?.owner || "Unassigned";
+
+          const list = [];
+          for(const l1 of safeChildren(l0Node)){
+            const i1 = parseInfo(l1.name);
+            const ownerRaw = l1?.owner || l0Owner || "Unassigned";
+            const cat = ownerCategory(ownerRaw);
+            OWNER_COUNTS.set(cat, (OWNER_COUNTS.get(cat) || 0) + 1);
+
+            const it = {
+              l0Id: l0Code,
+              l0Owner,
+              l1Id: i1.id,
+              l1Name: i1.name,
+              l1Node: l1,
+              owner: ownerRaw
+            };
+            list.push(it);
+            allItems.push(it);
+          }
+          itemsByL0.set(l0Code, list);
+        }
+
+        if(laneCollapsed[lane.key]){
+          const note = document.createElement("div");
+          note.className = "collapsedNote";
+          note.textContent = allItems.length ? `${allItems.length} L1 processes hidden.` : "No processes found for this lane.";
+          content.appendChild(note);
+        } else {
+          if(!allItems.length){
+            content.innerHTML = `<div class="error" style="grid-column:1/-1;">No processes found for this lane in data.json.</div>`;
+          } else {
+            if(lane.renderMode === "gridStory"){
+              renderGridStoryLane(content, lane, allItems);
+            } else if(lane.renderMode === "chainSingle"){
+              renderChainSingle(content, lane, allItems);
+            } else if(lane.renderMode === "chainGroup"){
+              renderChainGroup(content, lane, itemsByL0);
+            } else if(lane.renderMode === "foundationCollapsed"){
+              renderFoundationCollapsed(content, lane, itemsByL0);
+            }
+          }
+        }
+
+        row.appendChild(label);
+        row.appendChild(content);
+        body.appendChild(row);
+      }
+
+      body.querySelectorAll(".btn[data-action]").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const action = btn.dataset.action;
+          const laneKey = btn.dataset.lane;
+          if(action === "toggle"){
+            laneCollapsed[laneKey] = !laneCollapsed[laneKey];
+            renderMap();
+          }
+        });
+      });
+
+      renderOwnerLegendFooter();
+    }
+
+    function renderChainSingle(content, lane, allItems){
+      const group = document.createElement("div");
+      group.className = "chainGroup";
+
+      const section = document.createElement("div");
+      section.className = "chainSection";
+
+      const head = document.createElement("div");
+      head.className = "chainSectionHead";
+      head.innerHTML = `<div class="chainSectionTitle">${esc(lane.desc1 || lane.label)}</div>`;
+
+      const list = document.createElement("div");
+      list.className = "chainList";
+
+      allItems.forEach(it => list.appendChild(buildChainTile(it)));
+
+      section.appendChild(head);
+      section.appendChild(list);
+      group.appendChild(section);
+
+      content.appendChild(group);
+    }
+
+    function renderChainGroup(content, lane, itemsByL0){
+      const group = document.createElement("div");
+      group.className = "chainGroup";
+
+      for(const c of (lane.chains || [])){
+        const listItems = itemsByL0.get(c.l0) || [];
+        if(!listItems.length) continue;
+
+        const section = document.createElement("div");
+        section.className = "chainSection";
+
+        const head = document.createElement("div");
+        head.className = "chainSectionHead";
+        head.innerHTML = `<div class="chainSectionTitle">${esc(c.title)}</div>`;
+
+        const list = document.createElement("div");
+        list.className = "chainList";
+        listItems.forEach(it => list.appendChild(buildChainTile(it)));
+
+        section.appendChild(head);
+        section.appendChild(list);
+        group.appendChild(section);
+      }
+
+      content.appendChild(group);
+    }
+
+    function renderGridStoryLane(content, lane, allItems){
+      const perStage = Array.from({length:6}, () => []);
+      const continuous = [];
+
+      for(const it of allItems){
+        const span = getSpanFor(it.l0Id, it.l1Id);
+        if(span){
+          continuous.push({ ...it, span });
+          continue;
+        }
+        const col = colForL1(it.l0Id, it.l1Node);
+        const idx = Math.max(1, Math.min(6, col)) - 1;
+        perStage[idx].push(it);
+      }
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "gridLaneFixed";
+
+      perStage.forEach((list, i) => {
+        const col = document.createElement("div");
+        col.className = "stageCol";
+
+        const shown = list.slice(0, STORY_MAX_PER_STAGE);
+        const hidden = list.slice(STORY_MAX_PER_STAGE);
+
+        shown.forEach(it => col.appendChild(buildTile(it, { showStageChip:false, showOwner:false })));
+
+        for(let k=shown.length; k<STORY_MAX_PER_STAGE; k++){
+          const spacer = document.createElement("div");
+          spacer.style.height = "56px";
+          spacer.style.borderRadius = "14px";
+          spacer.style.border = "1px dashed rgba(16,24,40,0.10)";
+          spacer.style.background = "rgba(255,255,255,0.55)";
+          col.appendChild(spacer);
+        }
+
+        const chip = document.createElement("div");
+        chip.className = "moreChip";
+        chip.textContent = `+${hidden.length}`;
+        if(hidden.length) chip.classList.add("show");
+        chip.addEventListener("click", () => {
+          openDrawer({
+            title: `${lane.label} · Stage ${i+1} Overflow`,
+            subtitle: `Stage: ${STAGES[i].name} · Select a process to open details.`,
+            sections: [{
+              title: `Stage ${i+1} — ${STAGES[i].name}`,
+              countText: `${hidden.length} hidden`,
+              items: hidden
+            }]
+          });
+        });
+
+        col.appendChild(chip);
+        wrapper.appendChild(col);
+      });
+
+      content.appendChild(wrapper);
+
+      if(continuous.length){
+        const contRow = document.createElement("div");
+        contRow.className = "continuousRow";
+
+        const lab = document.createElement("div");
+        lab.className = "continuousLabel";
+        lab.textContent = "Continuous";
+        contRow.appendChild(lab);
+
+        const first = continuous[0];
+        contRow.appendChild(buildContinuousTile(first));
+
+        const rest = continuous.slice(1);
+        if(rest.length){
+          const more = document.createElement("div");
+          more.className = "moreChip show";
+          more.style.position = "static";
+          more.style.transform = "none";
+          more.textContent = `+${rest.length} more`;
+          more.addEventListener("click", () => {
+            openDrawer({
+              title: `${lane.label} · Continuous Services`,
+              subtitle: `Select a continuous process to open details.`,
+              sections: [{
+                title: "Continuous overflow",
+                countText: `${rest.length} hidden`,
+                items: rest
+              }]
+            });
+          });
+          contRow.appendChild(more);
+        }
+
+        content.appendChild(contRow);
+      }
+    }
+
+    function renderFoundationCollapsed(content, lane, itemsByL0){
+      const grid = document.createElement("div");
+      grid.className = "foundationGrid";
+
+      for(const code of lane.l0Codes){
+        const list = itemsByL0.get(code) || [];
+        if(!list.length) continue;
+
+        const l0Node = L0MAP.get(code);
+        const l0NameFromJson = parseInfo(l0Node?.name || "").name;
+        const friendly = (l0NameFromJson && l0NameFromJson !== code) ? l0NameFromJson : (FOUNDATION_LABELS[code] || code);
+
+        const chip = document.createElement("div");
+        chip.className = "foundationChip";
+        chip.innerHTML = `
+          <div class="left">
+            <div class="code">${esc(code)}</div>
+            <div class="name" title="${esc(friendly)}">${esc(friendly)}</div>
+          </div>
+          <div class="cnt">${esc(list.length)}</div>
+        `;
+        chip.addEventListener("click", () => {
+          openDrawer({
+            title: `Foundation · ${code}`,
+            subtitle: `${friendly} · Select a process to open details.`,
+            sections: [{
+              title: `${code} — ${friendly}`,
+              countText: `${list.length} items`,
+              items: list
+            }]
+          });
+        });
+        grid.appendChild(chip);
+      }
+
+      content.appendChild(grid);
+    }
+
+    /***********************
+     * Search (Enter)
+     ***********************/
+    const searchInput = $("#searchInput");
+    searchInput.addEventListener("keydown", (e) => {
+      if(e.key !== "Enter") return;
+      const q = searchInput.value.trim().toLowerCase();
+      if(!q) return;
+
+      const hits = Array.from(document.querySelectorAll("[data-l1]"));
+      const hit = hits.find(t => (t.getAttribute("data-l1") || "").toLowerCase().includes(q));
+      if(hit){
+        hit.scrollIntoView({ behavior:"smooth", block:"center" });
+        hit.click();
+      }
+    });
+
+    /***********************
+     * Init
+     ***********************/
+    function showError(msg){
+      const box = $("#errBox");
+      box.style.display = "block";
+      box.textContent = msg;
+    }
+
+    renderStageHeader();
+
+    fetch("data.json")
+      .then(r => {
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(data => {
+        if(!data || !Array.isArray(data.children)){
+          showError("data.json loaded but is missing expected 'children' array at root.");
+          return;
+        }
+        ROOT = data;
+        L0MAP = getL0Map(ROOT);
+        renderMap();
+      })
+      .catch(err => {
+        showError("Cannot load data.json. Run via a local server (not file://) and ensure data.json is next to this HTML. " + err);
+        console.error(err);
+      });
+  </script>
 </body>
 </html>
