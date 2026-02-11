@@ -22,12 +22,11 @@
       --legend-h:40px;
       --footer-h:30px;
       --deck-collapsed-h: calc(48px + var(--legend-h) + var(--footer-h));
-      --deck-expanded-h: min(60vh, 720px); /* higher as requested */
+      --deck-expanded-h: min(60vh, 720px);
 
       --lane-label-w:300px;
 
-      --tile-h:60px;
-      --tile-min-w:220px;
+      --tile-h:64px;
 
       --shadow: 0 10px 26px rgba(16,24,40,0.10);
       --shadow-2: 0 18px 44px rgba(16,24,40,0.14);
@@ -38,7 +37,7 @@
 
       /* ZERO-SCROLL initial view for story lanes */
       --gridLaneRows: 2;
-      --gridLaneRowH: 60px;
+      --gridLaneRowH: 64px;
       --gridLaneH: calc(var(--gridLaneRows) * var(--gridLaneRowH) + 26px);
 
       /* Lane theme tints */
@@ -365,6 +364,7 @@
       min-width:0;
     }
     .beltWrap{
+      grid-column: 1 / -1; /* CRITICAL: span full width of the lane */
       width:100%;
       display:flex;
       align-items:flex-start;
@@ -373,7 +373,7 @@
       border:1px solid rgba(16,24,40,0.10);
       border-radius:14px;
       background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(247,248,251,0.88) 100%);
-      overflow:visible; /* FIX: don't clip belt tiles */
+      overflow:visible;
       min-width:0;
     }
     .beltHint{
@@ -391,29 +391,24 @@
 
     .belt{
       display:flex;
-      flex-direction:row;     /* enforce horizontal */
+      flex-direction:row;
       gap:10px;
       align-items:stretch;
-      padding-bottom:2px;
       flex: 1 1 auto;
-      width:100%;             /* full width */
+      width:100%;
       min-width:0;
+      min-height:64px;
       scrollbar-width: thin;
     }
-
-    /* Default belt: horizontal scroll */
     .belt.scrollX{
       overflow-x:auto;
       overflow-y:hidden;
       flex-wrap:nowrap;
     }
-
-    /* Wrapped belt: show ALL items without "+ more" */
     .belt.wrapAll{
       overflow:visible;
       flex-wrap:wrap;
       align-items:stretch;
-      padding-bottom:0;
     }
 
     /* FOUNDATION summary (2-row grid) */
@@ -484,7 +479,7 @@
       flex:0 0 auto;
     }
 
-    /* CARD: shipping-label card v2 (readable titles) */
+    /* CARD: shipping-label card v3 (NO pills: use space efficiently) */
     .tile{
       height: var(--tile-h);
       display:flex;
@@ -522,42 +517,32 @@
       box-shadow: 0 0 0 3px rgba(255,204,0,0.55), 0 16px 32px rgba(16,24,40,0.14);
     }
     .tileMain{ flex: 1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; padding-left:4px; }
-    .tileTop{
+
+    /* Header labels inside cards (no pills) */
+    .tileHdr{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
       min-width:0;
     }
-
-    /* smaller ID tag (still used in continuous tile) */
-    .tileId{
-      flex:0 0 auto;
-      font-size:10px;
-      font-weight:980;
+    .tileIdTxt{
+      font-size:11px;
+      font-weight:950;
       color: var(--dhl-red);
-      background: rgba(212,5,17,0.06);
-      border:1px solid rgba(212,5,17,0.16);
-      padding:3px 7px;
-      border-radius:999px;
       white-space:nowrap;
-      max-width: 70%;
       overflow:hidden;
       text-overflow:ellipsis;
-      line-height:1.1;
+      flex:0 1 auto;
     }
-    .tileStageChip{
-      flex:0 0 auto;
+    .tileStageTxt{
       font-size:10px;
-      font-weight:980;
-      color: #1f2937;
-      background: rgba(16,24,40,0.04);
-      border: 1px solid rgba(16,24,40,0.10);
-      padding:3px 7px;
-      border-radius:999px;
+      font-weight:950;
+      color: rgba(16,24,40,0.65);
       white-space:nowrap;
-      line-height:1.1;
+      flex:0 0 auto;
     }
+
     .tileName{
       font-size:12.5px;
       font-weight:950;
@@ -578,24 +563,11 @@
     }
 
     /* Context sizing */
-    .gridLaneFixed .tile{ width:100%; } /* story grid cells */
-    .belt .tile{ width:auto; flex:0 0 auto; } /* belts must be horizontal */
+    .gridLaneFixed .tile{ width:100%; }
+    .belt .tile{ width:auto; flex:0 0 auto; }
 
-    /* Compact tile for belts */
-    .tile.compact{
-      min-width: 220px;
-      height: 56px;
-      padding:10px 10px 10px 12px;
-    }
-    .tile.compact .tileId{ max-width: 55%; }
-
-    /* Belt tile variant: always readable (single-line title) */
-    .tile.beltTile{
-      height: 56px;
-      min-width: 240px;
-      padding: 10px 12px 10px 14px;
-      align-items: flex-start;
-    }
+    .tile.compact{ min-width: 220px; height: 64px; padding:10px 10px 10px 12px; }
+    .tile.beltTile{ height: 64px; min-width: 240px; padding: 10px 12px 10px 14px; align-items: flex-start; }
     .tile.beltTile .tileName{
       -webkit-line-clamp: 1;
       white-space: nowrap;
@@ -603,32 +575,10 @@
       text-overflow: ellipsis;
       margin: 0;
     }
-    .tile.beltTile .tileMain{ gap: 6px; }
 
-    /* ID as a corner label (does not consume vertical space) */
-    .tileIdCorner{
-      position:absolute;
-      top:10px;
-      left:16px;
-      font-size:10px;
-      font-weight:980;
-      color: var(--dhl-red);
-      background: rgba(212,5,17,0.06);
-      border:1px solid rgba(212,5,17,0.16);
-      padding:3px 7px;
-      border-radius:999px;
-      white-space:nowrap;
-      max-width: 65%;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      line-height:1.1;
-      z-index:1;
-    }
-    .tile.hasCornerId .tileMain{ padding-top: 16px; }
-
-    /* Drawer tile variant: list rows, readable titles */
+    /* Drawer tile variant: readable titles */
     .drawerTile{
-      height: 68px;
+      height: 72px;
       display:flex;
       align-items:flex-start;
       gap:10px;
@@ -656,7 +606,7 @@
     .drawerTile:hover{ background:#FFF9E6; border-color: rgba(255,204,0,0.55); }
     .drawerTileMain{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px; padding-left:4px; }
     .drawerTileTop{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-    .drawerTileId{ font-size:10px; font-weight:980; color:var(--dhl-red); }
+    .drawerTileId{ font-size:11px; font-weight:980; color:var(--dhl-red); }
     .drawerTileName{
       font-size:12.5px;
       font-weight:950;
@@ -671,10 +621,10 @@
     /* Continuous card: L2 micro chevrons row */
     .tile.continuous{
       height: auto;
-      min-height: 70px;
+      min-height: 78px;
       padding-bottom:12px;
     }
-    .tile.continuous .tileName{ -webkit-line-clamp: 1; } /* keep top title clean */
+    .tile.continuous .tileName{ -webkit-line-clamp: 1; }
     .l2MicroRow{
       display:flex;
       flex-wrap:wrap;
@@ -708,7 +658,7 @@
       width:0;height:0;
       border-top:4px solid transparent;
       border-bottom:4px solid transparent;
-      border-left:6px solid rgba(16,24,40,0.45); /* tiny chevron feel */
+      border-left:6px solid rgba(16,24,40,0.45);
       transform: translateY(1px);
       opacity:0.55;
     }
@@ -959,7 +909,7 @@
     .footerBar .left{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; }
     .footerBar .right{ white-space:nowrap; flex:0 0 auto; }
 
-    /* Deck content: L2 grid (fits screen width, no huge wide columns) */
+    /* Deck content: L2 grid */
     .deckL2Grid{
       display:grid;
       grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -1135,7 +1085,7 @@
     ];
 
     /***********************
-     * Lane config (with richer descriptors)
+     * Lane config
      ***********************/
     const LANES = [
       {
@@ -1160,14 +1110,14 @@
         renderMode:"gridStory", defaultCollapsed:false, theme:"d2o"
       },
 
-      // Resolution: full-width horizontal scroll belt (fix vertical stacking / narrow belt)
+      /* Resolution: horizontal belt */
       { key: "RESO", label: "Resolution", l0Codes: ["P2R"], laneCode: "P2R",
         desc1:"Problem-to-Resolution", desc2:"Detect → Triage → Resolve → Recover",
         sub: "Issue Management",
         renderMode:"beltScroll", defaultCollapsed:false
       },
 
-      // Resources: 2 belts stacked, both horizontal scroll
+      /* Resources: two horizontal belts stacked */
       {
         key: "RSRC",
         label: "Resources",
@@ -1205,7 +1155,7 @@
       "R2R": "Record to Report"
     };
 
-    // Continuous rule: L2C_08 shown as continuous
+    /* Continuous rule */
     const SPAN_RULES = [
       { match: { l0: "L2C", l1: "L2C_08" }, span: { from: 4, to: 7 } }
     ];
@@ -1403,22 +1353,18 @@
     let ROOT = null;
     let L0MAP = null;
     const laneCollapsed = {};
-    const OWNER_COUNTS = new Map(); // category -> count
+    const OWNER_COUNTS = new Map();
 
     /***********************
      * Render header
      ***********************/
     function tryLoadStepIcons(){
-      // If you later add images like icons/step-1.png, they will auto-load.
       const base = "icons";
       document.querySelectorAll(".stepIcon").forEach(el=>{
         const step = el.getAttribute("data-step");
         const img = new Image();
-        img.onload = () => {
-          el.innerHTML = "";
-          el.appendChild(img);
-        };
-        img.onerror = () => {}; // keep placeholder
+        img.onload = () => { el.innerHTML = ""; el.appendChild(img); };
+        img.onerror = () => {};
         img.src = `${base}/step-${step}.png`;
       });
     }
@@ -1544,6 +1490,8 @@
       document.querySelectorAll(`.tile[data-l0="${CSS.escape(l0Id)}"][data-l1="${CSS.escape(l1Id)}"]`).forEach(t => t.classList.add("active"));
     }
 
+    function cssSafeId(s){ return String(s||"").replaceAll(/[^a-zA-Z0-9\-_:.]/g, "_"); }
+
     function selectL1(l0Id, l1Node, focusL2Id=null){
       const l0Node = L0MAP.get(l0Id);
       const l0Info = parseInfo(l0Node?.name);
@@ -1641,16 +1589,12 @@
       }
     }
 
-    function cssSafeId(s){
-      return String(s||"").replaceAll(/[^a-zA-Z0-9\-_:.]/g, "_");
-    }
-
     /***********************
-     * Tile builder (with hover tooltip)
+     * Tile builder (NO pills + hover tooltip)
      ***********************/
     function buildTile(item, { showStageChip=false, showOwner=false, compact=false, belt=false } = {}){
       const tile = document.createElement("div");
-      tile.className = "tile" + (compact ? " compact" : "") + (belt ? " beltTile" : "") + " hasCornerId";
+      tile.className = "tile" + (compact ? " compact" : "") + (belt ? " beltTile" : "");
       tile.dataset.l0 = item.l0Id;
       tile.dataset.l1 = item.l1Id;
 
@@ -1662,11 +1606,10 @@
       const chip = stageChipText(item.l0Id, item.l1Id, item.l1Node);
 
       tile.innerHTML = `
-        <span class="tileIdCorner">${esc(item.l1Id)}</span>
         <div class="tileMain">
-          <div class="tileTop">
-            <span style="flex:1 1 auto;"></span>
-            ${showStageChip ? `<span class="tileStageChip">${esc(chip)}</span>` : ``}
+          <div class="tileHdr">
+            <span class="tileIdTxt" title="${esc(item.l1Id)}">${esc(item.l1Id)}</span>
+            ${showStageChip ? `<span class="tileStageTxt">${esc(chip)}</span>` : ``}
           </div>
           <p class="tileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</p>
           ${showOwner ? `<div class="tileMeta">Owner: ${esc(cat)}</div>` : ``}
@@ -1736,7 +1679,7 @@
               <div class="drawerTileId">${esc(item.l1Id)}</div>
               <p class="drawerTileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</p>
             </div>
-            <span class="tileStageChip">${esc(chip)}</span>
+            <span class="tileStageTxt">${esc(chip)}</span>
           </div>
           <div class="tileMeta">Owner: ${esc(cat)}</div>
         </div>
@@ -1801,15 +1744,14 @@
       const l2Nodes = safeChildren(item.l1Node);
       const l2Infos = l2Nodes.map(n => parseInfo(n.name)).filter(x => x.id);
 
-      // show up to 8 micro chevrons, rest in drawer
       const shown = l2Infos.slice(0, 8);
       const hidden = l2Infos.slice(8);
 
       tile.innerHTML = `
         <div class="tileMain">
-          <div class="tileTop">
-            <span class="tileId">${esc(item.l1Id)}</span>
-            <span class="tileStageChip">${esc(chip)}</span>
+          <div class="tileHdr">
+            <span class="tileIdTxt" title="${esc(item.l1Id)}">${esc(item.l1Id)}</span>
+            <span class="tileStageTxt">${esc(chip)}</span>
           </div>
           <p class="tileName" title="${esc(item.l1Name)}">${esc(item.l1Name)}</p>
           <div class="l2MicroRow"></div>
@@ -1855,10 +1797,10 @@
             }]
           });
 
-          // Override click behavior: focus L2
           requestAnimationFrame(() => {
-            drawerBody.querySelectorAll(".drawerTile").forEach((t, idx) => {
-              const focus = (hidden[idx] && hidden[idx].id) ? hidden[idx].id : null;
+            const tiles = Array.from(drawerBody.querySelectorAll(".drawerTile"));
+            tiles.forEach((t, idx) => {
+              const focus = hidden[idx]?.id;
               if(!focus) return;
               t.addEventListener("click", (ev) => {
                 ev.preventDefault();
@@ -1880,7 +1822,6 @@
         hideTooltip();
       });
 
-      // reuse hover tooltip behavior
       tile.addEventListener("mouseenter", (e) => {
         if(ttTimer) clearTimeout(ttTimer);
         const { l2, l3 } = countL2L3(item.l1Node);
@@ -2011,10 +1952,6 @@
               renderSingleBeltScroll(content, lane, allItems);
             } else if(lane.renderMode === "beltGroupScroll"){
               renderBeltGroupScroll(content, lane, itemsByL0);
-            } else if(lane.renderMode === "beltWrapAll"){
-              renderSingleBeltWrapAll(content, lane, allItems);
-            } else if(lane.renderMode === "beltGroupWrapAll"){
-              renderBeltGroupWrapAll(content, lane, itemsByL0);
             } else if(lane.renderMode === "foundationCollapsed"){
               renderFoundationCollapsed(content, lane, itemsByL0);
             }
@@ -2043,8 +1980,6 @@
           const b = belt || belt2;
           if(!b) return;
 
-          if(b.classList.contains("wrapAll")) return;
-
           b.style.scrollBehavior = "smooth";
           if(action === "home") b.scrollTo({ left: 0, behavior: "smooth" });
           if(action === "end") b.scrollTo({ left: b.scrollWidth, behavior: "smooth" });
@@ -2052,25 +1987,6 @@
       });
 
       renderOwnerLegendFooter();
-    }
-
-    function renderSingleBeltWrapAll(content, lane, allItems){
-      const wrap = document.createElement("div");
-      wrap.className = "beltWrap";
-
-      const hint = document.createElement("div");
-      hint.className = "beltHint";
-      hint.textContent = "Compact belt";
-
-      const belt = document.createElement("div");
-      belt.className = "belt wrapAll";
-      belt.dataset.beltLane = lane.key;
-
-      allItems.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true, belt:true })));
-
-      wrap.appendChild(hint);
-      wrap.appendChild(belt);
-      content.appendChild(wrap);
     }
 
     function renderSingleBeltScroll(content, lane, allItems){
@@ -2085,40 +2001,12 @@
       belt.className = "belt scrollX";
       belt.dataset.beltLane = lane.key;
 
-      allItems.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true, belt:true })));
+      /* force horizontal, readable */
+      allItems.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, compact:true, belt:true })));
 
       wrap.appendChild(hint);
       wrap.appendChild(belt);
       content.appendChild(wrap);
-    }
-
-    function renderBeltGroupWrapAll(content, lane, itemsByL0){
-      const group = document.createElement("div");
-      group.className = "beltGroup";
-
-      for(const b of (lane.belts || [])){
-        const list = itemsByL0.get(b.l0) || [];
-        if(!list.length) continue;
-
-        const wrap = document.createElement("div");
-        wrap.className = "beltWrap";
-
-        const hint = document.createElement("div");
-        hint.className = "beltHint";
-        hint.textContent = b.title;
-
-        const belt = document.createElement("div");
-        belt.className = "belt wrapAll";
-        belt.dataset.beltGroup = lane.key;
-
-        list.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true, belt:true })));
-
-        wrap.appendChild(hint);
-        wrap.appendChild(belt);
-        group.appendChild(wrap);
-      }
-
-      content.appendChild(group);
     }
 
     function renderBeltGroupScroll(content, lane, itemsByL0){
@@ -2140,7 +2028,7 @@
         belt.className = "belt scrollX";
         belt.dataset.beltGroup = lane.key;
 
-        list.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, showOwner:false, compact:true, belt:true })));
+        list.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, compact:true, belt:true })));
 
         wrap.appendChild(hint);
         wrap.appendChild(belt);
@@ -2175,11 +2063,11 @@
         const shown = list.slice(0, STORY_MAX_PER_STAGE);
         const hidden = list.slice(STORY_MAX_PER_STAGE);
 
-        shown.forEach(it => col.appendChild(buildTile(it, { showStageChip:false, showOwner:false, compact:false })));
+        shown.forEach(it => col.appendChild(buildTile(it, { compact:false })));
 
         for(let k=shown.length; k<STORY_MAX_PER_STAGE; k++){
           const spacer = document.createElement("div");
-          spacer.style.height = "56px";
+          spacer.style.height = "64px";
           spacer.style.borderRadius = "14px";
           spacer.style.border = "1px dashed rgba(16,24,40,0.10)";
           spacer.style.background = "rgba(255,255,255,0.55)";
