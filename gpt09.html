@@ -1,0 +1,47 @@
+function renderSingleBeltScroll(content, lane, allItems){
+  const wrap = document.createElement("div");
+  wrap.className = "beltWrap";
+
+  const hint = document.createElement("div");
+  hint.className = "beltHint";
+  hint.textContent = "Compact belt";
+
+  const belt = document.createElement("div");
+  belt.className = "belt scrollX";
+  belt.dataset.beltLane = lane.key;
+
+  allItems.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, compact:true, belt:true })));
+
+  wrap.appendChild(hint);
+  wrap.appendChild(belt);
+  content.appendChild(wrap);
+}
+
+function renderBeltGroupScroll(content, lane, itemsByL0){
+  const group = document.createElement("div");
+  group.className = "beltGroup";
+
+  for(const b of (lane.belts || [])){
+    const list = itemsByL0.get(b.l0) || [];
+    if(!list.length) continue;
+
+    const wrap = document.createElement("div");
+    wrap.className = "beltWrap";
+
+    const hint = document.createElement("div");
+    hint.className = "beltHint";
+    hint.textContent = b.title;
+
+    const belt = document.createElement("div");
+    belt.className = "belt scrollX";
+    belt.dataset.beltGroup = lane.key;
+
+    list.forEach(it => belt.appendChild(buildTile(it, { showStageChip:true, compact:true, belt:true })));
+
+    wrap.appendChild(hint);
+    wrap.appendChild(belt);
+    group.appendChild(wrap);
+  }
+
+  content.appendChild(group);
+}
