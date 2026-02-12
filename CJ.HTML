@@ -294,6 +294,20 @@
       background: rgba(255, 255, 255, 0.35);
     }
 
+
+    .laneRow.collapsed .laneGrid {
+      padding: 6px 10px 8px 10px;
+      gap: 8px;
+      align-content: start;
+    }
+
+    .laneRow.collapsed .error {
+      margin: 0;
+      padding: 10px 12px;
+      box-shadow: none;
+      background: #fff;
+    }
+
     .laneLabel {
       position: sticky;
       left: 0;
@@ -572,15 +586,21 @@
     }
 
     .l2ChevChain {
-      display: grid;
+      display: flex;
       gap: 8px;
-      width: 100%;
       overflow: hidden;
       /* no horizontal slider */
+      overflow-y: hidden;
       padding-bottom: 2px;
       min-width: 0;
-      scrollbar-width: none;
-      grid-template-columns: repeat(var(--l2cols, 6), minmax(0, 1fr));
+      scrollbar-width: thin;
+    }
+
+    .l2ChevInner {
+      display: flex;
+      gap: 8px;
+      min-width: 0;
+      transform-origin: left center;
     }
 
     .l2ChevChain::-webkit-scrollbar {
@@ -671,12 +691,46 @@
     }
 
     .supportBlock.compact .chevChain {
-      padding-bottom: 1px;
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      gap: 8px;
+      overflow: hidden;
+      /* no horizontal slider */
+      overflow-y: hidden;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
+    }
+
+    .chevInner {
+      display: flex;
+      gap: 8px;
+      min-width: 0;
+      transform-origin: left center;
     }
 
     .supportBlock.compact .chev {
-      height: 38px;
-      font-size: 10.5px;
+      flex: 0 0 auto;
+      height: 34px;
+      min-width: 130px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 10px;
+      font-weight: 950;
+      color: #1f2937;
+      background: var(--dhl-yellow);
+      border: 1px solid rgba(212, 5, 17, 0.18);
+      border-radius: 12px;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: 0 10px 18px rgba(16, 24, 40, 0.06);
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%);
+      padding-left: 16px;
+      padding-right: 16px;
+      min-width: 0;
     }
 
 
@@ -2102,7 +2156,7 @@
       tile.style.setProperty("--own", categoryColor(cat));
 
       const l2Nodes = safeChildren(it.l1Node);
-      const l2Infos = l2Nodes.map(n => parseInfo(n.name)).filter(x => x.id);
+      const l2Infos = l2Nodes.map(n => ({ ...parseInfo(n.name), node: n })).filter(x => x.id);
 
       tile.innerHTML = `
         <div class="tileMain">
@@ -2124,11 +2178,51 @@
         chev.className = "l2Chev";
         chev.title = `${l2.id} · ${l2.name}`;
         chev.innerHTML = `<span class="l2ChevId">${esc(l2.id)}</span><span class="l2ChevTitle">${esc(l2.name)}</span>`;
+
+        // L2 hover tooltip (prevent parent L1 tooltip)
+        chev.addEventListener("mouseenter", (e) => {
+          e.stopPropagation();
+          if (ttTimer) clearTimeout(ttTimer);
+
+          const l2Node = l2.node;
+          const l3Count = safeChildren(l2Node).length;
+          const ownerRaw2 = (l2Node?.owner || it.owner || it.l0Owner || "Unassigned");
+          const cat2 = ownerCategory(ownerRaw2);
+          const desc2 = truncate(l2Node?.description || "");
+
+          ttTimer = setTimeout(() => {
+            const html = `
+              <div class="ttTop">
+                <p class="ttTitle">${esc(l2.id)} · ${esc(l2.name)}</p>
+                <span class="ttOwner">${esc(cat2)}</span>
+              </div>
+              <p class="ttDesc">${esc(desc2 || "No description available.")}</p>
+              <div class="ttStats">
+                <span class="ttPill">Level: L2</span>
+                <span class="ttPill">L3: ${esc(l3Count)}</span>
+                <span class="ttPill">Parent: ${esc(it.l1Id)}</span>
+              </div>
+            `;
+            showTooltipNear(e.clientX, e.clientY, html);
+          }, 120);
+        });
+        chev.addEventListener("mousemove", (e) => {
+          e.stopPropagation();
+          if (!tooltip.classList.contains("show")) return;
+          showTooltipNear(e.clientX, e.clientY, tooltip.innerHTML);
+        });
+        chev.addEventListener("mouseleave", (e) => {
+          e.stopPropagation();
+          if (ttTimer) clearTimeout(ttTimer);
+          hideTooltip();
+        });
+
         chev.addEventListener("click", (e) => {
           e.stopPropagation();
           selectL1(it.l0Id, it.l1Node, l2.id);
           highlightActiveTile(it.l0Id, it.l1Id);
         });
+
         chain.appendChild(chev);
       });
 
@@ -2269,6 +2363,37 @@
         }
       });
     }
+
+    /***********************
+     * Chevron fit-to-width (no horizontal slider)
+     ***********************/
+    function applyChevronFit() {
+      const chains = [
+        ...document.querySelectorAll('.l2ChevChain'),
+        ...document.querySelectorAll('.chevChain')
+      ];
+
+      chains.forEach(chain => {
+        const inner = chain.querySelector('.l2ChevInner') || chain.querySelector('.chevInner');
+        if (!inner) return;
+
+        // reset
+        inner.style.transform = '';
+
+        const available = chain.clientWidth;
+        const needed = inner.scrollWidth;
+
+        if (!available || !needed) return;
+
+        if (needed > available + 1) {
+          let scale = available / needed;
+          scale = Math.max(0.72, Math.min(1, scale)); // keep readable
+          inner.style.transformOrigin = 'left center';
+          inner.style.transform = `scaleX(${scale})`;
+        }
+      });
+    }
+
 
     // Re-apply on resize (keeps the fit stable)
     window.addEventListener('resize', () => {
@@ -2467,22 +2592,31 @@
 
         const label = document.createElement("div");
         label.className = "laneLabel";
+        const collapsed = !!laneCollapsed[lane.key];
+        const collapsedLine = collapsed
+          ? `<div class="laneSub" style="color:var(--muted);">Collapsed · Expand to see ${esc(lane.laneCode)}</div>`
+          : `<div class="laneSub">${esc(lane.sub || "")}</div>`;
+
+        const descBlock = collapsed ? "" : `
+          <div class="laneDesc">
+            <div class="line1">${esc(lane.desc1 || "")}</div>
+            <div class="line2">${esc(lane.desc2 || "")}</div>
+          </div>
+        `;
+
         label.innerHTML = `
           <div class="laneLabelTop">
             <div class="laneTitle">${esc(lane.label)}</div>
             <span class="laneCode">${esc(lane.laneCode)}</span>
           </div>
 
-          <div class="laneDesc">
-            <div class="line1">${esc(lane.desc1 || "")}</div>
-            <div class="line2">${esc(lane.desc2 || "")}</div>
-          </div>
+          ${descBlock}
 
-          <div class="laneSub">${esc(lane.sub || "")}</div>
+          ${collapsedLine}
 
           <div class="laneControls">
             <button class="btn" data-action="toggle" data-lane="${esc(lane.key)}">
-              ${laneCollapsed[lane.key] ? "Expand" : "Collapse"}
+              ${collapsed ? "Expand" : "Collapse"}
             </button>
           </div>
         `;
@@ -2500,7 +2634,7 @@
           note.style.gridColumn = "1/-1";
           note.style.color = "var(--muted)";
           note.style.borderColor = "rgba(16,24,40,0.14)";
-          note.textContent = "Lane collapsed.";
+          note.textContent = `Lane collapsed. Expand to see ${lane.laneCode}.`;
           content.appendChild(note);
         } else {
           if (!allItems.length && lane.renderMode !== "foundation2x4") {
@@ -2557,6 +2691,7 @@
       renderOwnerLegendFooter();
       // Apply OPS Step 4 vertical scale-to-fit after DOM paint
       requestAnimationFrame(applyOpsStep4Scale);
+      requestAnimationFrame(applyChevronFit);
     }
 
     /***********************
