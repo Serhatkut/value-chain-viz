@@ -572,13 +572,23 @@
     }
 
     .l2ChevChain {
-      display: flex;
+      display: grid;
       gap: 8px;
-      overflow-x: auto;
-      overflow-y: hidden;
+      width: 100%;
+      overflow: hidden;
+      /* no horizontal slider */
       padding-bottom: 2px;
       min-width: 0;
-      scrollbar-width: thin;
+      scrollbar-width: none;
+      grid-template-columns: repeat(var(--l2cols, 6), minmax(0, 1fr));
+    }
+
+    .l2ChevChain::-webkit-scrollbar {
+      display: none;
+    }
+
+    .l2ChevChain .l2ChevInner {
+      display: contents;
     }
 
     /* Keep the chevrons horizontal (the inner wrapper is created in JS) */
@@ -590,10 +600,11 @@
     }
 
     .l2Chev {
-      flex: 0 0 auto;
+      width: 100%;
       height: 34px;
-      min-width: 130px;
-      padding: 0 10px;
+      min-width: 0;
+      /* allow fit */
+      padding: 0 16px;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -608,8 +619,6 @@
       user-select: none;
       box-shadow: 0 10px 18px rgba(16, 24, 40, 0.06);
       clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%);
-      padding-left: 16px;
-      padding-right: 16px;
     }
 
     .l2Chev:hover {
@@ -667,75 +676,52 @@
 
     .supportBlock.compact .chev {
       height: 38px;
-      min-width: 200px;
       font-size: 10.5px;
     }
 
-    .supportRow {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .supportHeader {
-      flex: 0 0 auto;
-      font-size: 11px;
-      font-weight: 950;
-      color: #111827;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(16, 24, 40, 0.12);
-      background: #fff;
-      white-space: nowrap;
-    }
 
     .chevChain {
       flex: 1 1 auto;
       min-width: 0;
       display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      overflow-y: hidden;
+      overflow: hidden;
+      /* no horizontal slider */
       padding-bottom: 2px;
-      scrollbar-width: thin;
     }
 
-    /* Keep support chevrons horizontal (the inner wrapper is created in JS) */
     .chevInner {
-      display: flex;
+      width: 100%;
+      display: grid;
       gap: 8px;
-      align-items: center;
-      min-width: max-content;
+      grid-template-columns: repeat(var(--chevcols, 8), minmax(0, 1fr));
     }
 
     .chev {
-      flex: 0 0 auto;
+      width: 100%;
       height: 38px;
-      min-width: 120px;
-      max-width: 180px;
-      padding: 0 8px 0 8px;
+      min-width: 0;
+      max-width: none;
+      padding: 0 14px;
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 10px;
       font-weight: 950;
       color: #1f2937;
-      background: #FFF2B3;
-      border: 1px solid rgba(255, 204, 0, 0.75);
+      background: var(--dhl-yellow);
+      /* align with L2C_08 */
+      border: 1px solid rgba(212, 5, 17, 0.18);
       border-radius: 12px;
       position: relative;
       cursor: pointer;
       user-select: none;
       box-shadow: 0 10px 18px rgba(16, 24, 40, 0.06);
       clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 50%, calc(100% - 18px) 100%, 0 100%, 18px 50%);
-      padding-left: 14px;
-      padding-right: 14px;
     }
 
     .chev:hover {
       background: #FFEB8A;
-      border-color: rgba(212, 5, 17, 0.18);
+      border-color: rgba(212, 5, 17, 0.28);
     }
 
     .chevId {
@@ -2130,7 +2116,9 @@
         </div>
       `;
 
+      const chainWrap = tile.querySelector(".l2ChevChain");
       const chain = tile.querySelector(".l2ChevInner");
+      if (chainWrap) chainWrap.style.setProperty("--l2cols", String(Math.min(l2Infos.length || 1, 9)));
       l2Infos.forEach(l2 => {
         const chev = document.createElement("div");
         chev.className = "l2Chev";
@@ -2380,6 +2368,7 @@
 
         const chain = document.createElement("div");
         chain.className = "chevChain";
+        chain.style.setProperty("--chevcols", String(Math.min(list.length || 1, 9)));
 
         const inner = document.createElement("div");
         inner.className = "chevInner";
