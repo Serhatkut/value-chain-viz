@@ -6,9 +6,6 @@
   <title>DHL eCommerce · Customer Journey Map</title>
 
   <style>
-    :root{
-      --dhl-red:#D40511;
-      --dhl-yellow:#FFCC00;
 
       --ink:#101828;
       --muted:#667085;
@@ -27,8 +24,8 @@
       --lane-label-w:300px;
 
       /* story lane row sizing (computed in JS) */
-      --story-row-h: 64px;
-      --story-gap: 10px;
+      --story-row-h: 56px;
+      --story-gap: 8px;
 
       --shadow: 0 10px 26px rgba(16,24,40,0.10);
       --shadow-2: 0 18px 44px rgba(16,24,40,0.14);
@@ -281,7 +278,7 @@
       display:grid;
       grid-template-columns: repeat(6, minmax(190px, 1fr));
       gap:10px;
-      padding:10px 10px 12px 10px;
+      padding:8px 10px 10px 10px;
       align-content:start;
       border-left: 6px solid transparent;
       border-radius: 0 18px 18px 0;
@@ -298,7 +295,7 @@
       grid-column: 1 / -1;
       display:grid;
       grid-template-columns: repeat(6, minmax(190px, 1fr));
-      gap:10px;
+      gap: var(--story-gap);
       padding:2px 0 0 0;
       min-width:0;
       align-items:start;
@@ -306,7 +303,7 @@
     .stageStack{
       display:flex;
       flex-direction:column;
-      gap:10px;
+      gap: var(--story-gap);
       min-width:0;
     }
 
@@ -345,7 +342,7 @@
       display:flex;
       align-items:stretch;
       gap:10px;
-      padding:10px 12px 10px 12px;
+      padding:8px 12px;
       cursor:pointer;
       user-select:none;
       border-radius:14px;
@@ -383,7 +380,7 @@
       min-width:0;
       display:flex;
       flex-direction:column;
-      gap:6px;
+      gap:4px;
       padding-left:4px;
     }
 
@@ -430,7 +427,7 @@
     .l2MicroRow{
       display:flex;
       flex-wrap:wrap;
-      gap:6px;
+      gap:5px;
       margin-top:6px;
     }
     .l2Micro{
@@ -1900,7 +1897,7 @@
 
       const cs = getComputedStyle(document.documentElement);
       const rowH = parseFloat(cs.getPropertyValue('--story-row-h')) || 64;
-      const gap  = parseFloat(cs.getPropertyValue('--story-gap')) || 10;
+      const gap  = parseFloat(cs.getPropertyValue('--story-gap')) || 8;
 
       // Allowed height = 3 cards (2 gaps)
       const maxH = (3 * rowH) + (2 * gap);
@@ -1920,7 +1917,7 @@
         if(contentH > maxH + 1){
           let scale = maxH / contentH;
           // Keep readability; user expects up to 5 items so this should stay reasonable
-          scale = Math.max(0.78, Math.min(1, scale));
+          scale = Math.max(0.62, Math.min(1, scale));
           stack.style.transform = `scaleY(${scale})`;
         }
       });
