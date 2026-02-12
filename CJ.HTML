@@ -310,6 +310,13 @@
       min-width:0;
     }
 
+    /* OPS Step 4 (Network Move) vertical scale-to-fit wrapper */
+    .scaleWrap{
+      min-width:0;
+      overflow:hidden;
+      border-radius:14px;
+    }
+
     /* Continuous bar full width */
     .continuousBar{
       grid-column: 1 / -1;
@@ -1884,6 +1891,49 @@
     }
 
     /***********************
+     * OPS Step 4 vertical scale-to-fit (target: 5 cards into 3-card height)
+     ***********************/
+    function applyOpsStep4Scale(){
+      // Find all wrappers created for OPS step 4
+      const wraps = document.querySelectorAll('.scaleWrap[data-scale="ops-step4"]');
+      if(!wraps.length) return;
+
+      const cs = getComputedStyle(document.documentElement);
+      const rowH = parseFloat(cs.getPropertyValue('--story-row-h')) || 64;
+      const gap  = parseFloat(cs.getPropertyValue('--story-gap')) || 10;
+
+      // Allowed height = 3 cards (2 gaps)
+      const maxH = (3 * rowH) + (2 * gap);
+
+      wraps.forEach(wrap => {
+        wrap.style.height = `${maxH}px`;
+        const stack = wrap.querySelector('.stageStack');
+        if(!stack) return;
+
+        // Reset any previous transform
+        stack.style.transform = '';
+        stack.style.transformOrigin = 'top';
+
+        // Measure after reset
+        const contentH = stack.scrollHeight;
+
+        if(contentH > maxH + 1){
+          let scale = maxH / contentH;
+          // Keep readability; user expects up to 5 items so this should stay reasonable
+          scale = Math.max(0.78, Math.min(1, scale));
+          stack.style.transform = `scaleY(${scale})`;
+        }
+      });
+    }
+
+    // Re-apply on resize (keeps the fit stable)
+    window.addEventListener('resize', () => {
+      // Debounce lightly
+      clearTimeout(window.__opsScaleT);
+      window.__opsScaleT = setTimeout(applyOpsStep4Scale, 60);
+    });
+
+    /***********************
      * Map rendering
      ***********************/
     function renderStoryLane(content, lane, allItems){
@@ -1902,11 +1952,21 @@
       grid.className = "storyGrid";
 
       // stage stacks (NO drawer, NO scroll, full visibility)
-      perStage.forEach(list => {
+      perStage.forEach((list, idx) => {
         const stack = document.createElement("div");
         stack.className = "stageStack";
         list.forEach(it => stack.appendChild(buildTile(it)));
-        grid.appendChild(stack);
+
+        // OPS lane, Step 4 column only (idx 3) -> scale-to-fit vertically
+        if(lane.key === "OPS" && idx === 3){
+          const wrap = document.createElement("div");
+          wrap.className = "scaleWrap";
+          wrap.setAttribute('data-scale','ops-step4');
+          wrap.appendChild(stack);
+          grid.appendChild(wrap);
+        } else {
+          grid.appendChild(stack);
+        }
       });
 
       content.appendChild(grid);
@@ -2145,6 +2205,8 @@
       });
 
       renderOwnerLegendFooter();
+      // Apply OPS Step 4 vertical scale-to-fit after DOM paint
+      requestAnimationFrame(applyOpsStep4Scale);
     }
 
     /***********************
