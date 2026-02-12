@@ -1886,34 +1886,7 @@
     /***********************
      * Map rendering
      ***********************/
-    function computeStoryRows(allStoryItems){
-      // allStoryItems: { laneKey -> items[] } but we need a global max so O2D >= Commercial, etc.
-      let globalMax = 1;
-      for(const laneKey of ["COMM","OPS","DES"]){
-        const items = allStoryItems.get(laneKey) || [];
-        const perStage = Array.from({length:6}, () => 0);
-        for(const it of items){
-          if(getSpanFor(it.l0Id, it.l1Id)) continue; // continuous handled separately
-          const c = colForL1(it.l0Id, it.l1Node);
-          const idx = Math.max(1, Math.min(6, c)) - 1;
-          perStage[idx] += 1;
-        }
-        const laneMax = Math.max(...perStage, 1);
-        globalMax = Math.max(globalMax, laneMax);
-      }
-      // minimum 3? you didn’t require, but ensures density is ok
-      globalMax = Math.max(globalMax, 3);
-      return globalMax;
-    }
-
-    function setStoryLaneHeightPx(wrapper, rows){
-      const rowH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--story-row-h")) || 64;
-      const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--story-gap")) || 10;
-      const height = rows * rowH + (rows - 1) * gap;
-      wrapper.style.height = `${height}px`;
-    }
-
-    function renderStoryLane(content, lane, allItems, storyRows){
+    function renderStoryLane(content, lane, allItems){
       const perStage = Array.from({length:6}, () => []);
       const continuous = [];
 
@@ -1927,7 +1900,6 @@
 
       const grid = document.createElement("div");
       grid.className = "storyGrid";
-      setStoryLaneHeightPx(grid, storyRows);
 
       // stage stacks (NO drawer, NO scroll, full visibility)
       perStage.forEach(list => {
@@ -2047,9 +2019,6 @@
       body.innerHTML = "";
       OWNER_COUNTS.clear();
 
-      // Pre-collect all items per lane to compute global story rows
-      const storyItemsByLaneKey = new Map();
-
       for(const lane of LANES){
         const itemsByL0 = new Map();
         const allItems = [];
@@ -2077,10 +2046,6 @@
             allItems.push(it);
           }
           itemsByL0.set(l0Code, list);
-        }
-
-        if(lane.renderMode === "story"){
-          storyItemsByLaneKey.set(lane.key, allItems);
         }
 
         // Render row
@@ -2146,9 +2111,6 @@
         row.__allItems = allItems;
       }
 
-      // Compute global story rows so OPS >= COMM etc.
-      const storyRows = computeStoryRows(storyItemsByLaneKey);
-
       // Second pass: fill content blocks
       body.querySelectorAll(".laneRow").forEach(row => {
         const laneKey = row.dataset.laneKey;
@@ -2164,7 +2126,7 @@
         const allItems = row.__allItems || [];
 
         if(lane.renderMode === "story"){
-          renderStoryLane(content, lane, allItems, storyRows);
+          renderStoryLane(content, lane, allItems);
         } else if(lane.renderMode === "supportChains"){
           renderSupportChains(content, lane, itemsByL0);
         } else if(lane.renderMode === "foundation2x4"){
