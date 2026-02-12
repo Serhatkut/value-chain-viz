@@ -412,20 +412,7 @@
     .tile.continuousFull .tileTitleText{ white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient: vertical; }
 
     /* L2 chain inside continuous L1 tile (DHL yellow chevrons, 2-line titles) */
-    .l2ChainWrap{ display:flex; flex-direction:column; gap:6px; margin-top:6px; min-width:0; }
-    .lvlTag{
-      display:inline-flex;
-      align-items:center;
-      height:20px;
-      padding:0 8px;
-      border-radius:999px;
-      font-size:10px;
-      font-weight:980;
-      color: var(--muted);
-      border:1px solid rgba(16,24,40,0.12);
-      background: rgba(255,255,255,0.85);
-      width:fit-content;
-    }
+    .l2ChainWrap{ display:flex; flex-direction:column; gap:4px; margin-top:6px; min-width:0; }
     .l2ChevChain{
       display:flex;
       gap:8px;
@@ -468,6 +455,23 @@
       line-height:1.15;
     }
 
+
+    /* Chain scaling + aggressive wrap (<=8 scale-to-fit, >8 wrap to 2 rows) */
+    .chainScaleWrap{ min-width:0; overflow:hidden; }
+    .chainScaleInner{ transform-origin:left center; }
+
+    .chainWrap2{
+      display:grid !important;
+      grid-auto-flow: column;
+      grid-template-rows: repeat(2, auto);
+      gap:8px;
+      align-content:start;
+      overflow-x:auto;
+      overflow-y:hidden;
+      padding-bottom:2px;
+      scrollbar-width: thin;
+    }
+
     /* SUPPORT CHAINS (P2R / S2P / H2R): yellow chevron chain, L1-only */
     .supportBlock{
       grid-column: 1 / -1;
@@ -483,7 +487,7 @@
     .supportBlock.compact .supportRow{ gap:8px; }
     .supportBlock.compact .supportHeader{ padding:5px 9px; font-size:10px; }
     .supportBlock.compact .chevChain{ padding-bottom:1px; }
-    .supportBlock.compact .chev{ height:38px; min-width:200px; font-size:10.5px; }
+    .supportBlock.compact .chev{ height:38px; min-width:120px; max-width:180px; font-size:10px; }
     .supportRow{
       display:flex;
       align-items:center;
@@ -1747,8 +1751,9 @@
             <span class="tileTitleText" title="${esc(it.l1Name)}">${esc(it.l1Name)}</span>
           </div>
           <div class="l2ChainWrap">
-            <span class="lvlTag">L2</span>
-            <div class="l2ChevChain"></div>
+            <div class="chainScaleWrap" data-chain="l2">
+              <div class="l2ChevChain chainScaleInner"></div>
+            </div>
           </div>
         </div>
       `;
@@ -1905,11 +1910,59 @@
       });
     }
 
+    /***********************
+     * Aggressive chain fit (<=8 scale-to-fit, >8 wrap to 2 rows)
+     ***********************/
+    function applyChainFitAggressive(){
+      const wraps = document.querySelectorAll('.chainScaleWrap');
+      if(!wraps.length) return;
+
+      wraps.forEach(wrap => {
+        const inner = wrap.querySelector('.chainScaleInner');
+        if(!inner) return;
+
+        // reset
+        inner.style.transform = '';
+        inner.classList.remove('chainWrap2');
+
+        const count = inner.children.length;
+        if(count === 0) return;
+
+        // >8 items: 2-row wrap, no scaling
+        if(count > 8){
+          inner.classList.add('chainWrap2');
+          return;
+        }
+
+        // <=8 items: scale-to-fit horizontally
+        let totalW = 0;
+        for(let i=0;i<count;i++){
+          const el = inner.children[i];
+          const r = el.getBoundingClientRect();
+          totalW += r.width;
+          if(i < count-1) totalW += 8; // matches CSS gap
+        }
+
+        const avail = wrap.clientWidth;
+        if(!avail || !totalW) return;
+
+        if(totalW > avail){
+          let scale = avail / totalW;
+          scale = Math.max(0.62, Math.min(1, scale));
+          inner.style.transform = `scaleX(${scale})`;
+        }
+      });
+    }
+
+
     // Re-apply on resize (keeps the fit stable)
     window.addEventListener('resize', () => {
       // Debounce lightly
       clearTimeout(window.__opsScaleT);
-      window.__opsScaleT = setTimeout(applyOpsStep4Scale, 60);
+      window.__opsScaleT = setTimeout(() => {
+        applyOpsStep4Scale();
+        applyChainFitAggressive();
+      }, 60);
     });
 
     /***********************
@@ -1998,13 +2051,18 @@
         head.className = "supportHeader";
         head.textContent = cfg.title || cfg.l0;
 
+        const chainWrap = document.createElement("div");
+        chainWrap.className = "chainScaleWrap";
+        chainWrap.setAttribute("data-chain","support");
+
         const chain = document.createElement("div");
-        chain.className = "chevChain";
+        chain.className = "chevChain chainScaleInner";
+        chainWrap.appendChild(chain);
 
         list.forEach(it => chain.appendChild(buildChevron(it)));
 
         row.appendChild(head);
-        row.appendChild(chain);
+        row.appendChild(chainWrap);
         block.appendChild(row);
       });
 
@@ -2184,6 +2242,7 @@
       renderOwnerLegendFooter();
       // Apply OPS Step 4 vertical scale-to-fit after DOM paint
       requestAnimationFrame(applyOpsStep4Scale);
+      requestAnimationFrame(applyChainFitAggressive);
     }
 
     /***********************
