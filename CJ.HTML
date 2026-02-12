@@ -581,6 +581,14 @@
       scrollbar-width: thin;
     }
 
+    /* Keep the chevrons horizontal (the inner wrapper is created in JS) */
+    .l2ChevInner {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-width: max-content;
+    }
+
     .l2Chev {
       flex: 0 0 auto;
       height: 34px;
@@ -691,6 +699,14 @@
       overflow-y: hidden;
       padding-bottom: 2px;
       scrollbar-width: thin;
+    }
+
+    /* Keep support chevrons horizontal (the inner wrapper is created in JS) */
+    .chevInner {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      min-width: max-content;
     }
 
     .chev {
