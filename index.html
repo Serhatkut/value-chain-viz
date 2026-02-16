@@ -963,7 +963,9 @@
     let index = [];
 
     /* ========= LOAD ========= */
-    d3.json("data.json").then(function(data) {
+    const DATA_URL = new URL('data.json', window.location.href).toString();
+    // Use an absolute-resolved URL so GitHub Pages subpaths (/repo/) and trailing-slash differences don't break relative loading.
+    d3.json(DATA_URL).then(function(data) {
       if(!data || !data.children){
         showLoadError("data.json loaded but has no 'children'.");
         return;
@@ -986,13 +988,14 @@
         l1Container.innerHTML = '<div style="color:#999; font-size:12px; font-weight:900; padding:6px 2px;">Select an L0 stream above (or from the L0 dropdown in the breadcrumb) to populate L1 domains.</div>';
       }
     }).catch(err => {
-      showLoadError("Cannot load data.json. Ensure the file exists and you're using a local server (not file://).");
+      showLoadError(`Cannot load data.json from: ${DATA_URL}\n\nCheck: (1) data.json is committed & published in the same GitHub Pages folder, (2) correct case-sensitive filename, (3) open via https:// (not file://).\n\nSee console for details.`);
       console.error(err);
     });
 
     function showLoadError(msg){
       errorMsg.style.display = 'block';
       errorMsg.textContent = msg;
+      errorMsg.style.whiteSpace = 'pre-wrap';
     }
 
     function parseInfo(str) {
